@@ -3,7 +3,7 @@ import { ReactComponent as VerticalLineSVG } from '@/assets/svg/vertical-line.sv
 import { path } from '@/routes/path';
 import { typography } from '@/theme/foundations/typography';
 import { globalStyles } from '@/theme/styles';
-import { CREDIT_OFFICER_SIDEBAR_MENUS, SIDEBAR_MENUS, SIDEBAR_WIDTH } from '@/variables/sidebar';
+import { CREDIT_OFFICER_SIDEBAR_MENUS, SIDEBAR_WIDTH } from '@/variables/sidebar';
 import {
   Box,
   Flex,
@@ -15,20 +15,15 @@ import {
   Stack,
   Text
 } from '@chakra-ui/react';
-import { useState } from 'react';
 import { RiLogoutCircleRFill } from 'react-icons/ri';
 import { Link, Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom';
-import { useLocalStorage, useReadLocalStorage } from 'usehooks-ts';
+import { useLocalStorage } from 'usehooks-ts';
 
 const Sidebar = () => {
   const pathname = useLocation().pathname;
   const actualUri = `/${pathname.split('/')[1]}`;
-  const userEmail = useReadLocalStorage('email');
-  const isCreditOfficer = userEmail === 'creditofficer@email.com';
 
-  const [sidebarMenus] = useState<typeof SIDEBAR_MENUS>(
-    isCreditOfficer ? CREDIT_OFFICER_SIDEBAR_MENUS : SIDEBAR_MENUS
-  );
+  const sidebarMenus = CREDIT_OFFICER_SIDEBAR_MENUS;
 
   return (
     <Box

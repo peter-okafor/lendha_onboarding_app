@@ -4,7 +4,7 @@ import { path } from '@/routes/path';
 import { typography } from '@/theme/foundations/typography';
 import { globalStyles } from '@/theme/styles';
 import { LAYOUT_PADDING, MAX_SCREEN_WIDTH } from '@/variables/general';
-import { CREDIT_OFFICER_SIDEBAR_MENUS, SIDEBAR_MENUS, SIDEBAR_WIDTH } from '@/variables/sidebar';
+import { CREDIT_OFFICER_SIDEBAR_MENUS, SIDEBAR_WIDTH } from '@/variables/sidebar';
 import {
   Avatar,
   Box,
@@ -25,7 +25,7 @@ import {
 import { useState } from 'react';
 import { RiCloseLine, RiSearchLine } from 'react-icons/ri';
 import { Link as ReactRouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useCountdown, useReadLocalStorage } from 'usehooks-ts';
+import { useCountdown } from 'usehooks-ts';
 import { LendhaModal } from '../common';
 import Navbar from './Navbar';
 import Notifications from './Notifications';
@@ -81,12 +81,7 @@ const DashboardLayout = () => {
   //   };
   // });
 
-  const userEmail = useReadLocalStorage('email');
-  const isCreditOfficer = userEmail === 'creditofficer@email.com';
-
-  const [sidebarMenus] = useState<typeof SIDEBAR_MENUS>(
-    isCreditOfficer ? CREDIT_OFFICER_SIDEBAR_MENUS : SIDEBAR_MENUS
-  );
+  const sidebarMenus = CREDIT_OFFICER_SIDEBAR_MENUS;
 
   return (
     <Box h='auto' id='dashboard-layout'>
