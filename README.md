@@ -1,6 +1,6 @@
-## lendha-v3-frontend
+## lendha-onboard
 
-The frontend for the [v3 lendha](https://lendha.com) website.
+The frontend for on-field officers dashboard
 
 ### Table of Contents
 
