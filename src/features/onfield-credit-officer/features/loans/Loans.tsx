@@ -1,0 +1,476 @@
+import { TableBadge } from '@/components/badge';
+import { TransactionTable, TransactionTabList } from '@/components/common';
+import { SearchInput } from '@/components/common/';
+import { path } from '@/routes/path';
+import { formatNumber } from '@/utils/helpers';
+import {
+  Box,
+  Divider,
+  Flex,
+  Stack,
+  TableContainer,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr
+} from '@chakra-ui/react';
+import { faker } from '@faker-js/faker/locale/en_NG';
+import { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { v4 as key } from 'uuid';
+
+type Status = 'active' | 'pending' | 'declined' | 'due' | 'closed' | 'default' | string;
+interface Color {
+  bgColor: string;
+  color: string;
+}
+
+const statusColor = (status: Status): Color => {
+  switch (status) {
+    case 'active':
+      return {
+        bgColor: '#e8fff1',
+        color: '#219653'
+      };
+    case 'pending':
+      return {
+        bgColor: '#fff5e2',
+        color: '#B47E17'
+      };
+    case 'declined':
+      return {
+        bgColor: '#e8e8e8',
+        color: '#1A1A1A'
+      };
+    case 'due':
+      return {
+        bgColor: '#f8e8f4',
+        color: '#B5188D'
+      };
+    case 'closed':
+      return {
+        bgColor: '#e2e2e9',
+        color: 'darkblue.DEFAULT'
+      };
+    case 'default':
+      return {
+        bgColor: '#feeeee',
+        color: 'error'
+      };
+    default:
+      return {
+        bgColor: '#feeeee',
+        color: 'error'
+      };
+  }
+};
+
+interface LoanDetailProps {
+  name: string;
+  id: string;
+  amount: number;
+  status: Status | string;
+}
+const LoanDetail = (props: LoanDetailProps) => {
+  return (
+    <Flex justifyContent='space-between' alignItems='center'>
+      <Stack spacing='2px'>
+        <Text fontWeight={500} textStyle='sm'>
+          {props.name}
+        </Text>
+        <Text color='gray.300' textStyle='xs'>
+          {props.id}
+        </Text>
+      </Stack>
+      <Stack spacing='2px'>
+        <Text fontWeight={500} textStyle='sm'>
+          {`N${formatNumber(props.amount)}`}
+        </Text>
+        <Text
+          color={statusColor(props.status).color}
+          textStyle='xs'
+          textAlign='right'
+          textTransform='uppercase'
+        >
+          {props.status}
+        </Text>
+      </Stack>
+    </Flex>
+  );
+};
+
+interface TableData {
+  id: string;
+  name: string;
+  date: string;
+  amount: number;
+  status: string;
+}
+interface LoanTableProps {
+  headers: string[];
+  data: TableData[];
+}
+const LoanTable = (props: LoanTableProps) => {
+  const navigate = useNavigate();
+
+  return (
+    <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
+      <TransactionTable>
+        <Thead>
+          <Tr
+          // sx={{
+          //   'th:first-of-type': {
+          //     w: { base: '0', '2xl': '140px' }
+          //   }
+          // }}
+          >
+            {props.headers.map((th) => (
+              <Th key={key()}>{th}</Th>
+            ))}
+          </Tr>
+        </Thead>
+        <Tbody>
+          {props.data.map((loan) => (
+            <Tr
+              key={key()}
+              _hover={{
+                bgColor: '#f3f3f3',
+                cursor: 'pointer',
+                transition: 'all .1s ease-in'
+              }}
+              onClick={() => navigate(path.CREDIT_OFFICER_PAY_LOAN)}
+            >
+              <Td>{loan.id}</Td>
+              <Td>{loan.name}</Td>
+              <Td>{loan.date}</Td>
+              <Td>N{formatNumber(loan.amount)}</Td>
+              <Td>
+                <TableBadge
+                  bgColor={statusColor(loan.status).bgColor}
+                  color={statusColor(loan.status).color}
+                  text={loan.status}
+                  textTransform='uppercase'
+                />
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </TransactionTable>
+    </TableContainer>
+  );
+};
+
+const Loans = () => {
+  return (
+    <>
+      <Text
+        ml={{ base: 3, lg: 0 }}
+        fontFamily={['Nunito', 'Poppins']}
+        fontWeight={[700, 500]}
+        textStyle={['base', 'xl']}
+        color='black.DEFAULT'
+      >
+        Loans (123)
+      </Text>
+
+      <Tabs
+        variant='unstyled'
+        mt={[7, 9]}
+        w='100%'
+        sx={{
+          '.chakra-input__group': {
+            display: { base: 'none', md: 'block' }
+          }
+        }}
+      >
+        <TransactionTabList
+          tabs={['All', 'Active', 'Pending', 'Declined', 'Due', 'Closed', 'Default']}
+        />
+
+        <TabPanels
+          className='lendha__container'
+          sx={{
+            '.chakra-tabs__tab-panel': {
+              pl: { base: 0, md: 7 },
+              pr: { base: 0, md: '18px' },
+              pt: { base: 0, md: 5 },
+              bgColor: 'white',
+              minH: '400px'
+            }
+          }}
+        >
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'closed'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'default'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'declined'
+                }
+              ]}
+            />
+            {['active', 'closed', 'pending', 'declined', 'default', 'due'].map((status) => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status={status}
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'active'
+                }
+              ]}
+            />
+            {Array.from({ length: 5 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='active'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'pending'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'pending'
+                }
+              ]}
+            />
+            {Array.from({ length: 5 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='pending'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'declined'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'declined'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'declined'
+                }
+              ]}
+            />
+            {Array.from({ length: 5 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='declined'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'due'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'due'
+                }
+              ]}
+            />
+            {Array.from({ length: 5 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='due'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'closed'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'closed'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'closed'
+                }
+              ]}
+            />
+            {Array.from({ length: 5 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='closed'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+          <TabPanel>
+            <SearchInput />
+            <LoanTable
+              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
+              data={[
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'defaul'
+                },
+                {
+                  id: '00123R',
+                  name: 'Oluwasegun Oloruntobi',
+                  date: '1st Jul, 2022',
+                  amount: 2000000,
+                  status: 'defaul'
+                }
+              ]}
+            />
+            {Array.from({ length: 2 }, () => (
+              <LoanLink key={key()}>
+                <LoanDetail
+                  name={faker.name.fullName()}
+                  id='0231323'
+                  amount={20_000}
+                  status='default'
+                />
+              </LoanLink>
+            ))}
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </>
+  );
+};
+
+export default Loans;
+
+interface LoanLinkProps {
+  children: ReactNode;
+  linkTo?: string;
+}
+const LoanLink = ({ children, linkTo = path.CREDIT_OFFICER_PAY_LOAN }: LoanLinkProps) => {
+  const navigate = useNavigate();
+
+  return (
+    <Box
+      display={['block', 'none']}
+      key={key()}
+      _hover={{
+        bgColor: '#f3f3f3',
+        cursor: 'pointer',
+        transition: 'all .1s ease-in'
+      }}
+      onClick={() => navigate(linkTo)}
+      pt='18px'
+    >
+      {children}
+      <Divider color='gray.100' mt={4} />
+    </Box>
+  );
+};
