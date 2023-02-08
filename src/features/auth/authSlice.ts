@@ -1,7 +1,8 @@
-import { User } from '@/app/services/@types/user';
-import { authApi } from '@/app/services/auth';
+import { authApi, User } from '@/app/services/auth';
 import { RootState } from '@/app/store';
+import { encryptToken } from '@/utils/helpers/token.helpers';
 import { createSlice } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 const initialState = {
   user: null,
@@ -23,8 +24,13 @@ const slice = createSlice({
       .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
         console.log('fulfilled', action);
 
-        state.user = action.payload.data.user;
-        state.token = action.payload.data.auth_token;
+        const { data } = action.payload;
+
+        const token = encryptToken(data.access_token);
+        Cookies.set('token', token);
+
+        state.user = data.user;
+        state.token = data.access_token;
       })
       .addMatcher(authApi.endpoints.login.matchRejected, (_state, action) => {
         console.log('rejected', action);

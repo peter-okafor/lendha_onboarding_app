@@ -3,7 +3,7 @@ import { RootState } from '../store';
 
 // Create our baseQuery instance
 const baseQuery = fetchBaseQuery({
-  baseUrl: '/',
+  baseUrl: import.meta.env.VITE_LENDHA_API_URL,
   prepareHeaders: (headers, { getState }) => {
     // By default, if we have a token in the store, let's use that for authenticated requests
     const token = (getState() as RootState).auth.token;
@@ -50,6 +50,6 @@ export const api = createApi({
 
 export const enhancedApi = api.enhanceEndpoints({
   endpoints: () => ({
-    getPost: () => 'test'
+    getUser: () => 'test'
   })
 });

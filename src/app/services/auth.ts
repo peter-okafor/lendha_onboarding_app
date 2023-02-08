@@ -1,17 +1,58 @@
-import { LoginRequest, UserResponse } from './@types/user';
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 import { api } from './api';
 
-export interface Post {
-  id: number;
+export interface User {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  password?: string;
+}
+export interface LoginResponse {
+  status: boolean;
+  message: string;
+  data: {
+    user: User & {
+      id: string;
+      next_activation_stage: string;
+    };
+    access_token: string;
+  };
+}
+
+export interface SignupRequest {
   name: string;
-  fetched_at: string;
+  business_name: string;
+  email: string;
+  date_of_birth: string;
+  referral_channel: string;
+  password: string;
+  password_confirmation: string;
+  phone_number: string;
+}
+
+export interface SignupResponse {
+  message: string;
+  data: {
+    step: number;
+  };
 }
 
 export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
-    login: build.mutation<UserResponse, LoginRequest>({
+    login: build.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: 'login',
+        url: 'auth/login',
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    signup: build.mutation<SignupResponse, SignupRequest>({
+      query: (credentials) => ({
+        url: 'auth/signup',
         method: 'POST',
         body: credentials
       })
@@ -19,7 +60,7 @@ export const authApi = api.injectEndpoints({
   })
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useSignupMutation } = authApi;
 
 export const {
   endpoints: { login }

@@ -1,6 +1,7 @@
+import { SignupRequest as SignupPayload, useSignupMutation } from '@/app/services/auth';
 import { ReactComponent as Underline } from '@/assets/svg/yellow-underline-sm.svg';
 import AuthCard from '@/components/auth/AuthCard';
-import { FormInput, FormLeftAddonInput, PasswordInput } from '@/components/common';
+import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
 import { SuccessMessage as VerifyMessage } from '@/components/message';
 import { path } from '@/routes/path';
 import { usePhoneMask } from '@/utils/hooks';
@@ -10,14 +11,18 @@ import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import VerifyEmailForm from './components/VerifyEmail';
 import { SignupSchema } from './signup.schema';
+import { escape, mapValues } from 'lodash';
 
-type SignupFormValues = {
+export type SignupFormValues = {
   firstname: string;
   lastname: string;
+  businessName: string;
   email: string;
   phoneNumber: string;
+  dateOfBirth: string;
   password: string;
   confirmPassword: string;
+  referral: string;
 };
 
 const Signup = () => {
@@ -26,25 +31,65 @@ const Signup = () => {
   const [verifyEmailForm, setVerifyEmailForm] = useState(false);
 
   const toast = useToast();
+
+  const [signup, { error }] = useSignupMutation();
+
   const formik = useFormik<SignupFormValues>({
     initialValues: {
       firstname: '',
       lastname: '',
+      businessName: '',
       email: '',
       phoneNumber: '',
+      dateOfBirth: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      referral: ''
     },
-    onSubmit: async (values) => {
-      if (values.email === 'johndoe@email.com') {
-        setEmailExists(true);
-      } else {
-        setEmailExists(false);
-        setVerifyEmailForm(true);
+    onSubmit: async (formValues) => {
+      const values = mapValues(formValues, (value) => escape(value));
+      // if (values.email === 'johndoe@email.com') {
+      //   setEmailExists(true);
+      // } else {
+      //   setEmailExists(false);
+      //   setVerifyEmailForm(true);
+      // toast({
+      //   title: 'Success',
+      //   description: 'You have successfully signed up',
+      //   status: 'success',
+      //   duration: 4000,
+      //   position: 'top-right',
+      //   isClosable: true
+      // });
+      // }
+
+      try {
+        const payload: SignupPayload = {
+          business_name: values.businessName,
+          date_of_birth: values.dateOfBirth,
+          email: values.email,
+          name: values.firstname,
+          password: values.password,
+          password_confirmation: values.confirmPassword,
+          phone_number: values.phoneNumber,
+          referral_channel: values.referral
+        };
+
+        await signup(payload).unwrap();
+
         toast({
           title: 'Success',
           description: 'You have successfully signed up',
           status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'An error occured!',
+          status: 'error',
           duration: 4000,
           position: 'top-right',
           isClosable: true
@@ -55,7 +100,7 @@ const Signup = () => {
   });
   const router = useNavigate();
 
-  const { values, errors, touched, handleChange } = formik;
+  const { values, errors, touched, handleChange, isSubmitting } = formik;
 
   const maskedPhoneNumber = usePhoneMask(values.phoneNumber);
 
@@ -120,6 +165,15 @@ const Signup = () => {
                     handleChange={handleChange}
                     touchedField={touched.lastname}
                   />
+                  <FormInput
+                    id='business-name'
+                    name='businessName'
+                    label='Business name'
+                    value={values.businessName}
+                    errorMessage={errors.businessName}
+                    handleChange={handleChange}
+                    touchedField={touched.businessName}
+                  />
                   <Box>
                     <FormInput
                       id='email'
@@ -156,6 +210,16 @@ const Signup = () => {
                     touchedField={touched.phoneNumber}
                     value={maskedPhoneNumber}
                   />
+                  <FormInput
+                    id='dob'
+                    name='dateOfBirth'
+                    label='Date of birth (Same as registered with your bank)'
+                    type='date'
+                    touchedField={touched.dateOfBirth}
+                    errorMessage={errors.dateOfBirth}
+                    handleChange={handleChange}
+                    value={values.dateOfBirth}
+                  />
                   <PasswordInput
                     id='password'
                     name='password'
@@ -173,6 +237,25 @@ const Signup = () => {
                     errorMessage={errors.confirmPassword}
                     handleChange={handleChange}
                     touchedField={touched.confirmPassword}
+                  />
+                  <FormSelect
+                    id='referral'
+                    name='referral'
+                    label='How did you hear about Lendha?'
+                    value={values.referral}
+                    onChange={handleChange}
+                    errorMessage={errors.referral}
+                    touchedField={touched.referral}
+                    options={[
+                      { value: '', label: 'Select referral channel' },
+                      { value: '1', label: 'Facebook' },
+                      { value: '2', label: 'Instagram' },
+                      { value: '3', label: 'Twitter' },
+                      { value: '4', label: 'Google' },
+                      { value: '5', label: 'LinkedIn' },
+                      { value: '6', label: 'Medium' },
+                      { value: '7', label: 'Other' }
+                    ]}
                   />
                   <Stack>
                     <Text textStyle='xs' color='gray.300'>
@@ -193,7 +276,7 @@ const Signup = () => {
                         Terms and Conditions
                       </Link>
                     </Text>
-                    <Button size='md' type='submit'>
+                    <Button size='md' type='submit' isLoading={isSubmitting}>
                       register
                     </Button>
                     <Stack direction='row' justify='center' textStyle='sm'>

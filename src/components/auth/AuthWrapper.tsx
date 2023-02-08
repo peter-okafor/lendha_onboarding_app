@@ -12,7 +12,8 @@ const AuthWrapper = ({ children, ...props }: Props) => {
       border={{ base: 'none', md: '1px solid' }}
       borderColor={{ base: 'none', md: 'rgba(197, 197, 197, 0.5)' }}
       borderRadius={{ base: 'none', md: '10px' }}
-      px={{ base: '46px', lg: '54px' }}
+      // px={{ base: '46px', lg: '54px' }}
+      px={{ base: 5, lg: '30px' }}
       py={{ base: 0, md: '31px' }}
       w={['full', '434px']}
       boxShadow='0px 7px 40px -20px rgba(26, 31, 76, 0.15)'
