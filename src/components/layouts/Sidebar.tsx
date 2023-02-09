@@ -112,7 +112,9 @@ export const LogoutButton = () => {
       }}
     >
       <RiLogoutCircleRFill fontSize='20px' />
-      <Text textStyle='base'>Logout</Text>
+      <Text as='span' textStyle='base'>
+        Logout
+      </Text>
     </Stack>
   );
 };

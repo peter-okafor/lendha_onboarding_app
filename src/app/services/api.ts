@@ -1,3 +1,4 @@
+import { decryptToken } from '@/utils/helpers/token.helpers';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
 
@@ -8,13 +9,14 @@ const baseQuery = fetchBaseQuery({
     // By default, if we have a token in the store, let's use that for authenticated requests
     const token = (getState() as RootState).auth.token;
     if (token) {
-      headers.set('authentication', `Bearer ${token}`);
+      headers.set('authentication', `Bearer ${decryptToken(token)}`);
     }
+    // headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     return headers;
   }
 });
 
-const baseQueryWithRetry = retry(baseQuery, { maxRetries: 6 });
+const baseQueryWithRetry = retry(baseQuery, { maxRetries: 2 });
 
 /**
  * Create a base API to inject endpoints into elsewhere.

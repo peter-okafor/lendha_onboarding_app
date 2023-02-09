@@ -4,14 +4,13 @@ import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
 import { SuccessMessage as VerifyMessage } from '@/components/message';
 import { path } from '@/routes/path';
-import { usePhoneMask } from '@/utils/hooks';
 import { Box, Button, Flex, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
+import { escape, mapValues } from 'lodash';
 import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import VerifyEmailForm from './components/VerifyEmail';
 import { SignupSchema } from './signup.schema';
-import { escape, mapValues } from 'lodash';
 
 export type SignupFormValues = {
   firstname: string;
@@ -27,13 +26,14 @@ export type SignupFormValues = {
 
 const Signup = () => {
   const [verifyStatus, setVerifyStatus] = useState(false);
-  const [emailExists, setEmailExists] = useState(false);
-  const [verifyEmailForm, setVerifyEmailForm] = useState(false);
+  const [emailExists] = useState(false);
+  const [verifyEmailForm] = useState(false);
 
   const toast = useToast();
 
-  const [signup, { error }] = useSignupMutation();
+  const [signup] = useSignupMutation();
 
+  const router = useNavigate();
   const formik = useFormik<SignupFormValues>({
     initialValues: {
       firstname: '',
@@ -48,20 +48,6 @@ const Signup = () => {
     },
     onSubmit: async (formValues) => {
       const values = mapValues(formValues, (value) => escape(value));
-      // if (values.email === 'johndoe@email.com') {
-      //   setEmailExists(true);
-      // } else {
-      //   setEmailExists(false);
-      //   setVerifyEmailForm(true);
-      // toast({
-      //   title: 'Success',
-      //   description: 'You have successfully signed up',
-      //   status: 'success',
-      //   duration: 4000,
-      //   position: 'top-right',
-      //   isClosable: true
-      // });
-      // }
 
       try {
         const payload: SignupPayload = {
@@ -85,10 +71,12 @@ const Signup = () => {
           position: 'top-right',
           isClosable: true
         });
-      } catch (error) {
+
+        router(path.SIGNIN);
+      } catch (err: any) {
         toast({
-          title: 'Error',
-          description: 'An error occured!',
+          title: 'An error occured',
+          description: err?.data?.error || err?.data?.message,
           status: 'error',
           duration: 4000,
           position: 'top-right',
@@ -98,11 +86,8 @@ const Signup = () => {
     },
     validationSchema: SignupSchema
   });
-  const router = useNavigate();
 
   const { values, errors, touched, handleChange, isSubmitting } = formik;
-
-  const maskedPhoneNumber = usePhoneMask(values.phoneNumber);
 
   return (
     <>
@@ -203,12 +188,12 @@ const Signup = () => {
                     inputProps={{
                       name: 'phoneNumber',
                       id: 'phone-number',
-                      maxLength: 10,
-                      inputMode: 'tel'
+                      inputMode: 'tel',
+                      maxLength: 11
                     }}
                     label='Phone number'
                     touchedField={touched.phoneNumber}
-                    value={maskedPhoneNumber}
+                    value={values.phoneNumber}
                   />
                   <FormInput
                     id='dob'

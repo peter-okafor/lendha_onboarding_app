@@ -15,7 +15,7 @@ export const SignupSchema = Yup.object<Record<keyof SignupFormValues, Yup.AnySch
   email: Yup.string().email('Enter a valid email').required('Email is required'),
   phoneNumber: Yup.string()
     .matches(/^[0-9]+$/, 'Enter a valid phone number')
-    .min(10, 'Phone number must be at least 10 characters')
+    .length(11, 'Phone number must be 11 digits')
     .required('Phone number is required'),
   dateOfBirth: Yup.string().required('Date of birth is required'),
   password: Yup.string()

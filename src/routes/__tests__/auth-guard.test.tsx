@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { path } from '../path';
 
-describe('AuthGuard', () => {
+describe('ProutectedRoutes', () => {
   it('redirects to the sign in page if email is not set in local storage', async () => {
     renderWithRouter(<App />);
 

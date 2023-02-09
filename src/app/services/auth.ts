@@ -1,7 +1,3 @@
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
 import { api } from './api';
 
 export interface User {
@@ -11,16 +7,17 @@ export interface User {
   phone_number: string;
   password?: string;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 export interface LoginResponse {
-  status: boolean;
-  message: string;
-  data: {
-    user: User & {
-      id: string;
-      next_activation_stage: string;
-    };
-    access_token: string;
-  };
+  permissions: string;
+  access_token: string;
+  token_type: string;
+  expires_at: string;
+  step: string;
 }
 
 export interface SignupRequest {
@@ -39,6 +36,13 @@ export interface SignupResponse {
   data: {
     step: number;
   };
+}
+
+export interface SignupResponseError {
+  message: string;
+  errors: {
+    [key: string]: string[];
+  }[];
 }
 
 export const authApi = api.injectEndpoints({

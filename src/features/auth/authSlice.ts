@@ -17,24 +17,15 @@ const slice = createSlice({
     logout: () => initialState
   },
   extraReducers: (builder) => {
-    builder
-      .addMatcher(authApi.endpoints.login.matchPending, (_state, action) => {
-        console.log('pending', action);
-      })
-      .addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
-        console.log('fulfilled', action);
-
-        const { data } = action.payload;
-
-        const token = encryptToken(data.access_token);
-        Cookies.set('token', token);
-
-        state.user = data.user;
-        state.token = data.access_token;
-      })
-      .addMatcher(authApi.endpoints.login.matchRejected, (_state, action) => {
-        console.log('rejected', action);
+    builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
+      const token = encryptToken(payload.access_token);
+      Cookies.set('token', token, {
+        sameSite: 'strict'
+        // expires: new Date(new Date(payload.expires_at).getTime())
       });
+
+      state.token = token;
+    });
   }
 });
 

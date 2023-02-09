@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 import AuthRoutes from './auth.routes';
 import { CreditOfficerRoutes, OnFieldCreditOfficerRoutes } from './credit-officer.routes';
-import { AuthGuard } from './guards';
+import { ProutectedRoutes } from './guards';
 import { path } from './path';
 
 const CreditOfficerCustomers = lazy(
@@ -14,13 +14,12 @@ const CreditOfficerCustomerAddForm = lazy(
 
 export default function LendhaRouter() {
   return useRoutes([
-    // auth routes
     AuthRoutes,
     CreditOfficerRoutes,
     OnFieldCreditOfficerRoutes,
     {
       path: path.CUSTOMERS,
-      element: <AuthGuard />,
+      element: <ProutectedRoutes />,
       children: [
         { path: path.CUSTOMERS, element: <CreditOfficerCustomers /> },
         { path: path.CUSTOMER_NEW, element: <CreditOfficerCustomerAddForm /> },

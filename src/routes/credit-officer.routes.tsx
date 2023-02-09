@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
-import { AuthGuard } from './guards';
+import { ProutectedRoutes } from './guards';
 import { path } from './path';
 
 const CreditOfficer = lazy(() => import('@/features/credit-officer/CreditOfficer'));
@@ -21,7 +21,7 @@ const CreditOfficerUserProfile = lazy(
 
 export const CreditOfficerRoutes: RouteObject = {
   path: path.CREDIT_OFFICER,
-  element: <AuthGuard />,
+  element: <ProutectedRoutes />,
   children: [
     { path: path.CREDIT_OFFICER, element: <CreditOfficer /> },
     { path: '*', element: <Navigate to={path.CREDIT_OFFICER} replace /> }
@@ -30,7 +30,7 @@ export const CreditOfficerRoutes: RouteObject = {
 
 export const OnFieldCreditOfficerRoutes: RouteObject = {
   path: path.CREDIT_OFFICER_LOANS,
-  element: <AuthGuard />,
+  element: <ProutectedRoutes />,
   children: [
     {
       path: path.CREDIT_OFFICER_LOANS,

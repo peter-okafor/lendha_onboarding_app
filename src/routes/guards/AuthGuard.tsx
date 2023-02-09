@@ -1,22 +1,22 @@
+import Cookies from 'js-cookie';
 import { lazy, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLocalStorage } from 'usehooks-ts';
 import { path } from '../path';
 
 const DashboardLayout = lazy(() => import('@/components/layouts/DashboardLayout'));
 
-const AuthGuard = () => {
+const ProutectedRoutes = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useLocalStorage('email', '');
+
+  const token = Cookies.get('token');
 
   useEffect(() => {
-    if (!email) {
-      setEmail('');
+    if (!token) {
       navigate(path.SIGNIN);
     }
-  }, [email, navigate, setEmail]);
+  }, [navigate, token]);
 
-  return email ? <DashboardLayout /> : null;
+  return token ? <DashboardLayout /> : null;
 };
 
-export default AuthGuard;
+export default ProutectedRoutes;

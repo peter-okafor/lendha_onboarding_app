@@ -5,11 +5,24 @@ import { ReactComponent as InterestRateSVG } from '@/assets/svg/interest-rate.sv
 import { ReactComponent as LendhaWatermarkSVG } from '@/assets/svg/lendha-watermark.svg';
 import { ReactComponent as Logo } from '@/assets/svg/logo/logo-with-text.svg';
 import AuthCarousel from '@/components/auth/AuthCarousel';
+import { path } from '@/routes/path';
 import { Box, Flex } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import { useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 const AuthLayout = () => {
-  return (
+  const navigate = useNavigate();
+
+  const token = Cookies.get('token');
+
+  useEffect(() => {
+    if (token) {
+      navigate(path.CUSTOMERS);
+    }
+  }, [navigate, token]);
+
+  return !token ? (
     <Box
       bg='white'
       id='auth-layout'
@@ -76,7 +89,7 @@ const AuthLayout = () => {
         </Box>
       </Flex>
     </Box>
-  );
+  ) : null;
 };
 
 export default AuthLayout;

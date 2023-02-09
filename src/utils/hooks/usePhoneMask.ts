@@ -6,7 +6,7 @@ export default function usePhoneMask(phone: string) {
   useEffect(() => {
     const regex = /^(\d{3})(\d{3})(\d{4})$/;
 
-    setMaskedPhone(phone.replace(regex, '$1 $2 $3'));
+    setMaskedPhone(phone.replace(regex, '$1$2$3'));
   }, [phone]);
 
   return maskedPhone;
