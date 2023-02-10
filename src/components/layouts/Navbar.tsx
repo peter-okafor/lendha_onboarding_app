@@ -21,7 +21,7 @@ import {
   RiSearchLine
 } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
-import { useOnClickOutside, useReadLocalStorage } from 'usehooks-ts';
+import { useOnClickOutside } from 'usehooks-ts';
 import { BadgeIconLabel } from '../badge';
 import ProfileDropdown from '../dropdown/ProfileDropdown';
 import ActivateAccountLink from './ActivateAccountLink';
@@ -34,39 +34,34 @@ const Navbar = () => {
   const pathname = useLocation().pathname;
   const [pageTitle, setPageTitle] = useState('');
 
-  const userEmail = useReadLocalStorage('email');
-  const isCreditOfficer = userEmail === 'creditofficer@email.com';
-
   useEffect(() => {
-    if (isCreditOfficer) {
-      switch (pathname) {
-        case path.CUSTOMERS:
-          setPageTitle('Customer');
-          break;
-        case path.CUSTOMER_NEW:
-          setPageTitle('Customer');
-          break;
-        case path.CREDIT_OFFICER_TAKE_LOAN:
-          setPageTitle('Loans');
-          break;
-        case path.CREDIT_OFFICER_PAY_LOAN:
-          setPageTitle('Loans');
-          break;
-        case path.CREDIT_OFFICER:
-          setPageTitle('Credit Officer');
-          break;
-        case path.CREDIT_OFFICER_USER_PROFILE:
-          setPageTitle('User profile');
-          break;
-        case path.CREDIT_OFFICER_LOANS:
-          setPageTitle('Loans');
-          break;
-        default:
-          setPageTitle(stripSlashes(stripDashes(pathname.split('/')[1])));
-          break;
-      }
+    switch (pathname) {
+      case path.CUSTOMERS:
+        setPageTitle('Customer');
+        break;
+      case path.CUSTOMER_NEW:
+        setPageTitle('Customer');
+        break;
+      case path.CREDIT_OFFICER_TAKE_LOAN:
+        setPageTitle('Loans');
+        break;
+      case path.CREDIT_OFFICER_PAY_LOAN:
+        setPageTitle('Loans');
+        break;
+      case path.CREDIT_OFFICER:
+        setPageTitle('Credit Officer');
+        break;
+      case path.CREDIT_OFFICER_USER_PROFILE:
+        setPageTitle('User profile');
+        break;
+      case path.CREDIT_OFFICER_LOANS:
+        setPageTitle('Loans');
+        break;
+      default:
+        setPageTitle(stripSlashes(stripDashes(pathname.split('/')[1])));
+        break;
     }
-  }, [isCreditOfficer, pathname]);
+  }, [pathname]);
 
   const dispatch = useAppDispatch();
 

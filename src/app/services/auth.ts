@@ -38,11 +38,12 @@ export interface SignupResponse {
   };
 }
 
-export interface SignupResponseError {
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetResponse {
   message: string;
-  errors: {
-    [key: string]: string[];
-  }[];
 }
 
 export const authApi = api.injectEndpoints({
@@ -60,11 +61,18 @@ export const authApi = api.injectEndpoints({
         method: 'POST',
         body: credentials
       })
+    }),
+    passwordReset: build.mutation<PasswordResetResponse, PasswordResetRequest>({
+      query: (credentials) => ({
+        url: 'password/create',
+        method: 'POST',
+        body: credentials
+      })
     })
   })
 });
 
-export const { useLoginMutation, useSignupMutation } = authApi;
+export const { useLoginMutation, useSignupMutation, usePasswordResetMutation } = authApi;
 
 export const {
   endpoints: { login }

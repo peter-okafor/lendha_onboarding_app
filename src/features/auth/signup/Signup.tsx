@@ -4,9 +4,9 @@ import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
 import { SuccessMessage as VerifyMessage } from '@/components/message';
 import { path } from '@/routes/path';
+import { sanitize } from '@/utils/helpers';
 import { Box, Button, Flex, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
-import { escape, mapValues } from 'lodash';
 import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import VerifyEmailForm from './components/VerifyEmail';
@@ -47,7 +47,7 @@ const Signup = () => {
       referral: ''
     },
     onSubmit: async (formValues) => {
-      const values = mapValues(formValues, (value) => escape(value));
+      const values = sanitize<SignupFormValues>(formValues);
 
       try {
         const payload: SignupPayload = {

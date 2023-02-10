@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export const stripSlashes = (str: string) => str.replace(/\//g, ' ');
 export const stripDashes = (str: string) => str.replace(/-/g, ' ');
 export const getLastPath = (str: string) => str.split('/').pop() || '';
@@ -28,3 +30,6 @@ export const maskCurrency = (n: string) => {
     .replace(/\D/g, '')
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
+
+export const sanitize = <T extends object | null | undefined>(formValues: T): T =>
+  _.mapValues(formValues, (value: string) => _.escape(value)) as T;

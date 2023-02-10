@@ -14,6 +14,7 @@ const slice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setUserProfile: () => {},
     logout: () => initialState
   },
   extraReducers: (builder) => {

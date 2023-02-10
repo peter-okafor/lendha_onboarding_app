@@ -9,7 +9,7 @@ const baseQuery = fetchBaseQuery({
     // By default, if we have a token in the store, let's use that for authenticated requests
     const token = (getState() as RootState).auth.token;
     if (token) {
-      headers.set('authentication', `Bearer ${decryptToken(token)}`);
+      headers.set('Authentication', `Bearer ${decryptToken(token)}`);
     }
     // headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     return headers;

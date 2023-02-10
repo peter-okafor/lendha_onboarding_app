@@ -1,5 +1,14 @@
 import { path } from '@/routes/path';
-import { Avatar, Box, Stack, Text } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Flex,
+  Skeleton,
+  SkeletonCircle,
+  SkeletonText,
+  Stack,
+  Text
+} from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 import { Link as ReactRouterLink } from 'react-router-dom';
 import { useOnClickOutside } from 'usehooks-ts';
@@ -38,22 +47,20 @@ const ProfileDropdown = ({ name, email, src = 'https://bit.ly/kent-c-dodds' }: P
           ref={ref}
           onClick={handleClickInside}
         >
-          <Stack direction='row' spacing={5} alignItems='center'>
-            <Avatar size='sm' name={name} src={src} />
-            <Stack spacing={0} fontFamily='Poppins'>
-              <Text textStyle='base'>{name}</Text>
-              <Text textStyle='xs'>{email}</Text>
-            </Stack>
-            {/* <RiArrowDownSLine fontSize='24px' /> */}
+          <Stack direction='row' spacing={5} alignItems='center' minW='200px'>
+            <SkeletonCircle size='8' isLoaded={!!src}>
+              <Avatar size='sm' name={name} src={src} />
+            </SkeletonCircle>
+            <Flex gap={0} fontFamily='Poppins' flexDir='column'>
+              <SkeletonText noOfLines={1} isLoaded={!!name}>
+                <Text textStyle='base'>{name}</Text>
+              </SkeletonText>
+              <SkeletonText noOfLines={1} mt={email ? 0 : 2} isLoaded={!!email}>
+                <Text textStyle='xs'>{email}</Text>
+              </SkeletonText>
+            </Flex>
           </Stack>
         </Box>
-        {/* {dropdown && options.length > 0 && (
-          <DropdownWrapper position='absolute' w='100%' zIndex={1} mt={1} py={1}>
-            {options.map((item, i) => (
-              <DropdownText textStyle='base' key={i} text={item} />
-            ))}
-          </DropdownWrapper>
-        )} */}
       </Box>
     </ReactRouterLink>
   );

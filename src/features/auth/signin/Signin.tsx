@@ -3,9 +3,9 @@ import { ReactComponent as Underline } from '@/assets/svg/yellow-underline.svg';
 import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, PasswordInput, UserAccountBlocked } from '@/components/common';
 import { path } from '@/routes/path';
+import { sanitize } from '@/utils/helpers';
 import { Box, Button, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
-import { escape, mapValues } from 'lodash';
 import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import { SignInSchema } from './signin.schema';
@@ -30,15 +30,14 @@ const Signin = () => {
       password: ''
     },
     onSubmit: async (formValues) => {
-      const values = mapValues(formValues, (value) => escape(value));
+      const values = sanitize(formValues);
 
       try {
         await signin(values).unwrap();
 
         router(path.CUSTOMERS);
-        console.log('success');
       } catch (err: any) {
-        setFieldValue('password', '');
+        resetForm();
         toast({
           title:
             err?.data?.error ||
@@ -54,7 +53,7 @@ const Signin = () => {
     validationSchema: SignInSchema
   });
 
-  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
+  const { values, errors, touched, handleChange, isSubmitting, resetForm } = formik;
 
   return (
     <>
