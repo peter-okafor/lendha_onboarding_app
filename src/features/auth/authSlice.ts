@@ -1,4 +1,4 @@
-import { authApi, User } from '@/app/services/auth';
+import { login, User } from '@/app/services/auth';
 import { RootState } from '@/app/store';
 import { encryptToken } from '@/utils/helpers/token.helpers';
 import { createSlice } from '@reduxjs/toolkit';
@@ -18,7 +18,7 @@ const slice = createSlice({
     logout: () => initialState
   },
   extraReducers: (builder) => {
-    builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
+    builder.addMatcher(login.matchFulfilled, (state, { payload }) => {
       const token = encryptToken(payload.access_token);
       Cookies.set('token', token, {
         sameSite: 'strict'
