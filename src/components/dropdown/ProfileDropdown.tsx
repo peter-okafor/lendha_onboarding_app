@@ -1,14 +1,5 @@
 import { path } from '@/routes/path';
-import {
-  Avatar,
-  Box,
-  Flex,
-  Skeleton,
-  SkeletonCircle,
-  SkeletonText,
-  Stack,
-  Text
-} from '@chakra-ui/react';
+import { Avatar, Box, Flex, SkeletonCircle, SkeletonText, Stack, Text } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 import { Link as ReactRouterLink } from 'react-router-dom';
 import { useOnClickOutside } from 'usehooks-ts';
