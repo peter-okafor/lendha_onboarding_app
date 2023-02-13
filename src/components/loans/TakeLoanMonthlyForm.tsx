@@ -1,5 +1,4 @@
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
-import { LoanCategory } from '@/features/wallet/types';
 import { formatNumber, isObjectPropsEmpty, maskCurrency, stripCommas } from '@/utils/helpers';
 import {
   Box,
@@ -18,6 +17,15 @@ import * as Yup from 'yup';
 import { LOAN_AMOUNTS } from './constants';
 
 const { retail, wholesalers, smes } = LOAN_AMOUNTS;
+
+export type LoanValues = {
+  amount: string;
+  duration: string;
+  loanType: string;
+  interestRate: string;
+};
+
+export type LoanCategory = 'retail' | 'wholesalers' | 'smes' | 'float';
 
 const loanCategories = {
   retail: { rate: 7, minAmount: retail.min, maxAmount: retail.max },
