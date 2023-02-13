@@ -1,4 +1,5 @@
 import { api } from './api';
+import { ENDPOINTS as e } from './_endpoints';
 
 export interface User {
   first_name: string;
@@ -50,21 +51,21 @@ export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: 'auth/login',
+        url: e.login,
         method: 'POST',
         body: credentials
       })
     }),
     signup: build.mutation<SignupResponse, SignupRequest>({
       query: (credentials) => ({
-        url: 'auth/signup',
+        url: e.signup,
         method: 'POST',
         body: credentials
       })
     }),
     passwordReset: build.mutation<PasswordResetResponse, PasswordResetRequest>({
       query: (credentials) => ({
-        url: 'password/create',
+        url: e.passwordReset,
         method: 'POST',
         body: credentials
       })

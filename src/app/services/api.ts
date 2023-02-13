@@ -1,5 +1,6 @@
 import { decryptToken } from '@/utils/helpers/token.helpers';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
+import Cookies from 'js-cookie';
 import { RootState } from '../store';
 
 // Create our baseQuery instance
@@ -7,10 +8,12 @@ const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_LENDHA_API_URL,
   prepareHeaders: (headers, { getState }) => {
     // By default, if we have a token in the store, let's use that for authenticated requests
-    const token = (getState() as RootState).auth.token;
+    const token = (getState() as RootState).auth.token || Cookies.get('token');
     if (token) {
-      headers.set('Authentication', `Bearer ${decryptToken(token)}`);
+      headers.set('authentication', `Bearer ${decryptToken(token)}`);
     }
+    headers.set('accept', 'application/json');
+    headers.set('content-type', 'application/json');
     // headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     return headers;
   }
