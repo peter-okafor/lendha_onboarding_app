@@ -2,8 +2,10 @@ export const ENDPOINTS = {
   login: 'auth/login',
   signup: 'auth/signup',
   passwordReset: 'password/create',
-  onboardingUsers: 'onboarding_officer/users',
-  onboardingLoans: 'onboarding_officer/loans',
   bankList: 'bank/list',
-  referralChannels: 'referral_channel'
+  referralChannels: 'referral_channel',
+
+  users: 'onboarding_officer/users',
+  loans: 'onboarding_officer/loans',
+  profile: 'onboarding_officer/profile'
 };

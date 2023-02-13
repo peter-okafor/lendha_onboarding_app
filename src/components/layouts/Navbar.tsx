@@ -5,6 +5,7 @@ import {
   toggleSearchNav
 } from '@/app/appSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useProfileQuery } from '@/app/services/onboardingOfficer';
 import { ReactComponent as MobileLogoSVG } from '@/assets/svg/logo/logo-blue-mobile.svg';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
@@ -79,6 +80,9 @@ const Navbar = () => {
 
   useOnClickOutside(ref, handleClickOutside);
 
+  const { data: officerProfile } = useProfileQuery();
+  if (officerProfile) console.log(officerProfile);
+
   return (
     <>
       <Box
@@ -102,18 +106,6 @@ const Navbar = () => {
           </Text>
 
           <Stack spacing={4} direction='row' alignItems='center'>
-            {/* <InputGroup mr='44px'>
-              <InputLeftElement pointerEvents='none'>
-                <RiSearchLine color='#A2A2A2' />
-              </InputLeftElement>
-              <Input
-                type='search'
-                bgColor='white'
-                border='none'
-                placeholder='Search'
-                maxW='344px'
-              />
-            </InputGroup> */}
             <Flex>
               <Box as='button' onClick={handleClickInside}>
                 <BadgeIconLabel

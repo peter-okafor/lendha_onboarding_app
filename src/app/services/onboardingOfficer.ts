@@ -14,12 +14,15 @@ export interface UserResponse {
 export const onboardingOfficer = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, void>({
-      query: () => e.onboardingUsers
+      query: () => e.users
     }),
     loans: build.query<LoanResponse, void>({
-      query: () => e.onboardingLoans
+      query: () => e.loans
+    }),
+    profile: build.query<LoanResponse, void>({
+      query: () => e.profile
     })
   })
 });
 
-export const { useLoansQuery, useUsersQuery } = onboardingOfficer;
+export const { useLoansQuery, useUsersQuery, useProfileQuery } = onboardingOfficer;

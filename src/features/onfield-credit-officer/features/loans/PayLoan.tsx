@@ -234,7 +234,7 @@ const PayLoan = () => {
                           fontWeight={700}
                           fontSize='16px'
                           mt={5}
-                          onClick={() => navigate(path.WALLET)}
+                          onClick={() => navigate(path.CUSTOMERS)}
                           w='full'
                           variant='secondary'
                         >
