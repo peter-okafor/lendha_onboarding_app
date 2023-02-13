@@ -13,7 +13,8 @@ import {
   ListIcon,
   ListItem,
   Stack,
-  Text
+  Text,
+  useToast
 } from '@chakra-ui/react';
 import { RiLogoutCircleRFill } from 'react-icons/ri';
 import { Link, Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom';
@@ -95,8 +96,10 @@ const Sidebar = () => {
 export default Sidebar;
 
 export const LogoutButton = () => {
+  const toast = useToast();
   const navigate = useNavigate();
   const [, setEmail] = useLocalStorage('email', '');
+
 
   return (
     <Stack
@@ -108,6 +111,14 @@ export const LogoutButton = () => {
       pl={5}
       onClick={() => {
         setEmail('');
+        toast({
+          title: 'Success',
+          description: 'Logged out Successfully',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
         navigate(path.SIGNIN);
       }}
     >
