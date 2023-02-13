@@ -4,7 +4,7 @@ import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
 import { Box, BoxProps, Button, Divider, Flex, Icon, Link, Stack, Text } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { IconType } from 'react-icons';
 import {
   RiArrowLeftLine,
@@ -14,6 +14,7 @@ import {
   RiUserFill
 } from 'react-icons/ri';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
+import { v4 as key } from 'uuid';
 import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
 import {
@@ -296,7 +297,7 @@ const Stepper = ({ activeStep, steps }: StepperProps) => {
         }
 
         return (
-          <>
+          <Fragment key={key()}>
             <Circle
               icon={step.icon}
               isCompleted={activeStep - 1 > index}
@@ -305,7 +306,7 @@ const Stepper = ({ activeStep, steps }: StepperProps) => {
               text={step.text}
             />
             {index !== steps.length - 1 && <DashedLine />}
-          </>
+          </Fragment>
         );
       })}
     </>

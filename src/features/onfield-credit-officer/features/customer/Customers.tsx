@@ -1,3 +1,4 @@
+// import { useUsersQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { IconButton, TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
@@ -103,51 +104,54 @@ interface CustomerTableProps {
 }
 const CustomerTable = (props: CustomerTableProps) => {
   const navigate = useNavigate();
+  // const { data: users } = useUsersQuery();
 
   return (
-    <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
-      <TransactionTable>
-        <Thead>
-          <Tr
-            sx={{
-              'th:nth-of-type(2)': {
-                w: { '2xl': '140px' }
-              }
-            }}
-          >
-            {props.headers.map((th) => (
-              <Th key={key()}>{th}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {props.data.map((customer) => (
+    <>
+      <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
+        <TransactionTable>
+          <Thead>
             <Tr
-              key={key()}
-              _hover={{
-                bgColor: '#f3f3f3',
-                cursor: 'pointer',
-                transition: 'all .1s ease-in'
+              sx={{
+                'th:nth-of-type(2)': {
+                  w: { '2xl': '140px' }
+                }
               }}
-              onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
             >
-              <Td>{customer.name}</Td>
-              <Td>{customer.id}</Td>
-              <Td>{customer.date}</Td>
-              <Td>{customer.phoneNumber}</Td>
-              <Td>
-                <TableBadge
-                  bgColor={statusColor(customer.status).bgColor}
-                  color={statusColor(customer.status).color}
-                  text={customer.status}
-                  textTransform='uppercase'
-                />
-              </Td>
+              {props.headers.map((th) => (
+                <Th key={key()}>{th}</Th>
+              ))}
             </Tr>
-          ))}
-        </Tbody>
-      </TransactionTable>
-    </TableContainer>
+          </Thead>
+          <Tbody>
+            {props.data.map((customer) => (
+              <Tr
+                key={key()}
+                _hover={{
+                  bgColor: '#f3f3f3',
+                  cursor: 'pointer',
+                  transition: 'all .1s ease-in'
+                }}
+                onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
+              >
+                <Td>{customer.name}</Td>
+                <Td>{customer.id}</Td>
+                <Td>{customer.date}</Td>
+                <Td>{customer.phoneNumber}</Td>
+                <Td>
+                  <TableBadge
+                    bgColor={statusColor(customer.status).bgColor}
+                    color={statusColor(customer.status).color}
+                    text={customer.status}
+                    textTransform='uppercase'
+                  />
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </TransactionTable>
+      </TableContainer>
+    </>
   );
 };
 
