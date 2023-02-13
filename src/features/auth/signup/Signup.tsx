@@ -1,4 +1,5 @@
 import { SignupRequest as SignupPayload, useSignupMutation } from '@/app/services/auth';
+import { useReferralChannelsQuery } from '@/app/services/misc';
 import { ReactComponent as Underline } from '@/assets/svg/yellow-underline-sm.svg';
 import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
@@ -88,6 +89,9 @@ const Signup = () => {
   });
 
   const { values, errors, touched, handleChange, isSubmitting } = formik;
+
+  const { data } = useReferralChannelsQuery();
+  const referralChannels = (data?.data || []).map(({ id, name }) => ({ value: id, label: name }));
 
   return (
     <>
@@ -231,16 +235,7 @@ const Signup = () => {
                     onChange={handleChange}
                     errorMessage={errors.referral}
                     touchedField={touched.referral}
-                    options={[
-                      { value: '', label: 'Select referral channel' },
-                      { value: '1', label: 'Facebook' },
-                      { value: '2', label: 'Instagram' },
-                      { value: '3', label: 'Twitter' },
-                      { value: '4', label: 'Google' },
-                      { value: '5', label: 'LinkedIn' },
-                      { value: '6', label: 'Medium' },
-                      { value: '7', label: 'Other' }
-                    ]}
+                    options={[{ value: '', label: 'Select referral channel' }, ...referralChannels]}
                   />
                   <Stack>
                     <Text textStyle='xs' color='gray.300'>
