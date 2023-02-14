@@ -93,18 +93,18 @@ const CustomerDetail = (props: CustomerDetailProps) => {
 
 interface TableData {
   name: string;
-  id: string;
-  date: string;
-  phoneNumber: string;
-  status: Status;
+  id: number;
+  created_at: string;
+  phone_number: string;
+  status?: Status;
 }
 interface CustomerTableProps {
   headers: string[];
-  data: TableData[];
+  data: TableData[] | [];
 }
 const CustomerTable = (props: CustomerTableProps) => {
+  const { data } = props;
   const navigate = useNavigate();
-  const { data: users } = useUsersQuery();
 
   return (
     <>
@@ -124,30 +124,38 @@ const CustomerTable = (props: CustomerTableProps) => {
             </Tr>
           </Thead>
           <Tbody>
-            {props.data.map((customer) => (
-              <Tr
-                key={key()}
-                _hover={{
-                  bgColor: '#f3f3f3',
-                  cursor: 'pointer',
-                  transition: 'all .1s ease-in'
-                }}
-                onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
-              >
-                <Td>{customer.name}</Td>
-                <Td>{customer.id}</Td>
-                <Td>{customer.date}</Td>
-                <Td>{customer.phoneNumber}</Td>
-                <Td>
-                  <TableBadge
-                    bgColor={statusColor(customer.status).bgColor}
-                    color={statusColor(customer.status).color}
-                    text={customer.status}
-                    textTransform='uppercase'
-                  />
-                </Td>
-              </Tr>
-            ))}
+            {data.length > 0 ? (
+              data.map((customer) => (
+                <Tr
+                  key={key()}
+                  _hover={{
+                    bgColor: '#f3f3f3',
+                    cursor: 'pointer',
+                    transition: 'all .1s ease-in'
+                  }}
+                  onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
+                >
+                  <Td>{customer.name}</Td>
+                  <Td>{customer.id}</Td>
+                  <Td>{customer.created_at}</Td>
+                  <Td>{customer.phone_number}</Td>
+                  <Td>
+                    <TableBadge
+                      bgColor={statusColor(customer.status || 'pending').bgColor}
+                      color={statusColor(customer.status || 'pending').color}
+                      text={customer.status}
+                      textTransform='uppercase'
+                    />
+                  </Td>
+                </Tr>
+              ))
+            ) : (
+              <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
+                <Text as='span' textStyle='2xl' fontWeight={700}>
+                  No customers
+                </Text>
+              </Td>
+            )}
           </Tbody>
         </TransactionTable>
       </TableContainer>
@@ -158,6 +166,16 @@ const CustomerTable = (props: CustomerTableProps) => {
 const Customers = () => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
   const navigate = useNavigate();
+
+  const { data: response } = useUsersQuery();
+  const usersTable: TableData[] = response
+    ? response?.data.data.map(({ name, id, created_at, phone_number }) => ({
+        name,
+        id,
+        created_at,
+        phone_number
+      }))
+    : [];
 
   return (
     <>
@@ -210,36 +228,7 @@ const Customers = () => {
             <SearchInput />
             <CustomerTable
               headers={['Customer name', '#ID', 'Date', 'Phone number', 'Account Status']}
-              data={[
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'blocked'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'pending'
-                }
-              ]}
+              data={usersTable}
             />
 
             {['active', 'blocked', 'pending', 'active', 'blocked'].map((status) => (
@@ -260,23 +249,23 @@ const Customers = () => {
               data={[
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 93032,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'active'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 93032,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'active'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 93032,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'active'
                 }
               ]}
@@ -300,23 +289,23 @@ const Customers = () => {
               data={[
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'blocked'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'blocked'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'blocked'
                 }
               ]}
@@ -350,23 +339,23 @@ const Customers = () => {
               data={[
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'pending'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'pending'
                 },
                 {
                   name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
+                  id: 94049,
+                  created_at: '1st Jul, 2022',
+                  phone_number: faker.phone.number(),
                   status: 'pending'
                 }
               ]}
