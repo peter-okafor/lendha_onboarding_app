@@ -1,4 +1,4 @@
-// import { useUsersQuery } from '@/app/services/onboardingOfficer';
+import { useUsersQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { IconButton, TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
@@ -104,7 +104,7 @@ interface CustomerTableProps {
 }
 const CustomerTable = (props: CustomerTableProps) => {
   const navigate = useNavigate();
-  // const { data: users } = useUsersQuery();
+  const { data: users } = useUsersQuery();
 
   return (
     <>

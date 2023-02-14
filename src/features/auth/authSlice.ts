@@ -1,20 +1,20 @@
-import { login, User } from '@/app/services/auth';
+import { login, Officer } from '@/app/services/auth';
+import { profile } from '@/app/services/onboardingOfficer';
 import { RootState } from '@/app/store';
 import { encryptToken } from '@/utils/helpers/token.helpers';
 import { createSlice } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
 const initialState = {
-  user: null,
+  officer: null,
   token: '',
   isAuthenticated: false
-} as { user: User | null; token: string; isAuthenticated: boolean };
+} as { officer: Officer | null; token: string; isAuthenticated: boolean };
 
 const slice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // setUserProfile: () => {},
     logout: () => initialState
   },
   extraReducers: (builder) => {
@@ -26,6 +26,10 @@ const slice = createSlice({
       });
 
       state.token = token;
+    });
+
+    builder.addMatcher(profile.matchFulfilled, (state, { payload }) => {
+      state.officer = payload;
     });
   }
 });

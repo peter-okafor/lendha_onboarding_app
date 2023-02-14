@@ -81,7 +81,6 @@ const Navbar = () => {
   useOnClickOutside(ref, handleClickOutside);
 
   const { data: officerProfile } = useProfileQuery();
-  if (officerProfile) console.log(officerProfile);
 
   return (
     <>
@@ -120,7 +119,10 @@ const Navbar = () => {
               <RiQuestionFill fontSize='24px' color={globalStyles.colors.gray[300]} />
             </Box>
 
-            <ProfileDropdown email='johndoe@mail.com' name='John Doe' />
+            <ProfileDropdown
+              email={officerProfile?.email || 'johndoe@mail.com'}
+              name={officerProfile?.name || 'John Doe'}
+            />
           </Stack>
         </Flex>
         <Box border='1px solid #eeeef0' my={5} />

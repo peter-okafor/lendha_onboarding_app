@@ -9,7 +9,7 @@ export interface ReferralChannelResponse {
   message: string;
 }
 
-export const misc = api.injectEndpoints({
+export const miscApi = api.injectEndpoints({
   endpoints: (build) => ({
     referralChannels: build.query<ReferralChannelResponse, void>({
       query: () => e.referralChannels
@@ -17,4 +17,4 @@ export const misc = api.injectEndpoints({
   })
 });
 
-export const { useReferralChannelsQuery } = misc;
+export const { useReferralChannelsQuery } = miscApi;

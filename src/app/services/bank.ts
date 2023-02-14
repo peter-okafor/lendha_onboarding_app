@@ -14,7 +14,7 @@ export interface BanksResponse {
   message: string;
 }
 
-export const bank = api.injectEndpoints({
+export const bankApi = api.injectEndpoints({
   endpoints: (build) => ({
     bankList: build.query<BanksResponse, void>({
       query: () => e.bankList
@@ -22,4 +22,4 @@ export const bank = api.injectEndpoints({
   })
 });
 
-export const { useBankListQuery } = bank;
+export const { useBankListQuery } = bankApi;

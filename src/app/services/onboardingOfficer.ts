@@ -1,4 +1,5 @@
 import { api } from './api';
+import { Officer } from './auth';
 import { ENDPOINTS as e } from './_endpoints';
 
 export interface LoanResponse {
@@ -11,7 +12,7 @@ export interface UserResponse {
   message: string;
 }
 
-export const onboardingOfficer = api.injectEndpoints({
+export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, void>({
       query: () => e.users
@@ -19,10 +20,14 @@ export const onboardingOfficer = api.injectEndpoints({
     loans: build.query<LoanResponse, void>({
       query: () => e.loans
     }),
-    profile: build.query<LoanResponse, void>({
+    profile: build.query<Officer, void>({
       query: () => e.profile
     })
   })
 });
 
-export const { useLoansQuery, useUsersQuery, useProfileQuery } = onboardingOfficer;
+export const { useLoansQuery, useUsersQuery, useProfileQuery } = onboardingOfficerApi;
+
+export const {
+  endpoints: { profile }
+} = onboardingOfficerApi;
