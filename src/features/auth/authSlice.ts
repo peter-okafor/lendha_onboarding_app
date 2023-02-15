@@ -1,4 +1,4 @@
-import { login, Officer } from '@/app/services/auth';
+import { login, logout, Officer } from '@/app/services/auth';
 import { profile } from '@/app/services/onboardingOfficer';
 import { RootState } from '@/app/store';
 import { encryptToken } from '@/utils/helpers/token.helpers';
@@ -14,9 +14,7 @@ const initialState = {
 const slice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    logout: () => initialState
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder.addMatcher(login.matchFulfilled, (state, { payload }) => {
       const token = encryptToken(payload.access_token);
@@ -31,10 +29,15 @@ const slice = createSlice({
     builder.addMatcher(profile.matchFulfilled, (state, { payload }) => {
       state.officer = payload;
     });
+
+    builder.addMatcher(logout.matchFulfilled, (state) => {
+      Cookies.remove('token');
+
+      state.token = '';
+    });
   }
 });
 
-export const { logout } = slice.actions;
 export default slice.reducer;
 
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;

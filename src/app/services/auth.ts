@@ -59,6 +59,9 @@ export const authApi = api.injectEndpoints({
         body: credentials
       })
     }),
+    logout: build.query({
+      query: () => e.logout
+    }),
     signup: build.mutation<SignupResponse, SignupRequest>({
       query: (credentials) => ({
         url: e.signup,
@@ -76,8 +79,9 @@ export const authApi = api.injectEndpoints({
   })
 });
 
-export const { useLoginMutation, useSignupMutation, usePasswordResetMutation } = authApi;
+export const { useLoginMutation, useSignupMutation, usePasswordResetMutation, useLogoutQuery } =
+  authApi;
 
 export const {
-  endpoints: { login }
+  endpoints: { login, logout }
 } = authApi;

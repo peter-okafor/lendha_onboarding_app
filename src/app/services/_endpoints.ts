@@ -1,5 +1,6 @@
 export const ENDPOINTS = {
   login: 'auth/login',
+  logout: 'auth/logout',
   signup: 'auth/signup',
   passwordReset: 'password/create',
   bankList: 'bank/list',
