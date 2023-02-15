@@ -1,6 +1,5 @@
-// import { useBankListQuery } from '@/app/services/bank';
+import { useBankListQuery } from '@/app/services/bank';
 import { DropzoneFileUpload, FormInput, FormSelect, NextCancelButton } from '@/components/common';
-import { useBVN, useNIN } from '@/utils/hooks';
 import { Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
 import { VerificationInfoFormValues } from '../types';
@@ -14,11 +13,11 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
 
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
-  const bvn = useBVN(values.bvn);
-  const nin = useNIN(values.nin);
+  const bvn = values.bvn;
+  const nin = values.nin;
 
-  // const { data } = useBankListQuery();
-  // const banks = data?.data.list;
+  const { data } = useBankListQuery();
+  const banks = data?.data.list.map(({ code, name }) => ({ value: code, label: name }));
 
   const fallbackBanks = [
     {
@@ -68,7 +67,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             onChange={handleChange}
             errorMessage={errors.bankName}
             touchedField={touched.bankName}
-            options={bankList}
+            options={banks || bankList}
           />
           <FormInput
             label='Account number'

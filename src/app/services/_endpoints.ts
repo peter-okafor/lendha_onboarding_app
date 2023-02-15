@@ -7,5 +7,6 @@ export const ENDPOINTS = {
 
   users: 'onboarding_officer/users',
   loans: 'onboarding_officer/loans',
-  profile: 'onboarding_officer/profile'
+  profile: 'onboarding_officer/profile',
+  createUser: 'onboarding_officer/create_user'
 };
