@@ -1,3 +1,4 @@
+import { useLoansQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
@@ -117,48 +118,51 @@ interface LoanTableProps {
 }
 const LoanTable = (props: LoanTableProps) => {
   const navigate = useNavigate();
+  const { data } = props;
 
   return (
     <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
       <TransactionTable>
         <Thead>
-          <Tr
-          // sx={{
-          //   'th:first-of-type': {
-          //     w: { base: '0', '2xl': '140px' }
-          //   }
-          // }}
-          >
+          <Tr>
             {props.headers.map((th) => (
               <Th key={key()}>{th}</Th>
             ))}
           </Tr>
         </Thead>
         <Tbody>
-          {props.data.map((loan) => (
-            <Tr
-              key={key()}
-              _hover={{
-                bgColor: '#f3f3f3',
-                cursor: 'pointer',
-                transition: 'all .1s ease-in'
-              }}
-              onClick={() => navigate(path.CREDIT_OFFICER_PAY_LOAN)}
-            >
-              <Td>{loan.id}</Td>
-              <Td>{loan.name}</Td>
-              <Td>{loan.date}</Td>
-              <Td>N{formatNumber(loan.amount)}</Td>
-              <Td>
-                <TableBadge
-                  bgColor={statusColor(loan.status).bgColor}
-                  color={statusColor(loan.status).color}
-                  text={loan.status}
-                  textTransform='uppercase'
-                />
-              </Td>
-            </Tr>
-          ))}
+          {data.length > 0 ? (
+            data.map((loan) => (
+              <Tr
+                key={key()}
+                _hover={{
+                  bgColor: '#f3f3f3',
+                  cursor: 'pointer',
+                  transition: 'all .1s ease-in'
+                }}
+                onClick={() => navigate(path.CREDIT_OFFICER_PAY_LOAN)}
+              >
+                <Td>{loan.id}</Td>
+                <Td>{loan.name}</Td>
+                <Td>{loan.date}</Td>
+                <Td>N{formatNumber(loan.amount)}</Td>
+                <Td>
+                  <TableBadge
+                    bgColor={statusColor(loan.status).bgColor}
+                    color={statusColor(loan.status).color}
+                    text={loan.status}
+                    textTransform='uppercase'
+                  />
+                </Td>
+              </Tr>
+            ))
+          ) : (
+            <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
+              <Text as='span' textStyle='2xl' fontWeight={700}>
+                No loans
+              </Text>
+            </Td>
+          )}
         </Tbody>
       </TransactionTable>
     </TableContainer>
@@ -166,6 +170,17 @@ const LoanTable = (props: LoanTableProps) => {
 };
 
 const Loans = () => {
+  const { data: response } = useLoansQuery();
+  const loansTable: TableData[] = response
+    ? response?.data.map(({ application_id, user_id, created_at, amount, status }) => ({
+        id: application_id,
+        name: user_id.toString(),
+        date: created_at,
+        amount,
+        status
+      }))
+    : [];
+
   return (
     <>
       <Text
@@ -208,29 +223,7 @@ const Loans = () => {
             <SearchInput />
             <LoanTable
               headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'closed'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'default'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'declined'
-                }
-              ]}
+              data={loansTable}
             />
             {['active', 'closed', 'pending', 'declined', 'default', 'due'].map((status) => (
               <LoanLink key={key()}>

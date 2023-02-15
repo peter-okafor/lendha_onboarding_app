@@ -2,10 +2,6 @@ import { api } from './api';
 import { Officer } from './auth';
 import { ENDPOINTS as e } from './_endpoints';
 
-export interface LoanResponse {
-  data: any[];
-  message: string;
-}
 
 type Business = {
   id: number;
@@ -70,6 +66,30 @@ export interface UserResponse {
     to: 2;
     total: 2;
   };
+  message: string;
+}
+
+export interface LoanResponse {
+  data: {
+    application_id: string;
+    amount: number;
+    approved_amount: number;
+    request_date: string;
+    approval_date: null;
+    purpose: string;
+    duration: string;
+    status: string;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
+    merchant_id: number;
+    loan_interest_id: number;
+    open_duration: string;
+    monthly_payment: number;
+    total_expected_payment: number;
+    last_payment_details: any;
+    loan_denial_reason: string;
+  }[];
   message: string;
 }
 

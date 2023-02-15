@@ -100,7 +100,7 @@ interface TableData {
 }
 interface CustomerTableProps {
   headers: string[];
-  data: TableData[] | [];
+  data: TableData[];
 }
 const CustomerTable = (props: CustomerTableProps) => {
   const { data } = props;
