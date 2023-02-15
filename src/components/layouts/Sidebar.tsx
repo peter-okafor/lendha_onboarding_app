@@ -1,3 +1,6 @@
+import { useAppDispatch } from '@/app/hooks';
+import { api } from '@/app/services/api';
+import { authApi, logout, useLogoutQuery } from '@/app/services/auth';
 import { ReactComponent as Logo } from '@/assets/svg/logo/logo-blue.svg';
 import { ReactComponent as VerticalLineSVG } from '@/assets/svg/vertical-line.svg';
 import { path } from '@/routes/path';
@@ -13,12 +16,10 @@ import {
   ListIcon,
   ListItem,
   Stack,
-  Text,
-  useToast
+  Text
 } from '@chakra-ui/react';
 import { RiLogoutCircleRFill } from 'react-icons/ri';
 import { Link, Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom';
-import { useLocalStorage } from 'usehooks-ts';
 
 const Sidebar = () => {
   const pathname = useLocation().pathname;
@@ -96,10 +97,9 @@ const Sidebar = () => {
 export default Sidebar;
 
 export const LogoutButton = () => {
-  const toast = useToast();
   const navigate = useNavigate();
-  const [, setEmail] = useLocalStorage('email', '');
 
+  const dispatch = useAppDispatch();
 
   return (
     <Stack
@@ -110,15 +110,9 @@ export const LogoutButton = () => {
       as='button'
       pl={5}
       onClick={() => {
-        setEmail('');
-        toast({
-          title: 'Success',
-          description: 'Logged out Successfully',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
+        dispatch(logout.initiate({}, { forceRefetch: true })).then(() =>
+          dispatch(api.util.resetApiState())
+        );
         navigate(path.SIGNIN);
       }}
     >

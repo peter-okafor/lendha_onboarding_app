@@ -14,8 +14,8 @@ const slice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setUserProfile: () => {},
-    logout: () => initialState
+    // setUserProfile: () => {},
+    // logout: () => initialState
   },
   extraReducers: (builder) => {
     builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
@@ -27,10 +27,16 @@ const slice = createSlice({
 
       state.token = token;
     });
+
+    builder.addMatcher(authApi.endpoints.logout.matchFulfilled, (state, { payload }) => {
+      Cookies.remove('token');
+
+      state.token = '';
+    });
   }
 });
 
-export const { logout } = slice.actions;
+// export const { logout } = slice.actions;
 export default slice.reducer;
 
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;

@@ -19,9 +19,6 @@ export interface LoginResponse {
   expires_at: string;
   step: string;
 }
-export interface LogoutRequest {
-  message: string;
-}
 
 export interface SignupRequest {
   name: string;
@@ -58,12 +55,8 @@ export const authApi = api.injectEndpoints({
         body: credentials
       })
     }),
-    Logout: build.query<LogoutRequest, void>({
-      query: (credentials) => ({
-        url: 'auth/logout',
-        method: 'GET',
-        body: credentials
-      })
+    logout: build.query({
+      query: () => 'auth/logout'
     }),
     signup: build.mutation<SignupResponse, SignupRequest>({
       query: (credentials) => ({
@@ -82,8 +75,9 @@ export const authApi = api.injectEndpoints({
   })
 });
 
-export const { useLoginMutation, useSignupMutation, usePasswordResetMutation } = authApi;
+export const { useLoginMutation, useSignupMutation, usePasswordResetMutation, useLogoutQuery } =
+  authApi;
 
 export const {
-  endpoints: { login }
+  endpoints: { login, logout }
 } = authApi;
