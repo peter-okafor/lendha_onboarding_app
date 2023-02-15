@@ -3,13 +3,11 @@ import { ENDPOINTS as e } from './_endpoints';
 
 export interface BanksResponse {
   data: {
-    list: [
-      {
-        id: number;
-        code: string;
-        name: string;
-      }[]
-    ];
+    list: {
+      id: number;
+      code: string;
+      name: string;
+    }[];
   };
   message: string;
 }
