@@ -52,7 +52,7 @@ const Navbar = () => {
       case path.CREDIT_OFFICER:
         setPageTitle('Credit Officer');
         break;
-      case path.CREDIT_OFFICER_USER_PROFILE:
+      case path.CUSTOMER_PROFILE:
         setPageTitle('User profile');
         break;
       case path.CREDIT_OFFICER_LOANS:
