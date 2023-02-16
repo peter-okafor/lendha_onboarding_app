@@ -120,8 +120,8 @@ const Navbar = () => {
             </Box>
 
             <ProfileDropdown
-              email={officerProfile?.email || 'johndoe@mail.com'}
-              name={officerProfile?.name || 'John Doe'}
+              email={officerProfile?.data.email || ''}
+              name={officerProfile?.data.name || ''}
             />
           </Stack>
         </Flex>

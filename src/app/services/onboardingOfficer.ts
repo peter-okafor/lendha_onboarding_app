@@ -2,7 +2,6 @@ import { api } from './api';
 import { Officer } from './auth';
 import { ENDPOINTS as e } from './_endpoints';
 
-
 type Business = {
   id: number;
   name: string;
@@ -25,7 +24,7 @@ export interface UserResponse {
   data: {
     current_page: number;
     data: {
-      id: number;
+      id: string;
       name: string;
       email: string;
       phone_number: string;
@@ -79,7 +78,7 @@ export interface LoanResponse {
     purpose: string;
     duration: string;
     status: string;
-    user_id: number;
+    user_id: string;
     created_at: string;
     updated_at: string;
     merchant_id: number;

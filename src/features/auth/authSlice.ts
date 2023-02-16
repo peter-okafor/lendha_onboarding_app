@@ -1,7 +1,6 @@
 import { login, logout, Officer } from '@/app/services/auth';
 import { profile } from '@/app/services/onboardingOfficer';
 import { RootState } from '@/app/store';
-import { encryptToken } from '@/utils/helpers/token.helpers';
 import { createSlice } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
@@ -17,7 +16,7 @@ const slice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addMatcher(login.matchFulfilled, (state, { payload }) => {
-      const token = encryptToken(payload.access_token);
+      const token = payload.access_token;
       Cookies.set('token', token, {
         sameSite: 'strict'
         // expires: new Date(new Date(payload.expires_at).getTime())

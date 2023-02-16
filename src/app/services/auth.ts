@@ -2,14 +2,16 @@ import { api } from './api';
 import { ENDPOINTS as e } from './_endpoints';
 
 export interface Officer {
-  id: string;
-  name: string;
-  email: string;
-  phone_number: string;
-  date_of_birth: string;
-  state_of_residence: string;
-  gender: string;
-  address: string;
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    phone_number: string;
+    date_of_birth: string;
+    state_of_residence: string;
+    gender: string;
+    address: string;
+  };
 }
 
 export interface LoginRequest {

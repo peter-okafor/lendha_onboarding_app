@@ -1,4 +1,3 @@
-import { decryptToken } from '@/utils/helpers/token.helpers';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import Cookies from 'js-cookie';
 import { RootState } from '../store';
@@ -10,7 +9,7 @@ const baseQuery = fetchBaseQuery({
     // By default, if we have a token in the store, let's use that for authenticated requests
     const token = (getState() as RootState).auth.token || Cookies.get('token');
     if (token) {
-      headers.set('authentication', `Bearer ${decryptToken(token)}`);
+      headers.set('authorization', `Bearer ${token}`);
     }
     headers.set('accept', 'application/json');
     headers.set('content-type', 'application/json');

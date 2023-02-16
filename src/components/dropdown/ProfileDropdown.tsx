@@ -42,7 +42,7 @@ const ProfileDropdown = ({ name, email, src = 'https://bit.ly/kent-c-dodds' }: P
             <SkeletonCircle size='8' isLoaded={!!src}>
               <Avatar size='sm' name={name} src={src} />
             </SkeletonCircle>
-            <Flex gap={0} fontFamily='Poppins' flexDir='column'>
+            <Flex gap={0} fontFamily='Poppins' flexDir='column' w='full'>
               <SkeletonText noOfLines={1} isLoaded={!!name}>
                 <Text textStyle='base'>{name}</Text>
               </SkeletonText>
