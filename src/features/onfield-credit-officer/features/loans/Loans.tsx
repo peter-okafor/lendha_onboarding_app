@@ -156,11 +156,13 @@ const LoanTable = (props: LoanTableProps) => {
               </Tr>
             ))
           ) : (
-            <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
-              <Text as='span' textStyle='2xl' fontWeight={700}>
-                No loans
-              </Text>
-            </Td>
+            <Tr>
+              <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
+                <Text as='span' textStyle='2xl' fontWeight={700}>
+                  No loans
+                </Text>
+              </Td>
+            </Tr>
           )}
         </Tbody>
       </TransactionTable>
