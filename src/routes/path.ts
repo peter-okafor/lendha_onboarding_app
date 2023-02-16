@@ -29,9 +29,9 @@ export const path = {
 
   CUSTOMERS: '/customers',
   CUSTOMER_NEW: '/customers/new',
+  CUSTOMER_PROFILE: '/customers/profile/:id',
 
   CREDIT_OFFICER_LOANS: '/loans',
   CREDIT_OFFICER_TAKE_LOAN: '/loans/take',
-  CREDIT_OFFICER_PAY_LOAN: '/loans/pay',
-  CREDIT_OFFICER_USER_PROFILE: '/loans/user-profile'
+  CREDIT_OFFICER_PAY_LOAN: '/loans/pay'
 };

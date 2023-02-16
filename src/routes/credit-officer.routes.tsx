@@ -15,10 +15,6 @@ const CreditOfficerPayLoan = lazy(
   () => import('@/features/onfield-credit-officer/features/loans/PayLoan')
 );
 
-const CreditOfficerUserProfile = lazy(
-  () => import('@/features/onfield-credit-officer/features/user-profile/UserProfile')
-);
-
 export const CreditOfficerRoutes: RouteObject = {
   path: path.CREDIT_OFFICER,
   element: <ProutectedRoutes />,
@@ -38,7 +34,6 @@ export const OnFieldCreditOfficerRoutes: RouteObject = {
     },
     { path: path.CREDIT_OFFICER_TAKE_LOAN, element: <CreditOfficerTakeLoan /> },
     { path: path.CREDIT_OFFICER_PAY_LOAN, element: <CreditOfficerPayLoan /> },
-    { path: path.CREDIT_OFFICER_USER_PROFILE, element: <CreditOfficerUserProfile /> },
     { path: '*', element: <Navigate to={path.CREDIT_OFFICER_LOANS} replace /> }
   ]
 };
