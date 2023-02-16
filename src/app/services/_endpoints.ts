@@ -9,5 +9,6 @@ export const ENDPOINTS = {
   users: 'onboarding_officer/users',
   loans: 'onboarding_officer/loans',
   profile: 'onboarding_officer/profile',
-  createUser: 'onboarding_officer/create_user'
+  createUser: 'onboarding_officer/create_user',
+  homeAddress: 'onboarding_officer/home_address'
 };
