@@ -132,7 +132,7 @@ const CustomerTable = (props: CustomerTableProps) => {
                     cursor: 'pointer',
                     transition: 'all .1s ease-in'
                   }}
-                  onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
+                  onClick={() => navigate(`/customers/profile/${customer.id}`)}
                 >
                   <Td>{customer.name}</Td>
                   <Td>{customer.id}</Td>
@@ -300,10 +300,7 @@ interface CustomerWrapperProps {
   children: ReactNode;
   linkTo?: string;
 }
-const CustomerLink = ({
-  children,
-  linkTo = path.CREDIT_OFFICER_USER_PROFILE
-}: CustomerWrapperProps) => {
+const CustomerLink = ({ children, linkTo = path.CUSTOMERS }: CustomerWrapperProps) => {
   const navigate = useNavigate();
 
   return (
