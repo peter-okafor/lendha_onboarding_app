@@ -1,4 +1,5 @@
 import { Select, SelectProps, Text } from '@chakra-ui/react';
+import { v4 as key } from 'uuid';
 import FormControlLabel from './form-control-label';
 
 interface Props extends SelectProps {
@@ -34,7 +35,7 @@ const FormSelect = ({
       >
         {options.length > 0 &&
           options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={key()} value={option.value}>
               {option.label}
             </option>
           ))}

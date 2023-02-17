@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   profile: 'onboarding_officer/profile',
   createUser: 'onboarding_officer/create_user',
   homeAddress: 'onboarding_officer/home_address',
+  loanApply: 'onboarding_officer/loan_application',
 
   bankList: 'bank/list',
 

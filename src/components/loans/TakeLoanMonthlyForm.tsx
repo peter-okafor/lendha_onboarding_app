@@ -1,6 +1,13 @@
 import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
+import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
-import { formatNumber, isObjectPropsEmpty, maskCurrency, stripCommas } from '@/utils/helpers';
+import {
+  formatNumber,
+  isObjectPropsEmpty,
+  maskCurrency,
+  sanitize,
+  stripCommas
+} from '@/utils/helpers';
 import {
   Box,
   Button,
@@ -8,8 +15,10 @@ import {
   GridItem,
   Icon,
   InputRightElement,
+  Skeleton,
   Stack,
-  Text
+  Text,
+  useToast
 } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useEffect, useState } from 'react';
@@ -36,20 +45,21 @@ interface Props {
   showCancelBtn?: boolean;
 }
 interface TakeLoanValues {
-  amount: string;
-  loanPeriod: string;
+  amount: number;
+  loanPeriod: number;
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
-  const { data: interests } = useLoanInterestsQuery();
+  const toast = useToast();
+
+  const { data: interests, isLoading } = useLoanInterestsQuery();
 
   const [loanCategories, setLoanCategories] = useState<LoanInterest[]>([]);
 
   useEffect(() => {
     if (interests?.data) {
-      setLoanCategories((prev) => [
-        ...prev,
-        ...interests.data.map(
+      setLoanCategories(() =>
+        interests.data.map(
           ({
             id,
             interest,
@@ -68,7 +78,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
             moratorium
           })
         )
-      ]);
+      );
     }
   }, [interests?.data]);
 
@@ -82,15 +92,43 @@ const TakeLoanMonthlyForm = (props: Props) => {
     setLoanMaxAmount(loanCategories[selectedLoanCategory - 1]?.maximum_amount);
   }, [loanCategories, selectedLoanCategory]);
 
+  const [loanApply] = useLoanApplyMutation();
+
   const formik = useFormik<TakeLoanValues>({
     initialValues: {
-      amount: '',
-      loanPeriod: '',
+      amount: 0,
+      loanPeriod: 0,
       interestRate: ''
     },
-    onSubmit: async (values) => {
-      console.log(values);
-      props.onSubmit();
+    onSubmit: async (formValues) => {
+      const values = sanitize<TakeLoanValues>(formValues);
+      try {
+        const response = await loanApply({
+          loan_amount: values.amount,
+          loan_interest_id: selectedLoanCategory,
+          loan_term: values.loanPeriod,
+          user_id: 22 //TODO: remove after getting user creation flow from Peter
+        }).unwrap();
+
+        toast({
+          title: 'Loan Application',
+          description: response?.message,
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        props.onSubmit();
+      } catch (err: any) {
+        toast({
+          title: 'Loan Application Error',
+          description: err?.data?.message || 'An error occurred',
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: Yup.object<Record<keyof TakeLoanValues, Yup.AnySchema>>({
       amount: Yup.number()
@@ -102,7 +140,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
     })
   });
 
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const handleInputChange = (e: any /**TODO: fix this type**/) => {
     const amount: number | '' = Number(stripCommas(maskCurrency(e.target.value))) || '';
@@ -110,7 +148,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
     setFieldValue('amount', Number(amount) || '');
   };
 
-  const loanCategoryOptions = loanCategories.map((category) => ({
+  const loanCategoryOptions = loanCategories.slice(0, 3).map((category) => ({
     value: category.id,
     label: category.purpose,
     icon: getCategoryIcon(category.id),
@@ -128,24 +166,30 @@ const TakeLoanMonthlyForm = (props: Props) => {
         columnGap={[2, 5]}
         rowGap='10px'
       >
-        {loanCategoryOptions.map((option) => (
-          <GridItem key={option.value}>
-            <Button
-              onClick={option.onClick}
-              variant={option.value === selectedLoanCategory ? 'primary' : 'secondary'}
-              className={
-                option.value === selectedLoanCategory
-                  ? 'selected loan-category-option'
-                  : 'loan-category-option'
-              }
-            >
-              <Box as='span'>
-                <Icon as={option.icon} fontSize='20px' />
-                {option.label}
-              </Box>
-            </Button>
-          </GridItem>
-        ))}
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <GridItem key={index}>
+                <Skeleton key={index} height='30px' isLoaded={!!interests} />
+              </GridItem>
+            ))
+          : loanCategoryOptions.map((option) => (
+              <GridItem key={option.value}>
+                <Button
+                  onClick={option.onClick}
+                  variant={option.value === selectedLoanCategory ? 'primary' : 'secondary'}
+                  className={
+                    option.value === selectedLoanCategory
+                      ? 'selected loan-category-option'
+                      : 'loan-category-option'
+                  }
+                >
+                  <Box as='span'>
+                    <Icon as={option.icon} fontSize='20px' />
+                    {option.label}
+                  </Box>
+                </Button>
+              </GridItem>
+            ))}
         <FormError error={errors.interestRate} touched={touched.interestRate} />
       </Grid>
       <Box mt={4}>
@@ -185,27 +229,27 @@ const TakeLoanMonthlyForm = (props: Props) => {
                   },
                   {
                     label: '1 months',
-                    value: '10'
+                    value: '1'
                   },
                   {
                     label: '2 months',
-                    value: '20'
+                    value: '2'
                   },
                   {
                     label: '3 months',
-                    value: '30'
+                    value: '3'
                   },
                   {
                     label: '4 months',
-                    value: '40'
+                    value: '4'
                   },
                   {
                     label: '5 months',
-                    value: '50'
+                    value: '5'
                   },
                   {
                     label: '5 months',
-                    value: '60'
+                    value: '6'
                   }
                 ]}
                 value={values.loanPeriod}
@@ -232,6 +276,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
                 </Button>
               ) : (
                 <NextCancelButton
+                  isSubmitting={isSubmitting}
                   showCancelBtn={props.showCancelBtn}
                   onCancel={props.onGoBack}
                   hasErrors={Object.keys(errors).length > 0 || isObjectPropsEmpty(values)}

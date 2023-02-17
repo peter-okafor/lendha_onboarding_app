@@ -109,6 +109,18 @@ export interface CreateUserResponse {
   message: string;
 }
 
+export interface ApplyLoanRequest {
+  loan_amount: number;
+  loan_interest_id: number;
+  loan_term: number;
+  user_id: number;
+}
+
+export interface ApplyLoanResponse {
+  data: any[];
+  message: string;
+}
+
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, void>({
@@ -133,12 +145,20 @@ export const onboardingOfficerApi = api.injectEndpoints({
         method: 'POST',
         body: credentials
       })
+    }),
+    loanApply: build.mutation<ApplyLoanResponse, ApplyLoanRequest>({
+      query: (credentials) => ({
+        url: e.loanApply,
+        method: 'POST',
+        body: credentials
+      })
     })
   })
 });
 
-export const { useLoansQuery, useUsersQuery, useProfileQuery } = onboardingOfficerApi;
+export const { useLoansQuery, useUsersQuery, useProfileQuery, useLoanApplyMutation } =
+  onboardingOfficerApi;
 
 export const {
-  endpoints: { profile }
+  endpoints: { profile, loanApply }
 } = onboardingOfficerApi;
