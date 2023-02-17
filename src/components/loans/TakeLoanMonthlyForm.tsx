@@ -1,3 +1,4 @@
+import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
 import { formatNumber, isObjectPropsEmpty, maskCurrency, stripCommas } from '@/utils/helpers';
 import {
@@ -14,9 +15,6 @@ import { Form, FormikProvider, useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { RiCommunityFill, RiShoppingBagFill, RiStore2Fill } from 'react-icons/ri';
 import * as Yup from 'yup';
-import { LOAN_AMOUNTS } from './constants';
-
-const { retail, wholesalers, smes } = LOAN_AMOUNTS;
 
 export type LoanValues = {
   amount: string;
@@ -25,17 +23,10 @@ export type LoanValues = {
   interestRate: string;
 };
 
-export type LoanCategory = 'retail' | 'wholesalers' | 'smes' | 'float';
-
-const loanCategories = {
-  retail: { rate: 7, minAmount: retail.min, maxAmount: retail.max },
-  wholesalers: {
-    category: 'wholesalers',
-    rate: 6,
-    minAmount: wholesalers.min,
-    maxAmount: wholesalers.max
-  },
-  smes: { rate: 5, minAmount: smes.min, maxAmount: smes.max }
+const getCategoryIcon = (id: number) => {
+  if (id === 1) return RiShoppingBagFill;
+  else if (id === 2) return RiStore2Fill;
+  else return RiCommunityFill;
 };
 
 interface Props {
@@ -50,21 +41,46 @@ interface TakeLoanValues {
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
-  const [selectedLoanCategory, setSelectedLoanCategory] = useState<LoanCategory | ''>('');
+  const { data: interests } = useLoanInterestsQuery();
+
+  const [loanCategories, setLoanCategories] = useState<LoanInterest[]>([]);
+
+  useEffect(() => {
+    if (interests?.data) {
+      setLoanCategories((prev) => [
+        ...prev,
+        ...interests.data.map(
+          ({
+            id,
+            interest,
+            purpose,
+            minimum_amount,
+            maximum_amount,
+            repayment_duration,
+            moratorium
+          }) => ({
+            id,
+            interest,
+            purpose,
+            minimum_amount,
+            maximum_amount,
+            repayment_duration,
+            moratorium
+          })
+        )
+      ]);
+    }
+  }, [interests?.data]);
+
+  const [selectedLoanCategory, setSelectedLoanCategory] = useState<number>(0);
 
   const [loanMinAmount, setLoanMinAmount] = useState(50_000);
   const [loanMaxAmount, setLoanMaxAmount] = useState(1_000_000);
 
   useEffect(() => {
-    if (
-      selectedLoanCategory === 'retail' ||
-      selectedLoanCategory === 'wholesalers' ||
-      selectedLoanCategory === 'smes'
-    ) {
-      setLoanMinAmount(loanCategories[selectedLoanCategory].minAmount);
-      setLoanMaxAmount(loanCategories[selectedLoanCategory].maxAmount);
-    }
-  }, [selectedLoanCategory]);
+    setLoanMinAmount(loanCategories[selectedLoanCategory - 1]?.minimum_amount);
+    setLoanMaxAmount(loanCategories[selectedLoanCategory - 1]?.maximum_amount);
+  }, [loanCategories, selectedLoanCategory]);
 
   const formik = useFormik<TakeLoanValues>({
     initialValues: {
@@ -94,49 +110,16 @@ const TakeLoanMonthlyForm = (props: Props) => {
     setFieldValue('amount', Number(amount) || '');
   };
 
-  const loanCategoryOptions = [
-    {
-      value: 'retail',
-      label: 'Retail Merchants',
-      icon: RiShoppingBagFill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('retail');
-      }
-    },
-    {
-      value: 'wholesalers',
-      label: 'Wholesalers',
-      icon: RiStore2Fill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('wholesalers');
-      }
-    },
-    {
-      value: 'smes',
-      label: 'SMEs',
-      icon: RiCommunityFill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('smes');
-      }
+  const loanCategoryOptions = loanCategories.map((category) => ({
+    value: category.id,
+    label: category.purpose,
+    icon: getCategoryIcon(category.id),
+    onClick: () => {
+      setFieldValue('amount', '');
+      setFieldValue('interestRate', category.interest);
+      setSelectedLoanCategory(category.id);
     }
-  ];
-
-  useEffect(() => {
-    switch (selectedLoanCategory) {
-      case 'retail':
-        setFieldValue('interestRate', '7%');
-        break;
-      case 'wholesalers':
-        setFieldValue('interestRate', '6%');
-        break;
-      case 'smes':
-        setFieldValue('interestRate', '5%');
-        break;
-    }
-  }, [selectedLoanCategory, setFieldValue]);
+  }));
 
   return (
     <>

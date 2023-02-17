@@ -1,6 +1,5 @@
 import { login, logout, Officer } from '@/app/services/auth';
 import { profile } from '@/app/services/onboardingOfficer';
-import { RootState } from '@/app/store';
 import { createSlice } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
@@ -39,4 +38,4 @@ const slice = createSlice({
 
 export default slice.reducer;
 
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+// export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;

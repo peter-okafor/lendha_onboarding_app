@@ -122,7 +122,7 @@ const PayLoan = () => {
               isLink
               label='Customer name'
               text='John Orukpe'
-              linkPath={path.CREDIT_OFFICER_USER_PROFILE}
+              linkPath={path.CUSTOMER_PROFILE}
               linkProps={{
                 textDecor: 'underline'
               }}
