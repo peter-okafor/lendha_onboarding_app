@@ -122,6 +122,21 @@ export interface ApplyLoanResponse {
   message: string;
 }
 
+interface CreateHomeAddressRequest {
+  number: string;
+  street_name: string;
+  landmark: string;
+  city: string;
+  local_government: string;
+  state: string;
+  user_id: number;
+}
+
+interface CreateHomeAddressResponse {
+  step: number;
+  message: string;
+}
+
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, void>({
@@ -140,7 +155,7 @@ export const onboardingOfficerApi = api.injectEndpoints({
         body: credentials
       })
     }),
-    createAddress: build.mutation<CreateUserResponse, CreateUserRequest>({
+    createAddress: build.mutation<CreateHomeAddressResponse, CreateHomeAddressRequest>({
       query: (credentials) => ({
         url: e.homeAddress,
         method: 'POST',
@@ -157,9 +172,15 @@ export const onboardingOfficerApi = api.injectEndpoints({
   })
 });
 
-export const { useLoansQuery, useUsersQuery, useProfileQuery, useLoanApplyMutation } =
-  onboardingOfficerApi;
+export const {
+  useLoansQuery,
+  useUsersQuery,
+  useProfileQuery,
+  useLoanApplyMutation,
+  useCreateUserMutation,
+  useCreateAddressMutation
+} = onboardingOfficerApi;
 
 export const {
-  endpoints: { profile, loanApply }
+  endpoints: { profile, loanApply, createUser, createAddress }
 } = onboardingOfficerApi;

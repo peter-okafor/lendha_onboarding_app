@@ -5,6 +5,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
 import { SuccessMessage as VerifyMessage } from '@/components/message';
 import { path } from '@/routes/path';
+import ErrorMessages from '@/utils/components/ErrorMessages';
 import { sanitize } from '@/utils/helpers';
 import { Box, Button, Flex, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
@@ -62,11 +63,11 @@ const Signup = () => {
           referral_channel: values.referral
         };
 
-        await signup(payload).unwrap();
+        const response = await signup(payload).unwrap();
 
         toast({
           title: 'Success',
-          description: 'You have successfully signed up',
+          description: response.message || 'You have successfully signed up',
           status: 'success',
           duration: 4000,
           position: 'top-right',
@@ -76,8 +77,8 @@ const Signup = () => {
         router(path.SIGNIN);
       } catch (err: any) {
         toast({
-          title: 'An error occured',
-          description: err?.data?.error || err?.data?.message,
+          title: err?.data?.message || 'An error occurred',
+          description: <ErrorMessages errors={err?.data.errors} />,
           status: 'error',
           duration: 4000,
           position: 'top-right',

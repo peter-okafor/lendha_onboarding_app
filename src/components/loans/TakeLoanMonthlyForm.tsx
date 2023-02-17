@@ -1,6 +1,7 @@
 import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
 import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
+import ErrorMessages from '@/utils/components/ErrorMessages';
 import {
   formatNumber,
   isObjectPropsEmpty,
@@ -121,8 +122,8 @@ const TakeLoanMonthlyForm = (props: Props) => {
         props.onSubmit();
       } catch (err: any) {
         toast({
-          title: 'Loan Application Error',
-          description: err?.data?.message || 'An error occurred',
+          title: err?.data?.message || 'An error occurred',
+          description: <ErrorMessages errors={err?.data.errors} />,
           status: 'error',
           duration: 4000,
           position: 'top-right',
