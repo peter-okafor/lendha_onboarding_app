@@ -72,7 +72,8 @@ const statusColor = (status: Status): Color => {
 
 interface LoanDetailProps {
   name: string;
-  id: string;
+  id: number;
+  appId: string;
   amount: number;
   status: Status | string;
 }
@@ -81,10 +82,10 @@ const LoanDetail = (props: LoanDetailProps) => {
     <Flex justifyContent='space-between' alignItems='center'>
       <Stack spacing='2px'>
         <Text fontWeight={500} textStyle='sm'>
-          {props.name}
+          {props.id}
         </Text>
         <Text color='gray.300' textStyle='xs'>
-          {props.id}
+          {props.appId}
         </Text>
       </Stack>
       <Stack spacing='2px'>
@@ -105,7 +106,8 @@ const LoanDetail = (props: LoanDetailProps) => {
 };
 
 interface TableData {
-  id: string;
+  id: number;
+  appId: string;
   name: string;
   date: string;
   amount: number;
@@ -139,9 +141,9 @@ const LoanTable = (props: LoanTableProps) => {
                   cursor: 'pointer',
                   transition: 'all .1s ease-in'
                 }}
-                onClick={() => navigate(path.CREDIT_OFFICER_PAY_LOAN)}
+                onClick={() => navigate(`/loans/${loan.id}`)}
               >
-                <Td>{loan.id}</Td>
+                <Td>{loan.appId}</Td>
                 <Td>{loan.name}</Td>
                 <Td>{loan.date}</Td>
                 <Td>N{formatNumber(loan.amount)}</Td>
@@ -174,14 +176,22 @@ const Loans = () => {
   const { data: response } = useLoansQuery();
 
   const loansTable: TableData[] = response
-    ? response?.data.map(({ application_id, user_id, created_at, amount, status }) => ({
-        id: application_id,
+    ? response?.data.map(({ id, application_id, user_id, created_at, amount, status }) => ({
+        id,
+        appId: application_id,
         name: user_id.toString(),
         date: created_at,
         amount,
         status
       }))
     : [];
+
+  const activeTable = loansTable.filter((loan) => loan.status === 'active');
+  const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
+  const declinedTable = loansTable.filter((loan) => loan.status === 'declined');
+  const dueTable = loansTable.filter((loan) => loan.status === 'due');
+  const closedTable = loansTable.filter((loan) => loan.status === 'closed');
+  const defaultTable = loansTable.filter((loan) => loan.status === 'default');
 
   const tableHeaders = ['#ID', 'Customer name', 'Date', 'Amount', 'Status'];
 
@@ -228,10 +238,11 @@ const Loans = () => {
             <LoanTable headers={tableHeaders} data={loansTable} />
 
             {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -240,13 +251,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={activeTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {activeTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -255,13 +267,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={pendingTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {pendingTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -270,13 +283,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={declinedTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {declinedTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -285,13 +299,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={dueTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {dueTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -300,13 +315,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={closedTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {closedTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -315,13 +331,14 @@ const Loans = () => {
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable headers={tableHeaders} data={defaultTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()}>
+            {defaultTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
                   name={loan.name}
                   id={loan.id}
+                  appId={loan.appId}
                   amount={loan.amount}
                   status={loan.status}
                 />
@@ -340,7 +357,7 @@ interface LoanLinkProps {
   children: ReactNode;
   linkTo?: string;
 }
-const LoanLink = ({ children, linkTo = path.CREDIT_OFFICER_PAY_LOAN }: LoanLinkProps) => {
+const LoanLink = ({ children, linkTo = path.CREDIT_OFFICER_LOANS_DETAIL }: LoanLinkProps) => {
   const navigate = useNavigate();
 
   return (

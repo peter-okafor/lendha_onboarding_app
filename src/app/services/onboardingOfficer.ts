@@ -70,6 +70,7 @@ export interface UserResponse {
 
 export interface LoanResponse {
   data: {
+    id: number;
     application_id: string;
     amount: number;
     approved_amount: number;

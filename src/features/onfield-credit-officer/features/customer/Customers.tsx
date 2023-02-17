@@ -233,7 +233,7 @@ const Customers = () => {
             <CustomerTable headers={tableHeaders} data={usersTable} />
 
             {usersTable.map((customer) => (
-              <CustomerLink key={key()}>
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
                   name={customer.name}
                   id={customer.id}
@@ -248,7 +248,7 @@ const Customers = () => {
             <CustomerTable headers={tableHeaders} data={usersTable} />
 
             {usersTable.map((customer) => (
-              <CustomerLink key={key()}>
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
                   name={customer.name}
                   id={customer.id}
@@ -263,7 +263,7 @@ const Customers = () => {
             <CustomerTable headers={tableHeaders} data={usersTable} />
 
             {usersTable.map((customer) => (
-              <CustomerLink key={key()}>
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
                   name={customer.name}
                   id={customer.id}
@@ -278,7 +278,7 @@ const Customers = () => {
             <CustomerTable headers={tableHeaders} data={usersTable} />
 
             {usersTable.map((customer) => (
-              <CustomerLink key={key()}>
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
                   name={customer.name}
                   id={customer.id}

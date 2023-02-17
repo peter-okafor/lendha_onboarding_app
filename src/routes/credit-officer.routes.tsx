@@ -33,7 +33,7 @@ export const OnFieldCreditOfficerRoutes: RouteObject = {
       element: <CreditOfficerLoans />
     },
     { path: path.CREDIT_OFFICER_TAKE_LOAN, element: <CreditOfficerTakeLoan /> },
-    { path: path.CREDIT_OFFICER_PAY_LOAN, element: <CreditOfficerPayLoan /> },
+    { path: path.CREDIT_OFFICER_LOANS_DETAIL, element: <CreditOfficerPayLoan /> },
     { path: '*', element: <Navigate to={path.CREDIT_OFFICER_LOANS} replace /> }
   ]
 };
