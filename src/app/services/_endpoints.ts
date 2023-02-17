@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   passwordReset: 'password/create',
   bankList: 'bank/list',
   referralChannels: 'referral_channel',
+  accountName: 'bank/account_name',
 
   users: 'onboarding_officer/users',
   loans: 'onboarding_officer/loans',
