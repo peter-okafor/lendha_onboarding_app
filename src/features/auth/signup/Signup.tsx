@@ -95,6 +95,7 @@ const Signup = () => {
 
   return (
     <>
+    lendha{import.meta.env.VITE_LENDHA_API_URL}
       {verifyStatus ? (
         <AuthCard mt={['20px', '67px']} px={0}>
           {verifyStatus && (
