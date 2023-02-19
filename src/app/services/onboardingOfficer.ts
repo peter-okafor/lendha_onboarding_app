@@ -291,6 +291,37 @@ export const onboardingOfficerApi = api.injectEndpoints({
         url: e.loanDetail({ loan_id: params.loan_id.toString() }),
         method: 'GET'
       })
+    }),
+
+    proofOfResidence: build.mutation<{ step: number; message: string }, FormData>({
+      query: (formData) => ({
+        url: e.uploadProofOfResidence,
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    }),
+    uploadValidId: build.mutation<{ step: number; message: string }, FormData>({
+      query: (formData) => ({
+        url: e.uploadValidId,
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    }),
+    uploadPhotograph: build.mutation<{ step: number; message: string }, FormData>({
+      query: (formData) => ({
+        url: e.uploadPhotograph,
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
     })
   })
 });
@@ -305,7 +336,10 @@ export const {
   useAddBankMutation,
   useAddBusinessMutation,
   useGetUserDetailQuery,
-  useGetLoanDetailQuery
+  useGetLoanDetailQuery,
+  useProofOfResidenceMutation,
+  useUploadValidIdMutation,
+  useUploadPhotographMutation
 } = onboardingOfficerApi;
 
 export const {

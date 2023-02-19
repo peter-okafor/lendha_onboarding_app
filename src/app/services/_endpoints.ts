@@ -15,6 +15,10 @@ export const ENDPOINTS = {
   userDetail: ({ user_id }: { user_id: string }) => `onboarding_officer/user?user_id=${user_id}`,
   loanDetail: ({ loan_id }: { loan_id: string }) => `onboarding_officer/loan?loan_id=${loan_id}`,
 
+  uploadProofOfResidence: 'onboarding_officer/onboarding/documents/residence_proof',
+  uploadValidId: 'onboarding_officer/onboarding/documents/valid_id',
+  uploadPhotograph: 'onboarding_officer/onboarding/documents/passport_photo',
+
   bankList: 'bank/list',
   accountName: ({ code, number }: { code: string; number: string }) =>
     `bank/account_name/bank/${code}/account/${number}`,

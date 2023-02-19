@@ -2,7 +2,8 @@ import {
   useCreateAddressMutation,
   useCreateUserMutation,
   useAddBankMutation,
-  useAddBusinessMutation
+  useAddBusinessMutation,
+  useProofOfResidenceMutation
 } from '@/app/services/onboardingOfficer';
 import { ReactComponent as DashedLine } from '@/assets/svg/dashed-line.svg';
 import { Alert, Card } from '@/components/common';
@@ -43,10 +44,12 @@ import {
 } from './types';
 
 const CustomerAddForm = () => {
+  const [proofOfResidence] = useProofOfResidenceMutation();
+
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(3);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
 
   const navigate = useNavigate();
 
@@ -135,6 +138,21 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
+
+        const residenceFormData = new FormData();
+        residenceFormData.append('user_id', userId);
+        residenceFormData.append('residence_proof', values.proofOfResidence[0]);
+
+        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: residenceResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
         setActiveStep(2);
       } catch (err: any) {
         toast({
@@ -171,7 +189,7 @@ const CustomerAddForm = () => {
       try {
         const bankResponse = await createBank({
           account_number: values.accountNumber,
-          bank: 'bank',
+          bank: values.bankName,
           bank_code: values.bankName,
           bvn: values.bvn,
           nin: values.nin,
@@ -181,6 +199,20 @@ const CustomerAddForm = () => {
         toast({
           title: 'Success',
           description: bankResponse.message || 'Bank has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const idFormData = new FormData();
+        idFormData.append('user_id', userId);
+        idFormData.append('residence_proof', values.passportPhotograph[0]);
+
+        const id = await proofOfResidence(idFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: id.message || 'Document has been uploaded',
           status: 'success',
           duration: 4000,
           position: 'top-right',
