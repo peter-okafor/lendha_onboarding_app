@@ -1,7 +1,8 @@
+import { useGetLoanDetailQuery, useGetUserDetailQuery } from '@/app/services/onboardingOfficer';
 import { CopyToClipboard, DropzoneFileUpload, FormInput, LendhaModal } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
-import { maskCurrency } from '@/utils/helpers';
+import { formatCurrency, maskCurrency } from '@/utils/helpers';
 import { ACCOUNT_NAME, ACCOUNT_NUMBER, BANK_NAME } from '@/variables/general';
 import {
   Box,
@@ -17,7 +18,7 @@ import {
 import { Form, FormikProps, FormikProvider, useFormik } from 'formik';
 import { FormEvent, useState } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useReadLocalStorage } from 'usehooks-ts';
 import * as Yup from 'yup';
 import {
@@ -104,6 +105,12 @@ const PayLoan = () => {
   const navigate = useNavigate();
   const mx = { base: 3, lg: 0 };
 
+  const { id } = useParams();
+  const { data: response } = useGetLoanDetailQuery({ loan_id: Number(id) });
+  const loan = response?.data;
+
+  const { data: user } = useGetUserDetailQuery({ user_id: Number(loan?.user_id) });
+
   return (
     <>
       <LoanAction mx={mx} onPayLoan={onPayLoan} />
@@ -115,13 +122,13 @@ const PayLoan = () => {
           w='full'
         >
           <GridItem>
-            <LoanInfo label='Application ID' text='#34KV-RT' />
+            <LoanInfo label='Application ID' text={loan?.application_id || 'N/A'} />
           </GridItem>
           <GridItem>
             <LoanInfo
               isLink
               label='Customer name'
-              text='John Orukpe'
+              text={user?.data.name}
               linkPath={path.CUSTOMER_PROFILE}
               linkProps={{
                 textDecor: 'underline'
@@ -130,16 +137,19 @@ const PayLoan = () => {
             />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Loan amount' text='N120,000' />
+            <LoanInfo
+              label='Loan amount'
+              text={formatCurrency(loan?.approved_amount || 0).toString()}
+            />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Application date' text='12th Dec 2022' />
+            <LoanInfo label='Application date' text={loan?.request_date} />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Current Status' text='Reviewing' />
+            <LoanInfo label='Current Status' text={loan?.status} />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Loan type' text='Wholesale (3 months)' />
+            <LoanInfo label='Loan type' text={loan?.purpose} />
           </GridItem>
         </Grid>
       </LoanInfoContainer>

@@ -13,7 +13,7 @@ type Business = {
   city: any;
   state: any;
   landmark: any;
-  user_id: 7602;
+  user_id: number;
   created_at: string;
   updated_at: string;
   registration_status: false;
@@ -45,8 +45,23 @@ type User = {
   bank: any;
   cards: any;
   employment: any;
-  home_address: any;
-  social_media_handles: any;
+  home_address: {
+    id: number;
+    number: string;
+    street_name: string;
+    landmark: string;
+    city: string;
+    local_government: string;
+    state: string;
+    user_id: number;
+    created_at: string;
+    updated_at: string;
+  };
+  social_media_handles: {
+    facebook: string;
+    linkedin: string;
+    instagram: string;
+  };
   next_of_kin: any;
   documents: any;
   business: Business;
@@ -180,6 +195,33 @@ interface CreateBusinessRequest {
   user_id: string;
 }
 
+type Loan = {
+  id: number;
+  application_id: string;
+  amount: number;
+  approved_amount: number;
+  request_date: string;
+  approval_date: string;
+  purpose: string;
+  duration: string;
+  status: string;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  merchant_id: number;
+  loan_interest_id: number;
+  open_duration: string;
+  monthly_payment: number;
+  total_expected_payment: number;
+  last_payment_details: any;
+  loan_denial_reason: string;
+};
+
+interface LoanDetail {
+  data: Loan;
+  message: string;
+}
+
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, void>({
@@ -243,6 +285,12 @@ export const onboardingOfficerApi = api.injectEndpoints({
         url: e.userDetail({ user_id: params.user_id.toString() }),
         method: 'GET'
       })
+    }),
+    getLoanDetail: build.query<LoanDetail, { loan_id: number }>({
+      query: (params) => ({
+        url: e.loanDetail({ loan_id: params.loan_id.toString() }),
+        method: 'GET'
+      })
     })
   })
 });
@@ -256,9 +304,10 @@ export const {
   useCreateAddressMutation,
   useAddBankMutation,
   useAddBusinessMutation,
-  useGetUserDetailQuery
+  useGetUserDetailQuery,
+  useGetLoanDetailQuery
 } = onboardingOfficerApi;
 
 export const {
-  endpoints: { profile, loanApply, createUser, createAddress }
+  endpoints: { profile, loanApply, createUser, createAddress, getUserDetail }
 } = onboardingOfficerApi;

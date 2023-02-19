@@ -8,7 +8,7 @@ interface Props extends FlexProps {
   hasRightAction?: boolean;
   props?: FlexProps;
 }
-const LoanAction = ({ hasRightAction = true, ...props }: Props) => {
+const LoanAction = ({ hasRightAction = true, onPayLoan, ...props }: Props) => {
   const history = useNavigate();
 
   return (
@@ -27,7 +27,7 @@ const LoanAction = ({ hasRightAction = true, ...props }: Props) => {
         <Icon as={RiArrowLeftLine} color='gray.300' />
         <Text>Back</Text>
       </Stack>
-      {hasRightAction && <Button onClick={props.onPayLoan}>Pay loan</Button>}
+      {hasRightAction && <Button onClick={onPayLoan}>Pay loan</Button>}
     </Flex>
   );
 };
