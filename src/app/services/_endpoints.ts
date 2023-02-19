@@ -12,6 +12,7 @@ export const ENDPOINTS = {
   loanApply: 'onboarding_officer/loan_application',
   addBank: 'onboarding_officer/onboarding/bank',
   addBusiness: 'onboarding_officer/onboarding/business',
+  userDetail: ({ user_id }: { user_id: string }) => `onboarding_officer/user?user_id=${user_id}`,
 
   bankList: 'bank/list',
   accountName: ({ code, number }: { code: string; number: string }) =>

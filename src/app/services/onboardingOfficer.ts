@@ -20,40 +20,42 @@ type Business = {
   business_registration: any;
 };
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  phone_number: string;
+  date_of_birth: string;
+  state_of_residence: string;
+  gender: string;
+  address: string;
+  created_at: string;
+  updated_at: string;
+  suspended: number;
+  locked: number;
+  user_type_id: number;
+  referral_channel_id: number;
+  branch_id: number;
+  officer_id: 7;
+  employment_status: string;
+  profile_status: string;
+  is_defaulting: false;
+  onboarding_status: number;
+  type: string;
+  bank: any;
+  cards: any;
+  employment: any;
+  home_address: any;
+  social_media_handles: any;
+  next_of_kin: any;
+  documents: any;
+  business: Business;
+};
+
 export interface UserResponse {
   data: {
     current_page: number;
-    data: {
-      id: string;
-      name: string;
-      email: string;
-      phone_number: string;
-      date_of_birth: string;
-      state_of_residence: string;
-      gender: string;
-      address: string;
-      created_at: string;
-      updated_at: string;
-      suspended: number;
-      locked: number;
-      user_type_id: number;
-      referral_channel_id: number;
-      branch_id: number;
-      officer_id: 7;
-      employment_status: string;
-      profile_status: string;
-      is_defaulting: false;
-      onboarding_status: number;
-      type: string;
-      bank: any;
-      cards: any;
-      employment: any;
-      home_address: any;
-      social_media_handles: any;
-      next_of_kin: any;
-      documents: any;
-      business: Business;
-    }[];
+    data: User[];
     first_page_url: string;
     from: 1;
     last_page: 1;
@@ -229,6 +231,18 @@ export const onboardingOfficerApi = api.injectEndpoints({
         method: 'POST',
         body: credentials
       })
+    }),
+    getUserDetail: build.query<
+      {
+        data: User;
+        message: string;
+      },
+      { user_id: number }
+    >({
+      query: (params) => ({
+        url: e.userDetail({ user_id: params.user_id.toString() }),
+        method: 'GET'
+      })
     })
   })
 });
@@ -241,7 +255,8 @@ export const {
   useCreateUserMutation,
   useCreateAddressMutation,
   useAddBankMutation,
-  useAddBusinessMutation
+  useAddBusinessMutation,
+  useGetUserDetailQuery
 } = onboardingOfficerApi;
 
 export const {
