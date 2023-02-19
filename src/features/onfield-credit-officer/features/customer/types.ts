@@ -1,6 +1,7 @@
 import { Address } from '@/types';
 
 export type PersonalInfoFormValues = {
+  businessName: string; // TODO: might remove this later (reason: not present on UI but on backend)
   firstName: string;
   lastName: string;
   email: string;

@@ -7,6 +7,9 @@ import * as Yup from 'yup';
 import { REG_NUMBER_REGEX } from '@/variables/general';
 
 const PersonalInfoFormSchema = Yup.object<Record<keyof PersonalInfoFormValues, Yup.AnySchema>>({
+  businessName: Yup.string()
+    .matches(/^[aA-zZ\s]+$/, 'Please enter a valid busines name')
+    .required('First name is required'),
   firstName: Yup.string()
     .matches(/^[aA-zZ\s]+$/, 'Please enter a valid first name')
     .required('First name is required'),

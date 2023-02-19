@@ -41,7 +41,11 @@ const Signin = () => {
         resetForm();
         toast({
           title: err?.data?.message || 'An error occurred',
-          description: <ErrorMessages errors={err?.data.errors} />,
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
           status: 'info',
           duration: 4000,
           position: 'top-right',

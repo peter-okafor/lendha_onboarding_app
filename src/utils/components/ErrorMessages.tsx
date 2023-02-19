@@ -10,13 +10,11 @@ const ErrorMessages = ({ errors }: { errors: ErrorData }) => {
   }
 
   return (
-    <div>
-      <ul>
-        {errorMessages.map((message, index) => (
-          <li key={index}>{message}</li>
-        ))}
-      </ul>
-    </div>
+    <ul>
+      {errorMessages?.map((message, index) => (
+        <li key={index}>{message}</li>
+      ))}
+    </ul>
   );
 };
 

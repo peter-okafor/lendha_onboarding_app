@@ -106,6 +106,12 @@ export interface CreateUserRequest {
 export interface CreateUserResponse {
   data: {
     step: string;
+    user: {
+      name: string;
+      email: string;
+      phone_number: string;
+      id: number;
+    };
   };
   message: string;
 }
@@ -135,6 +141,41 @@ interface CreateHomeAddressRequest {
 interface CreateHomeAddressResponse {
   step: number;
   message: string;
+}
+
+interface CreateBankResponse {
+  step: number;
+  data?: {
+    id: number;
+    account_number: string;
+    account_name: string;
+    bank_name: string;
+    bvn: string;
+    user_id: number;
+    nin: string;
+  };
+  message: string;
+}
+
+interface CreateBankRequest {
+  bvn: string;
+  account_number: string;
+  bank: string;
+  bank_code: string;
+  nin: string;
+  user_id: string;
+}
+
+interface CreateBusinessRequest {
+  business_name: string;
+  email: string;
+  description: string;
+  address_number: string;
+  street: string;
+  city: string;
+  state: string;
+  landmark: string;
+  user_id: string;
 }
 
 export const onboardingOfficerApi = api.injectEndpoints({
@@ -168,6 +209,26 @@ export const onboardingOfficerApi = api.injectEndpoints({
         method: 'POST',
         body: credentials
       })
+    }),
+    addBank: build.mutation<CreateBankResponse, CreateBankRequest>({
+      query: (credentials) => ({
+        url: e.addBank,
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    addBusiness: build.mutation<
+      {
+        step: number;
+        message: string;
+      },
+      CreateBusinessRequest
+    >({
+      query: (credentials) => ({
+        url: e.addBusiness,
+        method: 'POST',
+        body: credentials
+      })
     })
   })
 });
@@ -178,7 +239,9 @@ export const {
   useProfileQuery,
   useLoanApplyMutation,
   useCreateUserMutation,
-  useCreateAddressMutation
+  useCreateAddressMutation,
+  useAddBankMutation,
+  useAddBusinessMutation
 } = onboardingOfficerApi;
 
 export const {

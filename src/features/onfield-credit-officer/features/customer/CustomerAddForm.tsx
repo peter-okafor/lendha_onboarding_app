@@ -1,8 +1,27 @@
+import {
+  useCreateAddressMutation,
+  useCreateUserMutation,
+  useAddBankMutation,
+  useAddBusinessMutation
+} from '@/app/services/onboardingOfficer';
 import { ReactComponent as DashedLine } from '@/assets/svg/dashed-line.svg';
 import { Alert, Card } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
-import { Box, BoxProps, Button, Divider, Flex, Icon, Link, Stack, Text } from '@chakra-ui/react';
+import ErrorMessages from '@/utils/components/ErrorMessages';
+import { sanitize } from '@/utils/helpers';
+import {
+  Box,
+  BoxProps,
+  Button,
+  Divider,
+  Flex,
+  Icon,
+  Link,
+  Stack,
+  Text,
+  useToast
+} from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { Fragment, useState } from 'react';
 import { IconType } from 'react-icons';
@@ -24,7 +43,10 @@ import {
 } from './types';
 
 const CustomerAddForm = () => {
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
+  const [userId, setUserId] = useState('');
+  const toast = useToast();
+
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(3);
 
   const navigate = useNavigate();
 
@@ -49,8 +71,14 @@ const CustomerAddForm = () => {
     }
   };
 
+  const [createUser] = useCreateUserMutation();
+  const [createAddress] = useCreateAddressMutation();
+  const [createBank] = useAddBankMutation();
+  const [createBusiness] = useAddBusinessMutation();
+
   const personalInfoFormik = useFormik<PersonalInfoFormValues>({
     initialValues: {
+      businessName: '',
       firstName: '',
       lastName: '',
       email: '',
@@ -66,8 +94,62 @@ const CustomerAddForm = () => {
       lga: '',
       state: ''
     },
-    onSubmit: async () => {
-      setActiveStep(2);
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const userResponse = await createUser({
+          business_name: values.businessName, // TODO: might probably remove this as it wasn't initially on UI
+          date_of_birth: values.dateOfBirth,
+          name: `${values.firstName} ${values.lastName}`,
+          password: '123456',
+          password_confirmation: '123456',
+          phone_number: values.phone,
+          referral_channel: '7'
+        }).unwrap();
+        setUserId(userResponse.data.user.id.toString());
+
+        toast({
+          title: 'Success',
+          description: userResponse.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const addressResponse = await createAddress({
+          number: values.addressNumber,
+          street_name: values.streetName,
+          landmark: values.nearestLandmark,
+          city: values.cityTown,
+          local_government: values.lga,
+          state: values.state,
+          user_id: userResponse.data.user.id // TODO: (adviced to hard-code) but remove this after getting flow for fetching user's information
+        }).unwrap();
+        toast({
+          title: 'Success',
+          description: addressResponse.message || 'Address has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(2);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: CustomerSchema.Personal
   });
@@ -78,13 +160,48 @@ const CustomerAddForm = () => {
       bvn: '',
       bankName: '',
       accountNumber: '',
-      accountName: 'John Doe',
+      accountName: '',
       utilityBillFile: '',
       idFile: '',
       passportPhotograph: ''
     },
-    onSubmit: async () => {
-      setActiveStep(3);
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const bankResponse = await createBank({
+          account_number: values.accountNumber,
+          bank: 'bank',
+          bank_code: values.bankName,
+          bvn: values.bvn,
+          nin: values.nin,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: bankResponse.message || 'Bank has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(3);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: CustomerSchema.Verification
   });
@@ -107,7 +224,45 @@ const CustomerAddForm = () => {
       hasSourceOfIncome: 'no',
       isBusinessRegistered: 'no'
     },
-    onSubmit: async () => {
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const businessResponse = await createBusiness({
+          address_number: values.addressNumber,
+          business_name: values.businessName,
+          city: values.cityTown,
+          description: values.businessDesc,
+          email: '',
+          landmark: values.nearestLandmark,
+          state: values.state,
+          street: values.streetName,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: businessResponse.message || 'Business has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+
       setActiveStep(4);
     },
     validationSchema: CustomerSchema.Business

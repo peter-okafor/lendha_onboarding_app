@@ -1,7 +1,9 @@
-import { useBankListQuery } from '@/app/services/bank';
+import { useAppDispatch } from '@/app/hooks';
+import { accountName, useBankListQuery } from '@/app/services/bank';
 import { DropzoneFileUpload, FormInput, FormSelect, NextCancelButton } from '@/components/common';
 import { Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
+import { useCallback, useEffect } from 'react';
 import { VerificationInfoFormValues } from '../types';
 
 interface Props {
@@ -9,12 +11,11 @@ interface Props {
   formik: FormikProps<VerificationInfoFormValues>;
 }
 const VerificationInfoForm = ({ formik, ...props }: Props) => {
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
+  const dispatch = useAppDispatch();
+
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
-
-  const bvn = values.bvn;
-  const nin = values.nin;
 
   const { data } = useBankListQuery();
   const banks = data?.data.list.map(({ code, name }) => ({ value: code, label: name }));
@@ -39,6 +40,26 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
 
   const bankList = fallbackBanks.map(({ code, name }) => ({ value: code, label: name }));
 
+  const getAccountName = useCallback(() => {
+    dispatch(
+      accountName.initiate(
+        { code: values.bankName, number: values.accountNumber },
+        { subscribe: true, forceRefetch: true }
+      )
+    ).then((res) => {
+      setFieldValue('accountName', res.data?.data.name || '');
+      setFieldValue('accountName', res.data?.data.name || '');
+    });
+  }, [dispatch, setFieldValue, values.accountNumber, values.bankName]);
+
+  useEffect(() => {
+    if (values.accountNumber.length === 10) {
+      getAccountName();
+    } else {
+      setFieldValue('accountName', '');
+    }
+  }, [getAccountName, setFieldValue, values.accountNumber.length]);
+
   return (
     <FormikProvider value={formik}>
       <Form>
@@ -46,7 +67,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
           <FormInput
             label='NIN'
             name='nin'
-            value={nin}
+            value={values.nin}
             handleChange={handleChange}
             errorMessage={errors.nin}
             touchedField={touched.nin}
@@ -54,7 +75,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
           <FormInput
             label='BVN'
             name='bvn'
-            value={bvn}
+            value={values.bvn}
             handleChange={handleChange}
             errorMessage={errors.bvn}
             touchedField={touched.bvn}
@@ -115,6 +136,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
           />
           <Stack direction='row' spacing={3}>
             <NextCancelButton
+              isSubmitting={isSubmitting}
               onCancel={props.onBack}
               showCancelBtn={isLargerThan810 ? false : true}
             />
