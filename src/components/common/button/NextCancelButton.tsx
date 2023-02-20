@@ -1,5 +1,4 @@
 import { Button } from '@chakra-ui/react';
-import { useState } from 'react';
 
 export interface NextCancelProps {
   cancelBtnText?: string;

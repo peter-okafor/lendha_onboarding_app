@@ -5,7 +5,7 @@ import { RiSearchLine } from 'react-icons/ri';
 
 interface Props extends InputGroupProps {
   value?: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 const SearchInput = (props: Props) => {
   const { colors } = globalStyles;
@@ -18,7 +18,7 @@ const SearchInput = (props: Props) => {
         </InputLeftElement>
         <Input
           value={props.value}
-          onChange={props.onChange}
+          onChange={props.onChange ? props.onChange : () => null}
           pl='3.5rem'
           type='search'
           bgColor='#f8f8fa'
