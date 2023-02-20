@@ -1,3 +1,4 @@
+import { useLoanSearchQuery } from '@/app/services/misc';
 import { useLoansQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { TransactionTable, TransactionTabList } from '@/components/common';
@@ -20,7 +21,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
 
@@ -173,7 +174,11 @@ const LoanTable = (props: LoanTableProps) => {
 };
 
 const Loans = () => {
+  const [value, setValue] = useState('');
   const { data: response } = useLoansQuery();
+
+  const { data: searchedLoan } = useLoanSearchQuery({ search: value });
+  console.log({ searchedLoan });
 
   const loansTable: TableData[] = response
     ? response?.data.map(({ id, application_id, user_id, created_at, amount, status }) => ({
@@ -234,7 +239,7 @@ const Loans = () => {
           }}
         >
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={loansTable} />
 
             {loansTable.map((loan) => (
@@ -250,7 +255,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={activeTable} />
 
             {activeTable.map((loan) => (
@@ -266,7 +271,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={pendingTable} />
 
             {pendingTable.map((loan) => (
@@ -282,7 +287,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={declinedTable} />
 
             {declinedTable.map((loan) => (
@@ -298,7 +303,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={dueTable} />
 
             {dueTable.map((loan) => (
@@ -314,7 +319,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={closedTable} />
 
             {closedTable.map((loan) => (
@@ -330,7 +335,7 @@ const Loans = () => {
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable headers={tableHeaders} data={defaultTable} />
 
             {defaultTable.map((loan) => (

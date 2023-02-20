@@ -1,4 +1,5 @@
 import { api } from './api';
+import { LoanResponse } from './onboardingOfficer';
 import { ENDPOINTS as e } from './_endpoints';
 
 export interface ReferralChannelResponse {
@@ -30,11 +31,17 @@ export const miscApi = api.injectEndpoints({
     }),
     loanInterests: build.query<LoanInterestsResponse, void>({
       query: () => e.loanInterests
+    }),
+    loanSearch: build.query<LoanResponse, { search: string }>({
+      query: (params) => ({
+        url: e.loanSearch({ search: params.search }),
+        method: 'GET'
+      })
     })
   })
 });
 
-export const { useReferralChannelsQuery, useLoanInterestsQuery } = miscApi;
+export const { useReferralChannelsQuery, useLoanInterestsQuery, useLoanSearchQuery } = miscApi;
 
 export const {
   endpoints: { loanInterests }

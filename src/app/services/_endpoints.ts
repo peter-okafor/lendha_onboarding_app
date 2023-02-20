@@ -24,5 +24,6 @@ export const ENDPOINTS = {
     `bank/account_name/bank/${code}/account/${number}`,
 
   referralChannels: 'referral_channel',
-  loanInterests: 'loan_interests'
+  loanInterests: 'loan_interests',
+  loanSearch: ({ search }: { search: string }) => `onboarding_officer/search?search=${search}`
 };
