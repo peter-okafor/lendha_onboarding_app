@@ -12,7 +12,7 @@ const baseQuery = fetchBaseQuery({
       headers.set('authorization', `Bearer ${token}`);
     }
     headers.set('accept', 'application/json');
-    headers.set('content-type', 'application/json');
+    // headers.set('content-type', 'application/json');
     // headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     return headers;
   }

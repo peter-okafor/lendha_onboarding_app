@@ -1,9 +1,11 @@
 import {
-  useCreateAddressMutation,
-  useCreateUserMutation,
   useAddBankMutation,
   useAddBusinessMutation,
-  useProofOfResidenceMutation
+  useCreateAddressMutation,
+  useCreateUserMutation,
+  useProofOfResidenceMutation,
+  useUploadPhotographMutation,
+  useUploadValidIdMutation
 } from '@/app/services/onboardingOfficer';
 import { ReactComponent as DashedLine } from '@/assets/svg/dashed-line.svg';
 import { Alert, Card } from '@/components/common';
@@ -45,11 +47,13 @@ import {
 
 const CustomerAddForm = () => {
   const [proofOfResidence] = useProofOfResidenceMutation();
+  const [validId] = useUploadValidIdMutation();
+  const [photograph] = useUploadPhotographMutation();
 
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(3);
 
   const navigate = useNavigate();
 
@@ -128,7 +132,7 @@ const CustomerAddForm = () => {
           city: values.cityTown,
           local_government: values.lga,
           state: values.state,
-          user_id: userResponse.data.user.id // TODO: (adviced to hard-code) but remove this after getting flow for fetching user's information
+          user_id: userResponse.data.user.id
         }).unwrap();
         toast({
           title: 'Success',
@@ -140,8 +144,8 @@ const CustomerAddForm = () => {
         });
 
         const residenceFormData = new FormData();
-        residenceFormData.append('user_id', userId);
         residenceFormData.append('residence_proof', values.proofOfResidence[0]);
+        residenceFormData.append('user_id', userId);
 
         const residenceResp = await proofOfResidence(residenceFormData).unwrap();
         toast({
@@ -189,7 +193,7 @@ const CustomerAddForm = () => {
       try {
         const bankResponse = await createBank({
           account_number: values.accountNumber,
-          bank: values.bankName,
+          bank: 'Zenith Bank',
           bank_code: values.bankName,
           bvn: values.bvn,
           nin: values.nin,
@@ -205,14 +209,42 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        const idFormData = new FormData();
-        idFormData.append('user_id', userId);
-        idFormData.append('residence_proof', values.passportPhotograph[0]);
+        const residenceFormData = new FormData();
+        residenceFormData.append('residence_proof', values.utilityBillFile[0]);
+        residenceFormData.append('user_id', userId);
 
-        const id = await proofOfResidence(idFormData).unwrap();
+        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
         toast({
           title: 'Success',
-          description: id.message || 'Document has been uploaded',
+          description: residenceResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const idFormData = new FormData();
+        idFormData.append('user_id', userId);
+        idFormData.append('valid_id', values.idFile[0]);
+
+        const validIdResp = await validId(idFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: validIdResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const photographFormData = new FormData();
+        photographFormData.append('user_id', userId);
+        photographFormData.append('passport_photo', values.passportPhotograph[0]);
+
+        const idResp = await photograph(photographFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: idResp.message || 'Document has been uploaded',
           status: 'success',
           duration: 4000,
           position: 'top-right',
@@ -242,6 +274,7 @@ const CustomerAddForm = () => {
     initialValues: {
       businessName: '',
       businessCategory: '',
+      email: '',
       businessDesc: '',
       facebookHandle: '',
       twitterHandle: '',
@@ -265,7 +298,7 @@ const CustomerAddForm = () => {
           business_name: values.businessName,
           city: values.cityTown,
           description: values.businessDesc,
-          email: '',
+          email: values.email,
           landmark: values.nearestLandmark,
           state: values.state,
           street: values.streetName,
@@ -280,6 +313,8 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
+
+        // setActiveStep(4);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',

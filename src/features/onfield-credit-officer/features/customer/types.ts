@@ -27,6 +27,7 @@ export type BusinessInfoFormValues = {
   businessName: string;
   businessCategory: string;
   businessDesc: string;
+  email: string;
   facebookHandle: string;
   twitterHandle: string;
   instagramHandle: string;
@@ -34,7 +35,7 @@ export type BusinessInfoFormValues = {
   businessLocationFile?: string;
   hasSourceOfIncome: 'yes' | 'no';
   regNumber?: string;
-  certOfIncorporationFile?: string;
-  memorandumFile?: string;
+  // certOfIncorporationFile?: string;
+  // memorandumFile?: string;
   sourceOfIncomeDesc?: string;
 } & Address;
