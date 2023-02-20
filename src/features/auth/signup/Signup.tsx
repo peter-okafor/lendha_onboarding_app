@@ -77,7 +77,7 @@ const Signup = () => {
         router(path.SIGNIN);
       } catch (err: any) {
         toast({
-          title: err?.data?.message || 'An error occurred',
+          title: err?.data?.message || err?.message || 'An error occurred',
           description: <ErrorMessages errors={err?.data.errors} />,
           status: 'error',
           duration: 4000,
