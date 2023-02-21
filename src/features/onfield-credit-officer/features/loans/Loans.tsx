@@ -139,19 +139,19 @@ const LoanTable = ({ isLoading = false, ...props }: LoanTableProps) => {
             ? Array.from({ length: 10 }, () => (
                 <Tr key={key()}>
                   <Td>
-                    <Skeleton key={key()} height='50px'></Skeleton>
+                    <Skeleton height='50px'></Skeleton>
                   </Td>
                   <Td>
-                    <Skeleton key={key()} height='50px'></Skeleton>
+                    <Skeleton height='50px'></Skeleton>
                   </Td>
                   <Td>
-                    <Skeleton key={key()} height='50px'></Skeleton>
+                    <Skeleton height='50px'></Skeleton>
                   </Td>
                   <Td>
-                    <Skeleton key={key()} height='50px'></Skeleton>
+                    <Skeleton height='50px'></Skeleton>
                   </Td>
                   <Td>
-                    <Skeleton key={key()} height='50px'></Skeleton>
+                    <Skeleton height='50px'></Skeleton>
                   </Td>
                 </Tr>
               ))
@@ -231,9 +231,9 @@ const Loans = () => {
   }, [allLoans]);
 
   useEffect(() => {
-    setIsSearchingLoan(true);
     const fetchedLoan = setTimeout(() => {
       if (value.length > 2) {
+        setIsSearchingLoan(true);
         trigger(
           {
             search: value

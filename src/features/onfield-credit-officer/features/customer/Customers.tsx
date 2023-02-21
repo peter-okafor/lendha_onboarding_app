@@ -7,6 +7,7 @@ import {
   Box,
   Divider,
   Flex,
+  Skeleton,
   Stack,
   TableContainer,
   TabPanel,
@@ -100,8 +101,9 @@ interface TableData {
 interface CustomerTableProps {
   headers: string[];
   data: TableData[];
+  isLoading?: boolean;
 }
-const CustomerTable = (props: CustomerTableProps) => {
+const CustomerTable = ({ isLoading = false, ...props }: CustomerTableProps) => {
   const { data } = props;
   const navigate = useNavigate();
 
@@ -123,32 +125,52 @@ const CustomerTable = (props: CustomerTableProps) => {
             </Tr>
           </Thead>
           <Tbody>
-            {data.length > 0 ? (
-              data.map((customer) => (
-                <Tr
-                  key={key()}
-                  _hover={{
-                    bgColor: '#f3f3f3',
-                    cursor: 'pointer',
-                    transition: 'all .1s ease-in'
-                  }}
-                  onClick={() => navigate(`/customers/profile/${customer.id}`)}
-                >
-                  <Td>{customer.name}</Td>
-                  <Td>{customer.id}</Td>
-                  <Td>{customer.created_at}</Td>
-                  <Td>{customer.phone_number}</Td>
-                  <Td>
-                    <TableBadge
-                      bgColor={statusColor(customer.status || 'pending').bgColor}
-                      color={statusColor(customer.status || 'pending').color}
-                      text={customer.status}
-                      textTransform='uppercase'
-                    />
-                  </Td>
-                </Tr>
-              ))
-            ) : (
+            {isLoading
+              ? Array.from({ length: 10 }, () => (
+                  <Tr key={key()}>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                  </Tr>
+                ))
+              : data.map((customer) => (
+                  <Tr
+                    key={key()}
+                    _hover={{
+                      bgColor: '#f3f3f3',
+                      cursor: 'pointer',
+                      transition: 'all .1s ease-in'
+                    }}
+                    onClick={() => navigate(`/customers/profile/${customer.id}`)}
+                  >
+                    <Td>{customer.name}</Td>
+                    <Td>{customer.id}</Td>
+                    <Td>{customer.created_at}</Td>
+                    <Td>{customer.phone_number}</Td>
+                    <Td>
+                      <TableBadge
+                        bgColor={statusColor(customer.status || 'pending').bgColor}
+                        color={statusColor(customer.status || 'pending').color}
+                        text={customer.status}
+                        textTransform='uppercase'
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+
+            {!isLoading && data.length < 1 && (
               <Tr>
                 <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
                   <Text as='span' textStyle='2xl' fontWeight={700}>
@@ -167,7 +189,7 @@ const CustomerTable = (props: CustomerTableProps) => {
 const Customers = () => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
-  const { data: response } = useUsersQuery();
+  const { data: response, isLoading } = useUsersQuery();
 
   const usersTable: TableData[] = response
     ? response?.data.data.map(({ name, id, created_at, phone_number, profile_status }) => ({
@@ -230,7 +252,7 @@ const Customers = () => {
         >
           <TabPanel>
             <SearchInput />
-            <CustomerTable headers={tableHeaders} data={usersTable} />
+            <CustomerTable headers={tableHeaders} data={usersTable} isLoading={isLoading} />
 
             {usersTable.map((customer) => (
               <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
