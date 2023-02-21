@@ -9,6 +9,7 @@ import {
   Box,
   Divider,
   Flex,
+  Skeleton,
   Stack,
   TableContainer,
   TabPanel,
@@ -117,8 +118,9 @@ interface TableData {
 interface LoanTableProps {
   headers: string[];
   data: TableData[];
+  isLoading?: boolean;
 }
-const LoanTable = (props: LoanTableProps) => {
+const LoanTable = ({ isLoading = false, ...props }: LoanTableProps) => {
   const navigate = useNavigate();
   const { data } = props;
 
@@ -133,32 +135,52 @@ const LoanTable = (props: LoanTableProps) => {
           </Tr>
         </Thead>
         <Tbody>
-          {data.length > 0 ? (
-            data.map((loan) => (
-              <Tr
-                key={key()}
-                _hover={{
-                  bgColor: '#f3f3f3',
-                  cursor: 'pointer',
-                  transition: 'all .1s ease-in'
-                }}
-                onClick={() => navigate(`/loans/${loan.id}`)}
-              >
-                <Td>{loan.appId}</Td>
-                <Td>{loan.name}</Td>
-                <Td>{loan.date}</Td>
-                <Td>N{formatNumber(loan.amount)}</Td>
-                <Td>
-                  <TableBadge
-                    bgColor={statusColor(loan.status).bgColor}
-                    color={statusColor(loan.status).color}
-                    text={loan.status}
-                    textTransform='uppercase'
-                  />
-                </Td>
-              </Tr>
-            ))
-          ) : (
+          {isLoading
+            ? Array.from({ length: 10 }, () => (
+                <Tr key={key()}>
+                  <Td>
+                    <Skeleton key={key()} height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton key={key()} height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton key={key()} height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton key={key()} height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton key={key()} height='50px'></Skeleton>
+                  </Td>
+                </Tr>
+              ))
+            : data.map((loan) => (
+                <Tr
+                  key={key()}
+                  _hover={{
+                    bgColor: '#f3f3f3',
+                    cursor: 'pointer',
+                    transition: 'all .1s ease-in'
+                  }}
+                  onClick={() => navigate(`/loans/${loan.id}`)}
+                >
+                  <Td>{loan.appId}</Td>
+                  <Td>{loan.name}</Td>
+                  <Td>{loan.date}</Td>
+                  <Td>N{formatNumber(loan.amount)}</Td>
+                  <Td>
+                    <TableBadge
+                      bgColor={statusColor(loan.status).bgColor}
+                      color={statusColor(loan.status).color}
+                      text={loan.status}
+                      textTransform='uppercase'
+                    />
+                  </Td>
+                </Tr>
+              ))}
+
+          {!isLoading && data.length < 1 && (
             <Tr>
               <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
                 <Text as='span' textStyle='2xl' fontWeight={700}>
@@ -183,10 +205,9 @@ type LoanData = {
 };
 const Loans = () => {
   const [value, setValue] = useState('');
-  const { data: response } = useLoansQuery();
+  const { data: response, isLoading: isLoanLoading } = useLoansQuery();
+  const [isSearchingLoan, setIsSearchingLoan] = useState(false);
 
-  // const { data: searchedLoan } = useLoanSearchQuery({ search: value });
-  // console.log({ searchedLoan });
   const [trigger] = loanSearch.useLazyQuerySubscription();
 
   const allLoans = useMemo(() => {
@@ -210,6 +231,7 @@ const Loans = () => {
   }, [allLoans]);
 
   useEffect(() => {
+    setIsSearchingLoan(true);
     const fetchedLoan = setTimeout(() => {
       if (value.length > 2) {
         trigger(
@@ -217,7 +239,8 @@ const Loans = () => {
             search: value
           },
           true
-        ).then((res: any) =>
+        ).then((res: any) => {
+          setIsSearchingLoan(false);
           setLoansTable(
             res?.data?.data?.map((loan: LoanData) => ({
               id: loan.id,
@@ -227,8 +250,8 @@ const Loans = () => {
               amount: loan.amount,
               status: loan.status
             }))
-          )
-        );
+          );
+        });
       } else {
         setLoansTable(allLoans);
       }
@@ -286,7 +309,11 @@ const Loans = () => {
         >
           <TabPanel>
             <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+            <LoanTable
+              headers={tableHeaders}
+              data={loansTable}
+              isLoading={isLoanLoading || isSearchingLoan}
+            />
 
             {loansTable.map((loan) => (
               <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>

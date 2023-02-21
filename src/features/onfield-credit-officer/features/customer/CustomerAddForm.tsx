@@ -53,7 +53,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(3);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
 
   const navigate = useNavigate();
 
