@@ -210,27 +210,31 @@ const Loans = () => {
   }, [allLoans]);
 
   useEffect(() => {
-    if (value.length > 2) {
-      trigger(
-        {
-          search: value
-        },
-        true
-      ).then((res: any) =>
-        setLoansTable(
-          res?.data?.data?.map((loan: LoanData) => ({
-            id: loan.id,
-            appId: loan.application_id,
-            name: loan.user_id.toString(),
-            date: loan.created_at,
-            amount: loan.amount,
-            status: loan.status
-          }))
-        )
-      );
-    } else {
-      setLoansTable(allLoans);
-    }
+    const fetchedLoan = setTimeout(() => {
+      if (value.length > 2) {
+        trigger(
+          {
+            search: value
+          },
+          true
+        ).then((res: any) =>
+          setLoansTable(
+            res?.data?.data?.map((loan: LoanData) => ({
+              id: loan.id,
+              appId: loan.application_id,
+              name: loan.user_id.toString(),
+              date: loan.created_at,
+              amount: loan.amount,
+              status: loan.status
+            }))
+          )
+        );
+      } else {
+        setLoansTable(allLoans);
+      }
+    }, 400);
+
+    return () => clearTimeout(fetchedLoan);
   }, [allLoans, trigger, value]);
 
   const activeTable = loansTable.filter((loan) => loan.status === 'active');
