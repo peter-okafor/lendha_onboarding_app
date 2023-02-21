@@ -18,7 +18,7 @@ const SearchInput = (props: Props) => {
         </InputLeftElement>
         <Input
           value={props.value}
-          onChange={props.onChange ? props.onChange : () => null}
+          onChange={props.onChange}
           pl='3.5rem'
           type='search'
           bgColor='#f8f8fa'

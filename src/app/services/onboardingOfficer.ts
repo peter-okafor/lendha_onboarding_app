@@ -20,7 +20,7 @@ type Business = {
   business_registration: any;
 };
 
-type User = {
+export type Customer = {
   id: string;
   name: string;
   email: string;
@@ -70,7 +70,7 @@ type User = {
 export interface UserResponse {
   data: {
     current_page: number;
-    data: User[];
+    data: Customer[];
     first_page_url: string;
     from: 1;
     last_page: 1;
@@ -86,27 +86,7 @@ export interface UserResponse {
 }
 
 export interface LoanResponse {
-  data: {
-    id: number;
-    application_id: string;
-    amount: number;
-    approved_amount: number;
-    request_date: string;
-    approval_date: null;
-    purpose: string;
-    duration: string;
-    status: string;
-    user_id: string;
-    created_at: string;
-    updated_at: string;
-    merchant_id: number;
-    loan_interest_id: number;
-    open_duration: string;
-    monthly_payment: number;
-    total_expected_payment: number;
-    last_payment_details: any;
-    loan_denial_reason: string;
-  }[];
+  data: Loan[];
   message: string;
 }
 
@@ -195,7 +175,7 @@ interface CreateBusinessRequest {
   user_id: string;
 }
 
-type Loan = {
+export type Loan = {
   id: number;
   application_id: string;
   amount: number;
@@ -276,7 +256,7 @@ export const onboardingOfficerApi = api.injectEndpoints({
     }),
     getUserDetail: build.query<
       {
-        data: User;
+        data: Customer;
         message: string;
       },
       { user_id: number }
@@ -336,6 +316,7 @@ export const {
   useAddBankMutation,
   useAddBusinessMutation,
   useGetUserDetailQuery,
+  useLazyGetUserDetailQuery,
   useGetLoanDetailQuery,
   useProofOfResidenceMutation,
   useUploadValidIdMutation,

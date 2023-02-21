@@ -1,4 +1,4 @@
-import { useLoanSearchQuery } from '@/app/services/misc';
+import { loanSearch } from '@/app/services/misc';
 import { useLoansQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { TransactionTable, TransactionTabList } from '@/components/common';
@@ -21,7 +21,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
 
@@ -173,23 +173,65 @@ const LoanTable = (props: LoanTableProps) => {
   );
 };
 
+type LoanData = {
+  id: number;
+  application_id: string;
+  user_id: number;
+  created_at: string;
+  amount: number;
+  status: string;
+};
 const Loans = () => {
   const [value, setValue] = useState('');
   const { data: response } = useLoansQuery();
 
-  const { data: searchedLoan } = useLoanSearchQuery({ search: value });
-  console.log({ searchedLoan });
+  // const { data: searchedLoan } = useLoanSearchQuery({ search: value });
+  // console.log({ searchedLoan });
+  const [trigger] = loanSearch.useLazyQuerySubscription();
 
-  const loansTable: TableData[] = response
-    ? response?.data.map(({ id, application_id, user_id, created_at, amount, status }) => ({
-        id,
-        appId: application_id,
-        name: user_id.toString(),
-        date: created_at,
-        amount,
-        status
-      }))
-    : [];
+  const allLoans = useMemo(() => {
+    if (response) {
+      return response.data.map((loan: LoanData) => ({
+        id: loan.id,
+        appId: loan.application_id,
+        name: loan.user_id.toString(),
+        date: loan.created_at,
+        amount: loan.amount,
+        status: loan.status
+      }));
+    }
+    return [];
+  }, [response]);
+
+  const [loansTable, setLoansTable] = useState(allLoans);
+
+  useEffect(() => {
+    setLoansTable(allLoans);
+  }, [allLoans]);
+
+  useEffect(() => {
+    if (value.length > 2) {
+      trigger(
+        {
+          search: value
+        },
+        true
+      ).then((res: any) =>
+        setLoansTable(
+          res?.data?.data?.map((loan: LoanData) => ({
+            id: loan.id,
+            appId: loan.application_id,
+            name: loan.user_id.toString(),
+            date: loan.created_at,
+            amount: loan.amount,
+            status: loan.status
+          }))
+        )
+      );
+    } else {
+      setLoansTable(allLoans);
+    }
+  }, [allLoans, trigger, value]);
 
   const activeTable = loansTable.filter((loan) => loan.status === 'active');
   const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
