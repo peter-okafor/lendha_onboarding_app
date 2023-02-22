@@ -1,14 +1,12 @@
 import {
-  DropzoneFileUpload,
   FormControlLabel,
   FormDatePicker,
   FormInput,
   FormLeftAddonInput,
   NextCancelButton
-  // PasswordInput
 } from '@/components/common';
 import { dateInSlashFormat } from '@/utils/helpers';
-import { Grid, GridItem, Stack, Text, useMediaQuery } from '@chakra-ui/react';
+import { Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
 import { useState } from 'react';
 import { PersonalInfoFormValues } from '../types';
@@ -81,24 +79,6 @@ const PersonalInfoForm = ({ formik, ...props }: Props) => {
             touchedField={touched.phone}
             value={values.phone}
           />
-          {/* <PasswordInput
-            name='password'
-            id='password'
-            label='Create password'
-            value={values.password}
-            errorMessage={errors.password}
-            handleChange={handleChange}
-            touchedField={touched.password}
-          />
-          <PasswordInput
-            name='confirmPassword'
-            id='confirm-password'
-            label='Confirm password'
-            value={values.confirmPassword}
-            errorMessage={errors.confirmPassword}
-            handleChange={handleChange}
-            touchedField={touched.confirmPassword}
-          /> */}
           <FormControlLabel
             textProps={{
               htmlFor: 'date-of-birth'
@@ -129,91 +109,12 @@ const PersonalInfoForm = ({ formik, ...props }: Props) => {
               onChange={handleOnDateOfBirth}
             />
           </FormControlLabel>
-          <Text className='title'>Home Address</Text>
-        </Stack>
-        <Stack spacing={5}>
-          <Grid templateColumns='repeat(4, 1fr)' gap={4} mt={5}>
-            <GridItem colSpan={1}>
-              <FormInput
-                name='addressNumber'
-                id='address-number'
-                label='Number'
-                errorMessage={errors.addressNumber}
-                touchedField={touched.addressNumber}
-                value={values.addressNumber}
-                handleChange={handleChange}
-              />
-            </GridItem>
-            <GridItem colSpan={3}>
-              <FormInput
-                name='streetName'
-                id='street-name'
-                label='Street name'
-                errorMessage={errors.streetName}
-                touchedField={touched.streetName}
-                value={values.streetName}
-                handleChange={handleChange}
-              />
-            </GridItem>
-          </Grid>
-          <FormInput
-            name='nearestLandmark'
-            id='nearest-landmark'
-            label='Nearest Landmark'
-            errorMessage={errors.nearestLandmark}
-            handleChange={handleChange}
-            touchedField={touched.nearestLandmark}
-            value={values.nearestLandmark}
-          />
-          <FormInput
-            name='cityTown'
-            id='city-town'
-            label='City/Town'
-            errorMessage={errors.cityTown}
-            handleChange={handleChange}
-            touchedField={touched.cityTown}
-            value={values.cityTown}
-          />
-          <Grid templateColumns='repeat(2, 1fr)' gap={4}>
-            <GridItem>
-              <FormInput
-                name='lga'
-                id='lga'
-                label='L.G.A'
-                errorMessage={errors.lga}
-                touchedField={touched.lga}
-                value={values.lga}
-                handleChange={handleChange}
-              />
-            </GridItem>
-            <GridItem>
-              <FormInput
-                name='state'
-                id='state'
-                label='State'
-                errorMessage={errors.state}
-                touchedField={touched.state}
-                value={values.state}
-                handleChange={handleChange}
-              />
-            </GridItem>
-          </Grid>
-          <DropzoneFileUpload
-            name='proofOfResidence'
-            setFieldValue={setFieldValue}
-            label='Upload a proof of residence'
-            touchedField={touched.proofOfResidence}
-            errorMessage={errors.proofOfResidence}
-            fileSize={5}
-          />
 
-          <Stack direction='row' spacing={3}>
-            <NextCancelButton
-              isSubmitting={isSubmitting}
-              onCancel={props.onBack}
-              showCancelBtn={isLargerThan810 ? false : true}
-            />
-          </Stack>
+          <NextCancelButton
+            isSubmitting={isSubmitting}
+            onCancel={props.onBack}
+            showCancelBtn={isLargerThan810 ? false : true}
+          />
         </Stack>
       </Form>
     </FormikProvider>

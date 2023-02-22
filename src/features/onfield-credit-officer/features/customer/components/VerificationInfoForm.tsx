@@ -1,6 +1,5 @@
-import { useAppDispatch } from '@/app/hooks';
 import { accountName, useBankListQuery } from '@/app/services/bank';
-import { DropzoneFileUpload, FormInput, FormSelect, NextCancelButton } from '@/components/common';
+import { FormInput, FormSelect, NextCancelButton } from '@/components/common';
 import { Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
 import { useCallback, useEffect } from 'react';
@@ -11,8 +10,6 @@ interface Props {
   formik: FormikProps<VerificationInfoFormValues>;
 }
 const VerificationInfoForm = ({ formik, ...props }: Props) => {
-  const dispatch = useAppDispatch();
-
   const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
@@ -40,17 +37,14 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
 
   const bankList = fallbackBanks.map(({ code, name }) => ({ value: code, label: name }));
 
+  const [trigger] = accountName.useLazyQuerySubscription();
+
   const getAccountName = useCallback(() => {
-    dispatch(
-      accountName.initiate(
-        { code: values.bankName, number: values.accountNumber },
-        { subscribe: true, forceRefetch: true }
-      )
-    ).then((res) => {
+    trigger({ code: values.bankName, number: values.accountNumber }, true).then((res) => {
       setFieldValue('accountName', res.data?.data.name || '');
       setFieldValue('accountName', res.data?.data.name || '');
     });
-  }, [dispatch, setFieldValue, values.accountNumber, values.bankName]);
+  }, [setFieldValue, trigger, values.accountNumber, values.bankName]);
 
   useEffect(() => {
     if (values.accountNumber.length === 10) {
@@ -106,33 +100,6 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.accountName}
             touchedField={touched.accountName}
-          />
-          <DropzoneFileUpload
-            name='utilityBillFile'
-            setFieldValue={setFieldValue}
-            label='Upload Utility bill'
-            labelSubText='(showing your house address)'
-            touchedField={touched.utilityBillFile}
-            errorMessage={errors.utilityBillFile}
-            fileSize={5}
-          />
-          <DropzoneFileUpload
-            name='idFile'
-            setFieldValue={setFieldValue}
-            label='Upload an ID'
-            labelSubText='(Valid and Government Issued ID)'
-            touchedField={touched.idFile}
-            errorMessage={errors.idFile}
-            fileSize={5}
-          />{' '}
-          <DropzoneFileUpload
-            name='passportPhotograph'
-            setFieldValue={setFieldValue}
-            label='Passport Photograph'
-            labelSubText='(Selfie while holding your ID)'
-            touchedField={touched.passportPhotograph}
-            errorMessage={errors.passportPhotograph}
-            fileSize={5}
           />
           <Stack direction='row' spacing={3}>
             <NextCancelButton

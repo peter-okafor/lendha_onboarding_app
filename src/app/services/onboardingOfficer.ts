@@ -257,6 +257,19 @@ export const onboardingOfficerApi = api.injectEndpoints({
         body: credentials
       })
     }),
+    addBusinessReg: build.mutation<
+      { business_registration_number: number; cac_document: string },
+      FormData
+    >({
+      query: (formData) => ({
+        url: e.addBusinessReg,
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    }),
     getUserDetail: build.query<
       {
         data: Customer;

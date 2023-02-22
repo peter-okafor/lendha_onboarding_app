@@ -7,27 +7,14 @@ import {
   useUploadPhotographMutation,
   useUploadValidIdMutation
 } from '@/app/services/onboardingOfficer';
-import { ReactComponent as DashedLine } from '@/assets/svg/dashed-line.svg';
 import { Alert, Card } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
 import ErrorMessages from '@/utils/components/ErrorMessages';
 import { sanitize } from '@/utils/helpers';
-import {
-  Box,
-  BoxProps,
-  Button,
-  Divider,
-  Flex,
-  Icon,
-  Link,
-  Stack,
-  Text,
-  useToast
-} from '@chakra-ui/react';
+import { Box, Button, Divider, Flex, Icon, Link, Text, useToast } from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { Fragment, useState } from 'react';
-import { IconType } from 'react-icons';
+import { useState } from 'react';
 import {
   RiArrowLeftLine,
   RiBriefcaseFill,
@@ -36,9 +23,11 @@ import {
   RiUserFill
 } from 'react-icons/ri';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
-import { v4 as key } from 'uuid';
 import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
+import AddressInfoForm from './components/AddressInfoForm';
+import BusinessRegForm, { BusRegFormValues } from './components/BusinessRegForm';
+import { Stepper } from './components/Stepper';
 import {
   BusinessInfoFormValues,
   PersonalInfoFormValues,
@@ -53,7 +42,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(5);
 
   const navigate = useNavigate();
 
@@ -90,23 +79,14 @@ const CustomerAddForm = () => {
       lastName: '',
       email: '',
       phone: '',
-      // password: '',
-      // confirmPassword: '',
-      dateOfBirth: '',
-      proofOfResidence: '',
-      addressNumber: '',
-      streetName: '',
-      nearestLandmark: '',
-      cityTown: '',
-      lga: '',
-      state: ''
+      dateOfBirth: ''
     },
     onSubmit: async (formValues) => {
       const values = sanitize(formValues);
 
       try {
         const userResponse = await createUser({
-          business_name: values.businessName, // TODO: might probably remove this as it wasn't initially on UI
+          business_name: values.businessName,
           date_of_birth: values.dateOfBirth,
           name: `${values.firstName} ${values.lastName}`,
           password: '123456',
@@ -124,39 +104,6 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-
-        const addressResponse = await createAddress({
-          number: values.addressNumber,
-          street_name: values.streetName,
-          landmark: values.nearestLandmark,
-          city: values.cityTown,
-          local_government: values.lga,
-          state: values.state,
-          user_id: userResponse.data.user.id
-        }).unwrap();
-        toast({
-          title: 'Success',
-          description: addressResponse.message || 'Address has been successfully added',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
-        const residenceFormData = new FormData();
-        residenceFormData.append('residence_proof', values.proofOfResidence[0]);
-        residenceFormData.append('user_id', userId);
-
-        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
-        toast({
-          title: 'Success',
-          description: residenceResp.message || 'Document has been uploaded',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
         setActiveStep(2);
       } catch (err: any) {
         toast({
@@ -176,16 +123,63 @@ const CustomerAddForm = () => {
     validationSchema: CustomerSchema.Personal
   });
 
+  const addressInfoFormik = useFormik({
+    initialValues: {
+      addressNumber: '',
+      streetName: '',
+      nearestLandmark: '',
+      cityTown: '',
+      lga: '',
+      state: ''
+    },
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const addressResponse = await createAddress({
+          number: values.addressNumber,
+          street_name: values.streetName,
+          landmark: values.nearestLandmark,
+          city: values.cityTown,
+          local_government: values.lga,
+          state: values.state,
+          user_id: Number(userId)
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: addressResponse.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(3);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: CustomerSchema.Address
+  });
+
   const verificationInfoFormik = useFormik<VerificationInfoFormValues>({
     initialValues: {
       nin: '',
       bvn: '',
       bankName: '',
       accountNumber: '',
-      accountName: '',
-      utilityBillFile: '',
-      idFile: '',
-      passportPhotograph: ''
+      accountName: ''
     },
     onSubmit: async (formValues) => {
       const values = sanitize(formValues);
@@ -209,49 +203,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        const residenceFormData = new FormData();
-        residenceFormData.append('residence_proof', values.utilityBillFile[0]);
-        residenceFormData.append('user_id', userId);
-
-        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
-        toast({
-          title: 'Success',
-          description: residenceResp.message || 'Document has been uploaded',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
-        const idFormData = new FormData();
-        idFormData.append('user_id', userId);
-        idFormData.append('valid_id', values.idFile[0]);
-
-        const validIdResp = await validId(idFormData).unwrap();
-        toast({
-          title: 'Success',
-          description: validIdResp.message || 'Document has been uploaded',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
-        const photographFormData = new FormData();
-        photographFormData.append('user_id', userId);
-        photographFormData.append('passport_photo', values.passportPhotograph[0]);
-
-        const idResp = await photograph(photographFormData).unwrap();
-        toast({
-          title: 'Success',
-          description: idResp.message || 'Document has been uploaded',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
-        setActiveStep(3);
+        setActiveStep(4);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -272,22 +224,14 @@ const CustomerAddForm = () => {
 
   const businessInfoFormik = useFormik<BusinessInfoFormValues>({
     initialValues: {
-      businessName: '',
-      businessCategory: '',
-      email: '',
-      businessDesc: '',
-      facebookHandle: '',
-      twitterHandle: '',
-      instagramHandle: '',
       addressNumber: '',
-      streetName: '',
+      businessName: '',
       cityTown: '',
-      lga: '',
-      state: '',
+      businessDesc: '',
+      email: '',
       nearestLandmark: '',
-      businessLocationFile: '',
-      hasSourceOfIncome: 'no',
-      isBusinessRegistered: 'no'
+      state: '',
+      streetName: ''
     },
     onSubmit: async (formValues) => {
       const values = sanitize(formValues);
@@ -302,7 +246,7 @@ const CustomerAddForm = () => {
           landmark: values.nearestLandmark,
           state: values.state,
           street: values.streetName,
-          user_id: userId
+          user_id: '83' //userId
         }).unwrap();
 
         toast({
@@ -314,7 +258,51 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        // setActiveStep(4);
+        setActiveStep(5);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+
+      setActiveStep(4);
+    },
+    validationSchema: CustomerSchema.Business
+  });
+
+  const businessRegFormik = useFormik<BusRegFormValues>({
+    initialValues: {
+      busRegNumber: '',
+      cacDocument: ''
+    },
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const businessRegResponse = await createBusiness({
+          // address_number
+          user_id: '83' //userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: businessRegResponse.message || 'Business has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(5);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -337,7 +325,7 @@ const CustomerAddForm = () => {
 
   return (
     <>
-      {activeStep !== 4 && (
+      {activeStep !== 6 && (
         <Flex
           alignItems='center'
           gap={3}
@@ -358,6 +346,7 @@ const CustomerAddForm = () => {
           </Text>
         </Flex>
       )}
+
       <Flex
         alignItems='center'
         gap='5px'
@@ -366,16 +355,18 @@ const CustomerAddForm = () => {
         mx='auto'
         w='fit-content'
       >
-        {/* TODO: clean this up 😭 */}
         <Stepper
           activeStep={activeStep}
           steps={[
             { icon: RiUserFill, text: 'Personal Info' },
+            { icon: RiUserFill, text: 'Address Info' },
             { icon: RiEmotionNormalFill, text: 'Verification' },
-            { icon: RiBriefcaseFill, text: 'Business Info' }
+            { icon: RiBriefcaseFill, text: 'Business Info' },
+            { icon: RiBriefcaseFill, text: 'Business Reg.' }
           ]}
         />
       </Flex>
+
       <Card
         borderColor={['transparent', 'gray.100']}
         px={[0, '30px']}
@@ -401,9 +392,11 @@ const CustomerAddForm = () => {
           textStyle={['xs', 'base']}
           px={[3, 0]}
         >
-          {activeStep === 1 && 'Personal information'}
-          {activeStep === 2 && 'Verification'}
-          {activeStep === 3 && 'Business information'}
+          {activeStep === 1 && 'Personal Information'}
+          {activeStep === 2 && 'Address Information'}
+          {activeStep === 3 && 'Verification'}
+          {activeStep === 4 && 'Business Information'}
+          {activeStep === 5 && 'Business Registration'}
         </Text>
         <Box display={['block', 'none']} mt='17px' mb={7}>
           <Divider color='gray.100' />
@@ -413,12 +406,18 @@ const CustomerAddForm = () => {
             <PersonalInfoForm formik={personalInfoFormik} onBack={() => navigate(path.CUSTOMERS)} />
           )}
           {activeStep === 2 && (
-            <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(1)} />
+            <AddressInfoForm formik={addressInfoFormik} onBack={() => setActiveStep(1)} />
           )}
           {activeStep === 3 && (
-            <BusinessInfoForm formik={businessInfoFormik} onBack={() => setActiveStep(2)} />
+            <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(2)} />
           )}
           {activeStep === 4 && (
+            <BusinessInfoForm formik={businessInfoFormik} onBack={() => setActiveStep(3)} />
+          )}
+          {activeStep === 5 && (
+            <BusinessRegForm formik={businessInfoFormik} onBack={() => setActiveStep(4)} />
+          )}
+          {activeStep === 6 && (
             <Alert
               icon={<RiCheckLine color={`${globalStyles.colors.yellow.DEFAULT}`} fontSize='70px' />}
               description={
@@ -459,78 +458,3 @@ const CustomerAddForm = () => {
 };
 
 export default CustomerAddForm;
-
-interface CircleProps extends BoxProps {
-  icon: IconType;
-  props?: BoxProps;
-  isCompleted: boolean;
-  text: string;
-}
-const Circle = ({ bgColor, color, icon, isCompleted, ...props }: CircleProps) => {
-  return (
-    <Stack>
-      <Box
-        display='inline-flex'
-        alignItems='center'
-        justifyContent='center'
-        borderRadius='full'
-        bgColor={bgColor}
-        h={6}
-        w={6}
-        color={color}
-        {...props}
-      >
-        <Icon as={isCompleted ? RiCheckLine : icon} />
-      </Box>
-      <Box pos='relative'>
-        <Text fontWeight={500} textStyle='xs' pos='absolute' whiteSpace='nowrap'>
-          {props.text}
-        </Text>
-      </Box>
-    </Stack>
-  );
-};
-
-interface StepperProps {
-  activeStep: number;
-  steps: {
-    icon: IconType;
-    text: string;
-  }[];
-}
-
-const Stepper = ({ activeStep, steps }: StepperProps) => {
-  return (
-    <>
-      {steps.map((step, index) => {
-        let bgColor;
-        let color;
-        const isCompleted = activeStep > index;
-
-        if (activeStep - 1 === index) {
-          bgColor = 'yellow.DEFAULT';
-          color = 'darkblue.DEFAULT';
-        } else if (isCompleted) {
-          bgColor = 'darkblue.DEFAULT';
-          color = 'white';
-        } else {
-          bgColor = 'white';
-          color = 'gray.300';
-        }
-
-        return (
-          <Fragment key={key()}>
-            <Circle
-              icon={step.icon}
-              isCompleted={activeStep - 1 > index}
-              bgColor={bgColor}
-              color={color}
-              text={step.text}
-            />
-            {index !== steps.length - 1 && <DashedLine />}
-          </Fragment>
-        );
-      })}
-    </>
-  );
-};

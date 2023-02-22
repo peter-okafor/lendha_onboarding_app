@@ -112,7 +112,7 @@ export const RADIAL_OPTIONS = {
   labels: ['Progress']
 };
 
-export const REG_NUMBER_REGEX = /[A-Za-z]{2}[0-9]{8}$/;
+export const REG_NUMBER_REGEX = /^(BN|RC)\d{7}$/;
 
 export const BANK_NAME = 'Providus Bank';
 export const ACCOUNT_NUMBER = '0291983021';
