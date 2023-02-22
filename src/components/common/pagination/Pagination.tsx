@@ -10,7 +10,7 @@ const Pagination = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          w: '25px',
+          w: 'auto',
           h: '25px',
           textStyle: 'sm',
           fontWeight: 600,
@@ -23,7 +23,9 @@ const Pagination = () => {
           my: 'auto'
         },
         '.pagination__item.active': {
-          bgColor: 'darkblue.DEFAULT',
+          bgColor: 'darkblue.DEFAULT'
+        },
+        '.pagination__item.active > a': {
           color: 'white'
         }
       }}

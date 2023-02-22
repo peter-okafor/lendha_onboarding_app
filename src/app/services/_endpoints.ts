@@ -4,7 +4,8 @@ export const ENDPOINTS = {
   signup: 'auth/signup',
   passwordReset: 'password/create',
 
-  users: 'onboarding_officer/users',
+  users: ({ page = 1 }: { page: number }) => `onboarding_officer/users?page=${page}`,
+  // users: 'onboarding_officer/users',
   loans: 'onboarding_officer/loans',
   profile: 'onboarding_officer/profile',
   createUser: 'onboarding_officer/create_user',

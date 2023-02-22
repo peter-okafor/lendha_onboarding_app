@@ -72,15 +72,15 @@ export interface UserResponse {
     current_page: number;
     data: Customer[];
     first_page_url: string;
-    from: 1;
-    last_page: 1;
+    from: number;
+    last_page: number;
     last_page_url: string;
-    next_page_url: any;
+    next_page_url: string;
     path: string;
-    per_page: 50;
-    prev_page_url: any;
-    to: 2;
-    total: 2;
+    per_page: number;
+    prev_page_url: string;
+    to: number;
+    total: number;
   };
   message: string;
 }
@@ -204,8 +204,11 @@ interface LoanDetail {
 
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
-    users: build.query<UserResponse, void>({
-      query: () => e.users
+    users: build.query<UserResponse, { page: number }>({
+      query: (params) => ({
+        url: e.users({ page: params.page }),
+        method: 'GET'
+      })
     }),
     loans: build.query<LoanResponse, void>({
       query: () => e.loans
@@ -324,5 +327,5 @@ export const {
 } = onboardingOfficerApi;
 
 export const {
-  endpoints: { profile, loanApply, createUser, createAddress, getUserDetail }
+  endpoints: { profile, loanApply, createUser, createAddress, getUserDetail, users }
 } = onboardingOfficerApi;
