@@ -23,6 +23,7 @@ export const ENDPOINTS = {
 
   uploadProofOfResidence: 'onboarding_officer/onboarding/documents/residence_proof',
   uploadValidId: 'onboarding_officer/onboarding/documents/valid_id',
+  uploadWorkId: 'onboarding_officer/onboarding/documents/work_id',
   uploadPhotograph: 'onboarding_officer/onboarding/documents/passport_photo',
 
   bankList: 'bank/list',

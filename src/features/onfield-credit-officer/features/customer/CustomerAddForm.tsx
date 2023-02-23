@@ -5,7 +5,8 @@ import {
   useCreateAddressMutation,
   useCreateUserMutation,
   useEmploymentMutation,
-  useNextOfKinMutation
+  useNextOfKinMutation,
+  useSocialHandlesMutation
 } from '@/app/services/onboardingOfficer';
 import { ENDPOINTS as e } from '@/app/services/_endpoints';
 import { Alert, Card } from '@/components/common';
@@ -29,8 +30,10 @@ import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
 import AddressInfoForm from './components/AddressInfoForm';
 import BusinessRegForm, { BusRegFormValues } from './components/BusinessRegForm';
-import BusinessSocialHandlesForm from './components/BusinessSocialHandlesForm';
-import DocumentsForm from './components/DocumentsForm';
+import BusinessSocialHandlesForm, {
+  SocialHandlesFormValues
+} from './components/BusinessSocialHandlesForm';
+import DocumentsForm, { DocumentsFormValues } from './components/DocumentsForm';
 import EmploymentForm, { EmploymentFormValues } from './components/EmploymentForm';
 import NextOfKinForm, { NextOfKinFormValues } from './components/NextOfKinForm';
 import { Stepper } from './components/Stepper';
@@ -44,7 +47,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(4);
+  const [activeStep, setActiveStep] = useState<number>(1);
 
   const navigate = useNavigate();
 
@@ -53,18 +56,9 @@ const CustomerAddForm = () => {
       case 1:
         navigate(path.CUSTOMERS);
         break;
-      case 2:
-        setActiveStep(1);
-        break;
-      case 3:
-        setActiveStep(2);
-        break;
-      case 4:
-        navigate(path.CUSTOMERS);
-        break;
 
       default:
-        navigate(path.CUSTOMERS);
+        setActiveStep(activeStep - 1);
         break;
     }
   };
@@ -75,6 +69,7 @@ const CustomerAddForm = () => {
   const [createBusiness] = useAddBusinessMutation();
   const [employment] = useEmploymentMutation();
   const [nextOfKin] = useNextOfKinMutation();
+  const [socialHandles] = useSocialHandlesMutation();
 
   const personalInfoFormik = useFormik<PersonalInfoFormValues>({
     initialValues: {
@@ -289,6 +284,54 @@ const CustomerAddForm = () => {
     })
   });
 
+  const socialHandlesFormik = useFormik({
+    initialValues: {
+      facebook: '',
+      instagram: '',
+      linkedin: ''
+    },
+    onSubmit: async (formValues) => {
+      const { facebook, instagram, linkedin } = sanitize(formValues);
+
+      try {
+        const response = await socialHandles({
+          facebook,
+          instagram,
+          linkedin,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: response.message || 'Social media handles validated',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(7);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof SocialHandlesFormValues, Yup.AnySchema>>({
+      facebook: Yup.string().required('Facebook handle is required'),
+      instagram: Yup.string().required('Instagram handle is required'),
+      linkedin: Yup.string().required('linkedin handle is required')
+    })
+  });
+
   const verificationInfoFormik = useFormik<VerificationInfoFormValues>({
     initialValues: {
       nin: '',
@@ -362,7 +405,7 @@ const CustomerAddForm = () => {
           landmark: values.nearestLandmark,
           state: values.state,
           street: values.streetName,
-          user_id: '83' //userId
+          user_id: userId
         }).unwrap();
 
         toast({
@@ -374,7 +417,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(5);
+        setActiveStep(8);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -389,8 +432,6 @@ const CustomerAddForm = () => {
           isClosable: true
         });
       }
-
-      setActiveStep(4);
     },
     validationSchema: CustomerSchema.Business
   });
@@ -403,7 +444,7 @@ const CustomerAddForm = () => {
     onSubmit: async (values) => {
       try {
         const formData = new FormData();
-        formData.append('user_id', '83');
+        formData.append('user_id', userId);
         formData.append('business_registration_number', values.busRegNumber);
         formData.append('cac_document', values.cacDocument[0], 'cac_document.png');
 
@@ -415,7 +456,7 @@ const CustomerAddForm = () => {
           body: formData
         };
 
-        const businessRegResponse = await fetch(
+        const response = await fetch(
           `${import.meta.env.VITE_LENDHA_API_URL}/${e.addBusinessReg}`,
           requestOptions
         )
@@ -425,15 +466,14 @@ const CustomerAddForm = () => {
         toast({
           title: 'Success',
           description:
-            businessRegResponse?.message ||
-            'Business registration info has been successfully added',
+            response?.message || 'Business registration info has been successfully added',
           status: 'success',
           duration: 4000,
           position: 'top-right',
           isClosable: true
         });
 
-        setActiveStep(6);
+        setActiveStep(9);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -450,6 +490,116 @@ const CustomerAddForm = () => {
       }
     },
     validationSchema: CustomerSchema.BusinessReg
+  });
+
+  const documentsFormik = useFormik({
+    initialValues: {
+      passport_photo: '',
+      work_id: '',
+      valid_id: ''
+    },
+    onSubmit: async (values) => {
+      const { passport_photo, valid_id, work_id } = values;
+
+      try {
+        const formData = new FormData();
+        formData.append('passport_photo', passport_photo[0], 'passport_photo.png');
+        formData.append('user_id', userId);
+
+        const requestOptions = {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${Cookies.get('token')}`
+          },
+          body: formData
+        };
+        const response = await fetch(
+          `${import.meta.env.VITE_LENDHA_API_URL}/${e.uploadPhotograph}`,
+          requestOptions
+        )
+          .then((response) => response.json())
+          .then((result) => result);
+        toast({
+          title: 'Success',
+          description: response?.message || 'Passport uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const workIDFormData = new FormData();
+        workIDFormData.append('work_id', work_id[0], 'work_id.png');
+        workIDFormData.append('user_id', userId);
+
+        const workIDResponse = await fetch(
+          `${import.meta.env.VITE_LENDHA_API_URL}/${e.uploadWorkId}`,
+          {
+            method: 'POST',
+            headers: {
+              authorization: `Bearer ${Cookies.get('token')}`
+            },
+            body: workIDFormData
+          }
+        )
+          .then((workResponse) => workResponse.json())
+          .then((result) => result);
+        toast({
+          title: 'Success',
+          description: workIDResponse?.message || 'Work ID uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const validIDFormData = new FormData();
+        validIDFormData.append('valid_id', valid_id[0], 'valid_id.png');
+        validIDFormData.append('user_id', userId);
+
+        const validIDResponse = await fetch(
+          `${import.meta.env.VITE_LENDHA_API_URL}/${e.uploadValidId}`,
+          {
+            method: 'POST',
+            headers: {
+              authorization: `Bearer ${Cookies.get('token')}`
+            },
+            body: validIDFormData
+          }
+        )
+          .then((workResponse) => workResponse.json())
+          .then((result) => result);
+        toast({
+          title: 'Success',
+          description: validIDResponse?.message || 'Valid ID uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(10);
+      } catch (err: any) {
+        console.log({ err });
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof DocumentsFormValues, Yup.AnySchema>>({
+      passport_photo: Yup.mixed().required('Passport photo is required'),
+      work_id: Yup.mixed().required('Work ID is required'),
+      valid_id: Yup.mixed().required('Valid ID is required')
+    })
   });
 
   return (

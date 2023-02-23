@@ -1,3 +1,4 @@
+import { SocialHandlesFormValues } from '@/features/onfield-credit-officer/features/customer/components/BusinessSocialHandlesForm';
 import { EmploymentFormValues } from '@/features/onfield-credit-officer/features/customer/components/EmploymentForm';
 import { NextOfKinFormValues } from '@/features/onfield-credit-officer/features/customer/components/NextOfKinForm';
 import { api } from './api';
@@ -8,18 +9,18 @@ type Business = {
   id: number;
   name: string;
   email: string;
-  category: any;
-  description: any;
-  address_number: any;
-  street: any;
-  city: any;
-  state: any;
-  landmark: any;
+  category: string;
+  description: string;
+  address_number: string;
+  street: string;
+  city: string;
+  state: string;
+  landmark: string;
   user_id: number;
   created_at: string;
   updated_at: string;
   registration_status: false;
-  business_registration: any;
+  business_registration: string;
 };
 
 export type Customer = {
@@ -265,6 +266,16 @@ export const onboardingOfficerApi = api.injectEndpoints({
         body: credentials
       })
     }),
+    socialHandles: build.mutation<
+      GenericCreateResponse,
+      SocialHandlesFormValues & { user_id: string }
+    >({
+      query: (credentials) => ({
+        url: e.socialHandles,
+        method: 'POST',
+        body: credentials
+      })
+    }),
     addBusiness: build.mutation<GenericCreateResponse, CreateBusinessRequest>({
       query: (credentials) => ({
         url: e.addBusiness,
@@ -306,7 +317,8 @@ export const {
   useLazyGetUserDetailQuery,
   useGetLoanDetailQuery,
   useEmploymentMutation,
-  useNextOfKinMutation
+  useNextOfKinMutation,
+  useSocialHandlesMutation
 } = onboardingOfficerApi;
 
 export const {

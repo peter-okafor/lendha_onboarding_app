@@ -20,7 +20,7 @@ const DocumentsForm = ({ formik, ...props }: Props) => {
       <Form>
         <Stack spacing={5}>
           <DropzoneFileUpload
-            name='passport'
+            name='passport_photo'
             setFieldValue={setFieldValue}
             label='Upload a passport photo'
             touchedField={touched.passport_photo}

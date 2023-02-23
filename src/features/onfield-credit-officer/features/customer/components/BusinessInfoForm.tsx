@@ -9,7 +9,7 @@ interface Props {
   formik: FormikProps<BusinessInfoFormValues>;
 }
 const BusinessInfoForm = ({ formik, ...props }: Props) => {
-  const { values, errors, touched, handleChange } = formik;
+  const { values, errors, touched, handleChange, isSubmitting } = formik;
 
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
@@ -105,6 +105,7 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
 
           <Stack direction='row' spacing={3}>
             <NextCancelButton
+              isSubmitting={isSubmitting}
               onCancel={props.onBack}
               showCancelBtn={isLargerThan810 ? false : true}
             />
