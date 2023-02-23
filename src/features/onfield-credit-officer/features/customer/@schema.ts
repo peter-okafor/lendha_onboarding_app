@@ -1,6 +1,8 @@
 // import { REG_NUMBER_REGEX } from '@/variables/general';
 import { Address } from '@/types';
+import { REG_NUMBER_REGEX } from '@/variables/general';
 import * as Yup from 'yup';
+import { BusRegFormValues } from './components/BusinessRegForm';
 import {
   BusinessInfoFormValues,
   PersonalInfoFormValues,
@@ -75,9 +77,17 @@ const BusinessInfoFormSchema = Yup.object<Record<keyof BusinessInfoFormValues, Y
   nearestLandmark: Yup.string().required('Nearest Landmark is required')
 });
 
+const BusinessRegFormSchema = Yup.object<Record<keyof BusRegFormValues, Yup.AnySchema>>({
+  busRegNumber: Yup.string()
+    .matches(REG_NUMBER_REGEX, 'Please enter a valid registration number')
+    .required('Registration number is required'),
+  cacDocument: Yup.mixed().required('CAC document is required')
+});
+
 export const CustomerSchema = {
   Personal: PersonalInfoFormSchema,
   Address: AddressInfoFormSchema,
   Verification: VerificationInfoFormSchema,
-  Business: BusinessInfoFormSchema
+  Business: BusinessInfoFormSchema,
+  BusinessReg: BusinessRegFormSchema
 };

@@ -1,12 +1,13 @@
+import * as Yup from 'yup';
 import {
   useAddBankMutation,
   useAddBusinessMutation,
   useCreateAddressMutation,
   useCreateUserMutation,
-  useProofOfResidenceMutation,
-  useUploadPhotographMutation,
-  useUploadValidIdMutation
+  useEmploymentMutation,
+  useNextOfKinMutation
 } from '@/app/services/onboardingOfficer';
+import { ENDPOINTS as e } from '@/app/services/_endpoints';
 import { Alert, Card } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
@@ -14,6 +15,7 @@ import ErrorMessages from '@/utils/components/ErrorMessages';
 import { sanitize } from '@/utils/helpers';
 import { Box, Button, Divider, Flex, Icon, Link, Text, useToast } from '@chakra-ui/react';
 import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
   RiArrowLeftLine,
@@ -27,6 +29,10 @@ import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
 import AddressInfoForm from './components/AddressInfoForm';
 import BusinessRegForm, { BusRegFormValues } from './components/BusinessRegForm';
+import BusinessSocialHandlesForm from './components/BusinessSocialHandlesForm';
+import DocumentsForm from './components/DocumentsForm';
+import EmploymentForm, { EmploymentFormValues } from './components/EmploymentForm';
+import NextOfKinForm, { NextOfKinFormValues } from './components/NextOfKinForm';
 import { Stepper } from './components/Stepper';
 import {
   BusinessInfoFormValues,
@@ -35,14 +41,10 @@ import {
 } from './types';
 
 const CustomerAddForm = () => {
-  const [proofOfResidence] = useProofOfResidenceMutation();
-  const [validId] = useUploadValidIdMutation();
-  const [photograph] = useUploadPhotographMutation();
-
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(5);
+  const [activeStep, setActiveStep] = useState<number>(4);
 
   const navigate = useNavigate();
 
@@ -71,6 +73,8 @@ const CustomerAddForm = () => {
   const [createAddress] = useCreateAddressMutation();
   const [createBank] = useAddBankMutation();
   const [createBusiness] = useAddBusinessMutation();
+  const [employment] = useEmploymentMutation();
+  const [nextOfKin] = useNextOfKinMutation();
 
   const personalInfoFormik = useFormik<PersonalInfoFormValues>({
     initialValues: {
@@ -123,6 +127,65 @@ const CustomerAddForm = () => {
     validationSchema: CustomerSchema.Personal
   });
 
+  const employmentFormik = useFormik<EmploymentFormValues>({
+    initialValues: {
+      address: '',
+      email: '',
+      name: '',
+      phone: '',
+      resumption_date: '',
+      site: ''
+    },
+    onSubmit: async (formValues) => {
+      const { address, email, name, phone, resumption_date, site } = sanitize(formValues);
+
+      try {
+        const response = await employment({
+          address,
+          email,
+          name,
+          phone,
+          resumption_date,
+          site,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: response.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(3);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof EmploymentFormValues, Yup.AnySchema>>({
+      name: Yup.string().required('Name is required'),
+      email: Yup.string().email('Invalid email').required('Email is required'),
+      site: Yup.string().required('Site is required'),
+      address: Yup.string().required('Address is required'),
+      phone: Yup.string()
+        .matches(/^\+?\d{10,14}$/, 'Invalid phone number')
+        .required('Phone is required'),
+      resumption_date: Yup.string().required('Resumption date is required')
+    })
+  });
+
   const addressInfoFormik = useFormik({
     initialValues: {
       addressNumber: '',
@@ -154,7 +217,7 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-        setActiveStep(3);
+        setActiveStep(4);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -171,6 +234,59 @@ const CustomerAddForm = () => {
       }
     },
     validationSchema: CustomerSchema.Address
+  });
+
+  const nextOfKinFormik = useFormik({
+    initialValues: {
+      name: '',
+      phone: '',
+      address: '',
+      relationship: ''
+    },
+    onSubmit: async (formValues) => {
+      const { name, phone, relationship, address } = sanitize(formValues);
+
+      try {
+        const response = await nextOfKin({
+          address,
+          name,
+          phone,
+          relationship,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: response.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(5);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof NextOfKinFormValues, Yup.AnySchema>>({
+      name: Yup.string().required('Name is required'),
+      relationship: Yup.string().required('Relatioship is required'),
+      address: Yup.string().required('Address is required'),
+      phone: Yup.string()
+        .matches(/^\+?\d{10,14}$/, 'Invalid phone number')
+        .required('Phone is required')
+    })
   });
 
   const verificationInfoFormik = useFormik<VerificationInfoFormValues>({
@@ -203,7 +319,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(4);
+        setActiveStep(6);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -284,25 +400,40 @@ const CustomerAddForm = () => {
       busRegNumber: '',
       cacDocument: ''
     },
-    onSubmit: async (formValues) => {
-      const values = sanitize(formValues);
-
+    onSubmit: async (values) => {
       try {
-        const businessRegResponse = await createBusiness({
-          // address_number
-          user_id: '83' //userId
-        }).unwrap();
+        const formData = new FormData();
+        formData.append('user_id', '83');
+        formData.append('business_registration_number', values.busRegNumber);
+        formData.append('cac_document', values.cacDocument[0], 'cac_document.png');
+
+        const requestOptions = {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${Cookies.get('token')}`
+          },
+          body: formData
+        };
+
+        const businessRegResponse = await fetch(
+          `${import.meta.env.VITE_LENDHA_API_URL}/${e.addBusinessReg}`,
+          requestOptions
+        )
+          .then((response) => response.json())
+          .then((result) => result);
 
         toast({
           title: 'Success',
-          description: businessRegResponse.message || 'Business has been successfully added',
+          description:
+            businessRegResponse?.message ||
+            'Business registration info has been successfully added',
           status: 'success',
           duration: 4000,
           position: 'top-right',
           isClosable: true
         });
 
-        setActiveStep(5);
+        setActiveStep(6);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -317,15 +448,13 @@ const CustomerAddForm = () => {
           isClosable: true
         });
       }
-
-      setActiveStep(4);
     },
-    validationSchema: CustomerSchema.Business
+    validationSchema: CustomerSchema.BusinessReg
   });
 
   return (
     <>
-      {activeStep !== 6 && (
+      {activeStep !== 10 && (
         <Flex
           alignItems='center'
           gap={3}
@@ -359,10 +488,14 @@ const CustomerAddForm = () => {
           activeStep={activeStep}
           steps={[
             { icon: RiUserFill, text: 'Personal Info' },
-            { icon: RiUserFill, text: 'Address Info' },
+            { icon: RiUserFill, text: 'Employment' },
+            { icon: RiUserFill, text: 'Address' },
+            { icon: RiUserFill, text: 'Next of Kin' },
             { icon: RiEmotionNormalFill, text: 'Verification' },
+            { icon: RiBriefcaseFill, text: 'Social Handles' },
             { icon: RiBriefcaseFill, text: 'Business Info' },
-            { icon: RiBriefcaseFill, text: 'Business Reg.' }
+            { icon: RiBriefcaseFill, text: 'Business Reg.' },
+            { icon: RiBriefcaseFill, text: 'Documents' }
           ]}
         />
       </Flex>
@@ -393,10 +526,14 @@ const CustomerAddForm = () => {
           px={[3, 0]}
         >
           {activeStep === 1 && 'Personal Information'}
-          {activeStep === 2 && 'Address Information'}
-          {activeStep === 3 && 'Verification'}
-          {activeStep === 4 && 'Business Information'}
-          {activeStep === 5 && 'Business Registration'}
+          {activeStep === 2 && 'Employment Information'}
+          {activeStep === 3 && 'Address Information'}
+          {activeStep === 4 && 'Next of Kin Information'}
+          {activeStep === 5 && 'Verification Information'}
+          {activeStep === 6 && 'Social Handles'}
+          {activeStep === 7 && 'Business Information'}
+          {activeStep === 8 && 'Business Registration Information'}
+          {activeStep === 9 && 'Documents'}
         </Text>
         <Box display={['block', 'none']} mt='17px' mb={7}>
           <Divider color='gray.100' />
@@ -406,18 +543,45 @@ const CustomerAddForm = () => {
             <PersonalInfoForm formik={personalInfoFormik} onBack={() => navigate(path.CUSTOMERS)} />
           )}
           {activeStep === 2 && (
-            <AddressInfoForm formik={addressInfoFormik} onBack={() => setActiveStep(1)} />
+            <EmploymentForm
+              formik={employmentFormik}
+              onBack={() => setActiveStep(activeStep - 1)}
+            />
           )}
           {activeStep === 3 && (
-            <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(2)} />
+            <AddressInfoForm
+              formik={addressInfoFormik}
+              onBack={() => setActiveStep(activeStep - 1)}
+            />
           )}
           {activeStep === 4 && (
-            <BusinessInfoForm formik={businessInfoFormik} onBack={() => setActiveStep(3)} />
+            <NextOfKinForm formik={nextOfKinFormik} onBack={() => setActiveStep(activeStep - 1)} />
           )}
           {activeStep === 5 && (
-            <BusinessRegForm formik={businessInfoFormik} onBack={() => setActiveStep(4)} />
+            <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(2)} />
           )}
           {activeStep === 6 && (
+            <BusinessSocialHandlesForm
+              formik={socialHandlesFormik}
+              onBack={() => setActiveStep(activeStep - 1)}
+            />
+          )}
+          {activeStep === 7 && (
+            <BusinessInfoForm
+              formik={businessInfoFormik}
+              onBack={() => setActiveStep(activeStep - 1)}
+            />
+          )}
+          {activeStep === 8 && (
+            <BusinessRegForm
+              formik={businessRegFormik}
+              onBack={() => setActiveStep(activeStep - 1)}
+            />
+          )}
+          {activeStep === 9 && (
+            <DocumentsForm formik={documentsFormik} onBack={() => setActiveStep(activeStep - 1)} />
+          )}
+          {activeStep === 10 && (
             <Alert
               icon={<RiCheckLine color={`${globalStyles.colors.yellow.DEFAULT}`} fontSize='70px' />}
               description={

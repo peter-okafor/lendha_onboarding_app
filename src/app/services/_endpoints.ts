@@ -14,6 +14,9 @@ export const ENDPOINTS = {
   addBank: 'onboarding_officer/onboarding/bank',
   addBusiness: 'onboarding_officer/onboarding/business',
   addBusinessReg: 'onboarding_officer/onboarding/documents/business_registration',
+  employment: 'onboarding_officer/onboarding/employment',
+  nextOfKin: 'onboarding_officer/onboarding/next_of_kin',
+  socialHandles: 'onboarding_officer/onboarding/social_media_handles',
 
   userDetail: ({ user_id }: { user_id: string }) => `onboarding_officer/user?user_id=${user_id}`,
   loanDetail: ({ loan_id }: { loan_id: string }) => `onboarding_officer/loan?loan_id=${loan_id}`,

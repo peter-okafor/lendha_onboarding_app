@@ -1,3 +1,5 @@
+import { EmploymentFormValues } from '@/features/onfield-credit-officer/features/customer/components/EmploymentForm';
+import { NextOfKinFormValues } from '@/features/onfield-credit-officer/features/customer/components/NextOfKinForm';
 import { api } from './api';
 import { Officer } from './auth';
 import { ENDPOINTS as e } from './_endpoints';
@@ -202,6 +204,11 @@ interface LoanDetail {
   message: string;
 }
 
+export type GenericCreateResponse = {
+  step: number;
+  message: string;
+};
+
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
     users: build.query<UserResponse, { page: number }>({
@@ -244,30 +251,25 @@ export const onboardingOfficerApi = api.injectEndpoints({
         body: credentials
       })
     }),
-    addBusiness: build.mutation<
-      {
-        step: number;
-        message: string;
-      },
-      CreateBusinessRequest
-    >({
+    employment: build.mutation<GenericCreateResponse, EmploymentFormValues & { user_id: string }>({
       query: (credentials) => ({
-        url: e.addBusiness,
+        url: e.employment,
         method: 'POST',
         body: credentials
       })
     }),
-    addBusinessReg: build.mutation<
-      { business_registration_number: number; cac_document: string },
-      FormData
-    >({
-      query: (formData) => ({
-        url: e.addBusinessReg,
+    nextOfKin: build.mutation<GenericCreateResponse, NextOfKinFormValues & { user_id: string }>({
+      query: (credentials) => ({
+        url: e.nextOfKin,
         method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        body: credentials
+      })
+    }),
+    addBusiness: build.mutation<GenericCreateResponse, CreateBusinessRequest>({
+      query: (credentials) => ({
+        url: e.addBusiness,
+        method: 'POST',
+        body: credentials
       })
     }),
     getUserDetail: build.query<
@@ -287,37 +289,6 @@ export const onboardingOfficerApi = api.injectEndpoints({
         url: e.loanDetail({ loan_id: params.loan_id.toString() }),
         method: 'GET'
       })
-    }),
-
-    proofOfResidence: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadProofOfResidence,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-    }),
-    uploadValidId: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadValidId,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-    }),
-    uploadPhotograph: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadPhotograph,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
     })
   })
 });
@@ -334,9 +305,8 @@ export const {
   useGetUserDetailQuery,
   useLazyGetUserDetailQuery,
   useGetLoanDetailQuery,
-  useProofOfResidenceMutation,
-  useUploadValidIdMutation,
-  useUploadPhotographMutation
+  useEmploymentMutation,
+  useNextOfKinMutation
 } = onboardingOfficerApi;
 
 export const {

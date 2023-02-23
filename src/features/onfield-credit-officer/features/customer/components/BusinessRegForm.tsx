@@ -11,7 +11,7 @@ interface Props {
   formik: FormikProps<BusRegFormValues>;
 }
 const BusinessRegForm = ({ formik, ...props }: Props) => {
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
   return (
@@ -21,6 +21,7 @@ const BusinessRegForm = ({ formik, ...props }: Props) => {
           <FormInput
             name='busRegNumber'
             label='Business registration number'
+            subLabel='(starts with BN or RC and 7 numbers)'
             errorMessage={errors.busRegNumber}
             handleChange={handleChange}
             touchedField={touched.busRegNumber}
@@ -36,6 +37,7 @@ const BusinessRegForm = ({ formik, ...props }: Props) => {
             fileSize={5}
           />
           <NextCancelButton
+            isSubmitting={isSubmitting}
             onCancel={props.onBack}
             showCancelBtn={isLargerThan810 ? false : true}
           />
