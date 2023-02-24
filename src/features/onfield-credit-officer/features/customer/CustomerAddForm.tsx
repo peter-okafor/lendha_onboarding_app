@@ -51,7 +51,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(1);
+  const [activeStep, setActiveStep] = useState<number>(4);
 
   const navigate = useNavigate();
 
@@ -442,11 +442,11 @@ const CustomerAddForm = () => {
   const documentsFormik = useFormik({
     initialValues: {
       passport_photo: '',
-      work_id: '',
+      // work_id: '',
       valid_id: ''
     },
     onSubmit: async (values) => {
-      const { passport_photo, valid_id, work_id } = values;
+      const { passport_photo, valid_id } = values;
 
       try {
         const formData = new FormData();
@@ -475,31 +475,6 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        const workIDFormData = new FormData();
-        workIDFormData.append('work_id', work_id[0], 'work_id.png');
-        workIDFormData.append('user_id', userId);
-
-        const workIDResponse = await fetch(
-          `${import.meta.env.VITE_LENDHA_API_URL}/${e.uploadWorkId}`,
-          {
-            method: 'POST',
-            headers: {
-              authorization: `Bearer ${Cookies.get('token')}`
-            },
-            body: workIDFormData
-          }
-        )
-          .then((workResponse) => workResponse.json())
-          .then((result) => result);
-        toast({
-          title: 'Success',
-          description: workIDResponse?.message || 'Work ID uploaded',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
         const validIDFormData = new FormData();
         validIDFormData.append('valid_id', valid_id[0], 'valid_id.png');
         validIDFormData.append('user_id', userId);
@@ -518,7 +493,7 @@ const CustomerAddForm = () => {
           .then((result) => result);
         toast({
           title: 'Success',
-          description: validIDResponse?.message || 'Valid ID uploaded',
+          description: validIDResponse?.message || 'ID uploaded',
           status: 'success',
           duration: 4000,
           position: 'top-right',
@@ -544,7 +519,6 @@ const CustomerAddForm = () => {
     },
     validationSchema: Yup.object<Record<keyof DocumentsFormValues, Yup.AnySchema>>({
       passport_photo: Yup.mixed().required('Passport photo is required'),
-      work_id: Yup.mixed().required('Work ID is required'),
       valid_id: Yup.mixed().required('Valid ID is required')
     })
   });

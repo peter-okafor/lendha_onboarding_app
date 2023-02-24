@@ -15,7 +15,9 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
   const { data } = useBankListQuery();
-  const banks = data?.data.list.map(({ code, name }) => ({ value: code, label: name }));
+  const banks = data?.data.list
+    .map(({ code, name }) => ({ value: code, label: name }))
+    .sort((a, b) => (a.label > b.label ? 1 : b.label > a.label ? -1 : 0));
 
   const fallbackBanks = [
     {

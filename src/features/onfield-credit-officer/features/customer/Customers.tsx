@@ -230,10 +230,7 @@ const Customers = () => {
         </Skeleton>
         <Skeleton isLoaded={!isLoading}>
           <Link to={path.CUSTOMER_NEW}>
-            <IconButton
-              icon={<RiAddFill style={{ fontSize: '20px' }} />}
-              text={isLargerThan810 ? 'Add Customer' : 'Add'}
-            />
+            <IconButton icon={<RiAddFill style={{ fontSize: '20px' }} />} text='Add Customer' />
           </Link>
         </Skeleton>
       </Flex>

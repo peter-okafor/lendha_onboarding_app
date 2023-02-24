@@ -4,7 +4,7 @@ import { Form, FormikProps, FormikProvider } from 'formik';
 
 export type DocumentsFormValues = {
   passport_photo: string;
-  work_id: string;
+  // work_id: string;
   valid_id: string;
 };
 interface Props {
@@ -27,18 +27,18 @@ const DocumentsForm = ({ formik, ...props }: Props) => {
             errorMessage={errors.passport_photo}
             fileSize={5}
           />
-          <DropzoneFileUpload
+          {/* <DropzoneFileUpload
             name='work_id'
             setFieldValue={setFieldValue}
             label='Upload your Work ID'
             touchedField={touched.work_id}
             errorMessage={errors.work_id}
             fileSize={5}
-          />
+          /> */}
           <DropzoneFileUpload
             name='valid_id'
             setFieldValue={setFieldValue}
-            label='Upload a valid ID'
+            label='Upload a Govt Issued ID'
             touchedField={touched.valid_id}
             errorMessage={errors.valid_id}
             fileSize={5}
