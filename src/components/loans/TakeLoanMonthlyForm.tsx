@@ -1,3 +1,4 @@
+import { useAppSelector } from '@/app/hooks';
 import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
 import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
@@ -51,6 +52,7 @@ interface TakeLoanValues {
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
+  const userId = useAppSelector((state) => state.customer.userId);
   const toast = useToast();
 
   const { data: interests, isLoading } = useLoanInterestsQuery();
@@ -108,7 +110,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
           loan_amount: values.amount,
           loan_interest_id: selectedLoanCategory,
           loan_term: values.loanPeriod,
-          user_id: 22 //TODO: remove after getting user creation flow from Peter
+          user_id: Number(userId)
         }).unwrap();
 
         toast({
@@ -122,8 +124,12 @@ const TakeLoanMonthlyForm = (props: Props) => {
         props.onSubmit();
       } catch (err: any) {
         toast({
-          title: err?.data?.message || 'An error occurred',
-          description: <ErrorMessages errors={err?.data.errors} />,
+          title: 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message || 'An error occurred'
+          ),
           status: 'error',
           duration: 4000,
           position: 'top-right',

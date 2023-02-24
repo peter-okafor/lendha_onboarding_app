@@ -168,8 +168,6 @@ const CustomerTable = (props: CustomerTableProps) => {
 };
 
 const Customers = () => {
-  const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
-
   const [pageNumber, setPageNumber] = useState(1);
   const { data: response, isLoading } = useUsersQuery({ page: pageNumber });
   const [trigger] = users.useLazyQuerySubscription();
@@ -208,6 +206,11 @@ const Customers = () => {
   const handlePageClick = (event: { selected: number }) => {
     setPageNumber(event.selected + 1);
   };
+
+  const activeTable = customersTable.filter((customer) => customer.status === 'active');
+  const pendingTable = customersTable.filter((customer) => customer.status === 'pending');
+  const blockedTable = customersTable.filter((customer) => customer.status === 'blocked');
+
 
   const tableHeaders = ['Customer name', '#ID', 'Date', 'Phone number', 'Account Status'];
 
@@ -299,9 +302,9 @@ const Customers = () => {
             </TabPanel>
             <TabPanel>
               <SearchInput />
-              <CustomerTable headers={tableHeaders} data={customersTable} />
+              <CustomerTable headers={tableHeaders} data={activeTable} />
 
-              {customersTable.map((customer) => (
+              {activeTable.map((customer) => (
                 <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                   <CustomerDetail
                     name={customer.name}
@@ -314,9 +317,9 @@ const Customers = () => {
             </TabPanel>
             <TabPanel>
               <SearchInput />
-              <CustomerTable headers={tableHeaders} data={customersTable} />
+              <CustomerTable headers={tableHeaders} data={pendingTable} />
 
-              {customersTable.map((customer) => (
+              {pendingTable.map((customer) => (
                 <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                   <CustomerDetail
                     name={customer.name}
@@ -329,9 +332,9 @@ const Customers = () => {
             </TabPanel>
             <TabPanel>
               <SearchInput />
-              <CustomerTable headers={tableHeaders} data={customersTable} />
+              <CustomerTable headers={tableHeaders} data={blockedTable} />
 
-              {customersTable.map((customer) => (
+              {blockedTable.map((customer) => (
                 <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                   <CustomerDetail
                     name={customer.name}

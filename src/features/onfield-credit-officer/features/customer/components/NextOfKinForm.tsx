@@ -1,4 +1,4 @@
-import { FormInput, NextCancelButton } from '@/components/common';
+import { FormInput, FormLeftAddonInput, NextCancelButton } from '@/components/common';
 import FormTextArea from '@/components/common/input/form-textarea';
 import { Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
@@ -30,14 +30,19 @@ const NextOfKinForm = ({ formik, ...props }: Props) => {
             value={values.name}
             type='text'
           />
-          <FormInput
-            name='phone'
-            label='Phone Number'
+          <FormLeftAddonInput
+            addonText='+234'
             errorMessage={errors.phone}
             handleChange={handleChange}
+            inputProps={{
+              name: 'phone',
+              id: 'phone',
+              maxLength: 11,
+              inputMode: 'tel'
+            }}
+            label='Phone number'
             touchedField={touched.phone}
             value={values.phone}
-            type='text'
           />
           <FormTextArea
             id='address'

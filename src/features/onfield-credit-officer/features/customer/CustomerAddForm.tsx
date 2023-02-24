@@ -1,4 +1,3 @@
-import { isObjectPropsEmpty } from '@/utils/helpers/object.helpers';
 import {
   useAddBankMutation,
   useAddBusinessMutation,
@@ -13,6 +12,7 @@ import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
 import ErrorMessages from '@/utils/components/ErrorMessages';
 import { sanitize } from '@/utils/helpers';
+import { isObjectPropsEmpty } from '@/utils/helpers/object.helpers';
 import { Box, Button, Divider, Flex, Icon, Link, Text, useToast } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
@@ -51,7 +51,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(1);
+  const [activeStep, setActiveStep] = useState<number>(5);
 
   const navigate = useNavigate();
 
@@ -109,7 +109,7 @@ const CustomerAddForm = () => {
         setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
-          title: err?.data?.message || 'An error occurred',
+          title: 'An error occurred',
           description: err?.data?.errors ? (
             <ErrorMessages errors={err?.data?.errors} />
           ) : (
@@ -643,7 +643,6 @@ const CustomerAddForm = () => {
           </Text>
         </Flex>
       )}
-
       <Flex
         alignItems='center'
         gap='5px'
@@ -667,7 +666,6 @@ const CustomerAddForm = () => {
           ]}
         />
       </Flex>
-
       <Card
         borderColor={['transparent', 'gray.100']}
         px={[0, '30px']}

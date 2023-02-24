@@ -67,6 +67,7 @@ const PersonalInfoForm = ({ formik, ...props }: Props) => {
             touchedField={touched.email}
           />
           <FormLeftAddonInput
+            addonText='+234'
             errorMessage={errors.phone}
             handleChange={handleChange}
             inputProps={{

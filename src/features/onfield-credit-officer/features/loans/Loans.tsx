@@ -237,7 +237,7 @@ const Loans = () => {
   }, [allLoans, trigger, value]);
 
   const activeTable = loansTable.filter((loan) => loan.status === 'active');
-  const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
+  // const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
   const declinedTable = loansTable.filter((loan) => loan.status === 'declined');
   const dueTable = loansTable.filter((loan) => loan.status === 'due');
   const closedTable = loansTable.filter((loan) => loan.status === 'closed');
@@ -270,9 +270,7 @@ const Loans = () => {
         }}
       >
         <Skeleton isLoaded={!isLoading}>
-          <TransactionTabList
-            tabs={['All', 'Active', 'Pending', 'Declined', 'Due', 'Closed', 'Default']}
-          />
+          <TransactionTabList tabs={['All', 'Active', 'Declined', 'Due', 'Closed', 'Default']} />
         </Skeleton>
 
         <Skeleton isLoaded={!isLoading}>
@@ -309,22 +307,6 @@ const Loans = () => {
               <LoanTable headers={tableHeaders} data={activeTable} />
 
               {activeTable.map((loan) => (
-                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                  <LoanDetail
-                    name={loan.name}
-                    id={loan.id}
-                    appId={loan.appId}
-                    amount={loan.amount}
-                    status={loan.status}
-                  />
-                </LoanLink>
-              ))}
-            </TabPanel>
-            <TabPanel>
-              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-              <LoanTable headers={tableHeaders} data={pendingTable} />
-
-              {pendingTable.map((loan) => (
                 <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                   <LoanDetail
                     name={loan.name}

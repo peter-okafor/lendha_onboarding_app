@@ -67,6 +67,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.nin}
             touchedField={touched.nin}
+            maxLength={11}
           />
           <FormInput
             label='BVN'
@@ -75,6 +76,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.bvn}
             touchedField={touched.bvn}
+            maxLength={10}
           />
           <FormSelect
             label='Bank name'
