@@ -51,7 +51,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(4);
+  const [activeStep, setActiveStep] = useState<number>(1);
 
   const navigate = useNavigate();
 
@@ -523,6 +523,103 @@ const CustomerAddForm = () => {
     })
   });
 
+  const steps = [
+    {
+      label: 'Personal Information',
+      component: (
+        <PersonalInfoForm formik={personalInfoFormik} onBack={() => navigate(path.CUSTOMERS)} />
+      )
+    },
+    {
+      label: 'Address Information',
+      component: (
+        <AddressInfoForm formik={addressInfoFormik} onBack={() => setActiveStep(activeStep - 1)} />
+      )
+    },
+    {
+      label: 'Business Information',
+      component: (
+        <BusinessInfoForm
+          formik={businessInfoFormik}
+          onBack={() => setActiveStep(activeStep - 1)}
+        />
+      )
+    },
+    {
+      label: 'Business Registration Information',
+      component: (
+        <BusinessRegForm formik={businessRegFormik} onBack={() => setActiveStep(activeStep - 1)} />
+      )
+    },
+    {
+      label: 'Verification Information',
+      component: (
+        <VerificationInfoForm
+          formik={verificationInfoFormik}
+          onBack={() => setActiveStep(activeStep - 1)}
+        />
+      )
+    },
+    {
+      label: 'Documents',
+      component: (
+        <DocumentsForm formik={documentsFormik} onBack={() => setActiveStep(activeStep - 1)} />
+      )
+    },
+    {
+      label: 'Guarantor Information',
+      component: (
+        <NextOfKinForm formik={nextOfKinFormik} onBack={() => setActiveStep(activeStep - 1)} />
+      )
+    },
+    {
+      label: 'Social Handles',
+      component: (
+        <BusinessSocialHandlesForm
+          formik={socialHandlesFormik}
+          onBack={() => setActiveStep(activeStep - 1)}
+        />
+      )
+    },
+    {
+      label: '',
+      component: (
+        <Alert
+          icon={<RiCheckLine color={`${globalStyles.colors.yellow.DEFAULT}`} fontSize='70px' />}
+          description={
+            <Box>
+              <Text maxW={['240px', '300px']} mx='auto' className='header--success'>
+                Your account is under review
+              </Text>
+            </Box>
+          }
+        >
+          <Button
+            w='full'
+            size='md'
+            onClick={() => {
+              navigate(path.CREDIT_OFFICER_TAKE_LOAN);
+            }}
+          >
+            Take a loan
+          </Button>
+          <Flex justifyContent='center'>
+            <Link
+              as={ReactRouterLink}
+              color='darkblue.DEFAULT'
+              to={path.CUSTOMERS}
+              textStyle='sm'
+              fontWeight={700}
+              mt={5}
+            >
+              Back to Customers
+            </Link>
+          </Flex>
+        </Alert>
+      )
+    }
+  ];
+
   return (
     <>
       {activeStep !== 9 && (
@@ -561,12 +658,12 @@ const CustomerAddForm = () => {
             { icon: RiUserFill, text: 'Personal Info' },
             // { icon: RiUserFill, text: 'Employment' },
             { icon: RiHome2Fill, text: 'Address' },
-            { icon: RiGroupFill, text: 'Next of Kin' },
-            { icon: RiEmotionNormalFill, text: 'Verification' },
-            { icon: RiCellphoneFill, text: 'Social Handles' },
             { icon: RiBriefcaseFill, text: 'Business Info' },
             { icon: RiInformationFill, text: 'Business Reg.' },
-            { icon: RiFilePaper2Fill, text: 'Documents' }
+            { icon: RiEmotionNormalFill, text: 'Verification' },
+            { icon: RiFilePaper2Fill, text: 'Documents' },
+            { icon: RiGroupFill, text: 'Guarantor' },
+            { icon: RiCellphoneFill, text: 'Social Media Handles' }
           ]}
         />
       </Flex>
@@ -596,97 +693,12 @@ const CustomerAddForm = () => {
           textStyle={['xs', 'base']}
           px={[3, 0]}
         >
-          {activeStep === 1 && 'Personal Information'}
-          {/* {activeStep === 2 && 'Employment Information'} */}
-          {activeStep === 3 && 'Address Information'}
-          {activeStep === 4 && 'Next of Kin Information'}
-          {activeStep === 5 && 'Verification Information'}
-          {activeStep === 6 && 'Social Handles'}
-          {activeStep === 7 && 'Business Information'}
-          {activeStep === 8 && 'Business Registration Information'}
-          {activeStep === 9 && 'Documents'}
+          {steps[activeStep - 1].label}
         </Text>
         <Box display={['block', 'none']} mt='17px' mb={7}>
           <Divider color='gray.100' />
         </Box>
-        <Box className='lendha__container'>
-          {activeStep === 1 && (
-            <PersonalInfoForm formik={personalInfoFormik} onBack={() => navigate(path.CUSTOMERS)} />
-          )}
-          {/* {activeStep === 2 && (
-            <EmploymentForm
-              formik={employmentFormik}
-              onBack={() => setActiveStep(activeStep - 1)}
-            />
-          )} */}
-          {activeStep === 2 && (
-            <AddressInfoForm
-              formik={addressInfoFormik}
-              onBack={() => setActiveStep(activeStep - 1)}
-            />
-          )}
-          {activeStep === 3 && (
-            <NextOfKinForm formik={nextOfKinFormik} onBack={() => setActiveStep(activeStep - 1)} />
-          )}
-          {activeStep === 4 && (
-            <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(2)} />
-          )}
-          {activeStep === 5 && (
-            <BusinessSocialHandlesForm
-              formik={socialHandlesFormik}
-              onBack={() => setActiveStep(activeStep - 1)}
-            />
-          )}
-          {activeStep === 6 && (
-            <BusinessInfoForm
-              formik={businessInfoFormik}
-              onBack={() => setActiveStep(activeStep - 1)}
-            />
-          )}
-          {activeStep === 7 && (
-            <BusinessRegForm
-              formik={businessRegFormik}
-              onBack={() => setActiveStep(activeStep - 1)}
-            />
-          )}
-          {activeStep === 8 && (
-            <DocumentsForm formik={documentsFormik} onBack={() => setActiveStep(activeStep - 1)} />
-          )}
-          {activeStep === 9 && (
-            <Alert
-              icon={<RiCheckLine color={`${globalStyles.colors.yellow.DEFAULT}`} fontSize='70px' />}
-              description={
-                <Box>
-                  <Text maxW={['240px', '300px']} mx='auto' className='header--success'>
-                    Your account is under review
-                  </Text>
-                </Box>
-              }
-            >
-              <Button
-                w='full'
-                size='md'
-                onClick={() => {
-                  navigate(path.CREDIT_OFFICER_TAKE_LOAN);
-                }}
-              >
-                Take a loan
-              </Button>
-              <Flex justifyContent='center'>
-                <Link
-                  as={ReactRouterLink}
-                  color='darkblue.DEFAULT'
-                  to={path.CUSTOMERS}
-                  textStyle='sm'
-                  fontWeight={700}
-                  mt={5}
-                >
-                  Back to Customers
-                </Link>
-              </Flex>
-            </Alert>
-          )}
-        </Box>
+        <Box className='lendha__container'>{steps[activeStep - 1].component}</Box>
       </Card>
     </>
   );
