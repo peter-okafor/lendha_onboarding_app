@@ -44,5 +44,5 @@ export const miscApi = api.injectEndpoints({
 export const { useReferralChannelsQuery, useLoanInterestsQuery, useLoanSearchQuery } = miscApi;
 
 export const {
-  endpoints: { loanInterests }
+  endpoints: { loanInterests, loanSearch }
 } = miscApi;

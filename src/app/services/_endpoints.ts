@@ -4,7 +4,8 @@ export const ENDPOINTS = {
   signup: 'auth/signup',
   passwordReset: 'password/create',
 
-  users: 'onboarding_officer/users',
+  users: ({ page = 1 }: { page: number }) => `onboarding_officer/users?page=${page}`,
+  // users: 'onboarding_officer/users',
   loans: 'onboarding_officer/loans',
   profile: 'onboarding_officer/profile',
   createUser: 'onboarding_officer/create_user',
@@ -12,11 +13,17 @@ export const ENDPOINTS = {
   loanApply: 'onboarding_officer/loan_application',
   addBank: 'onboarding_officer/onboarding/bank',
   addBusiness: 'onboarding_officer/onboarding/business',
+  addBusinessReg: 'onboarding_officer/onboarding/documents/business_registration',
+  employment: 'onboarding_officer/onboarding/employment',
+  nextOfKin: 'onboarding_officer/onboarding/next_of_kin',
+  socialHandles: 'onboarding_officer/onboarding/social_media_handles',
+
   userDetail: ({ user_id }: { user_id: string }) => `onboarding_officer/user?user_id=${user_id}`,
   loanDetail: ({ loan_id }: { loan_id: string }) => `onboarding_officer/loan?loan_id=${loan_id}`,
 
   uploadProofOfResidence: 'onboarding_officer/onboarding/documents/residence_proof',
   uploadValidId: 'onboarding_officer/onboarding/documents/valid_id',
+  uploadWorkId: 'onboarding_officer/onboarding/documents/work_id',
   uploadPhotograph: 'onboarding_officer/onboarding/documents/passport_photo',
 
   bankList: 'bank/list',

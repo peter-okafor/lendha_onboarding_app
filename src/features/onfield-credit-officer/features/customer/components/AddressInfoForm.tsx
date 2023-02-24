@@ -1,58 +1,25 @@
 import { FormInput, NextCancelButton } from '@/components/common';
-import FormTextArea from '@/components/common/input/form-textarea';
-import { Box, Grid, GridItem, Stack, Text, useMediaQuery } from '@chakra-ui/react';
+import { Address } from '@/types';
+import { Grid, GridItem, Stack, useMediaQuery } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider } from 'formik';
-import { BusinessInfoFormValues } from '../types';
 
 interface Props {
   onBack: () => void;
-  formik: FormikProps<BusinessInfoFormValues>;
+  formik: FormikProps<Address>;
 }
-const BusinessInfoForm = ({ formik, ...props }: Props) => {
-  const { values, errors, touched, handleChange, isSubmitting } = formik;
-
+const AddressInfoForm = ({ formik, ...props }: Props) => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
+  const { values, errors, touched, handleChange, isSubmitting } = formik;
 
   return (
     <FormikProvider value={formik}>
       <Form>
         <Stack spacing={5}>
-          <FormInput
-            name='businessName'
-            label='Business name'
-            errorMessage={errors.businessName}
-            handleChange={handleChange}
-            touchedField={touched.businessName}
-            value={values.businessName}
-            type='text'
-          />
-          <FormInput
-            name='email'
-            label='Email'
-            errorMessage={errors.email}
-            handleChange={handleChange}
-            touchedField={touched.email}
-            value={values.email}
-            type='text'
-          />
-          <FormTextArea
-            id='business-desc'
-            name='businessDesc'
-            label='Tell us more about your business'
-            errorMessage={errors.businessDesc}
-            handleChange={handleChange}
-            touchedField={touched.businessDesc}
-            value={values.businessDesc}
-          />
-        </Stack>
-        <Stack spacing={5} mt={5}>
-          <Box>
-            <Text className='title'>Business Address</Text>
-          </Box>
           <Grid templateColumns='repeat(4, 1fr)' gap={4}>
             <GridItem colSpan={1}>
               <FormInput
                 name='addressNumber'
+                id='address-number'
                 label='Number'
                 errorMessage={errors.addressNumber}
                 touchedField={touched.addressNumber}
@@ -63,6 +30,7 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
             <GridItem colSpan={3}>
               <FormInput
                 name='streetName'
+                id='street-name'
                 label='Street name'
                 errorMessage={errors.streetName}
                 touchedField={touched.streetName}
@@ -73,32 +41,43 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
           </Grid>
           <FormInput
             name='nearestLandmark'
+            id='nearest-landmark'
             label='Nearest Landmark'
             errorMessage={errors.nearestLandmark}
             handleChange={handleChange}
             touchedField={touched.nearestLandmark}
             value={values.nearestLandmark}
           />
-
+          <FormInput
+            name='cityTown'
+            id='city-town'
+            label='City/Town'
+            errorMessage={errors.cityTown}
+            handleChange={handleChange}
+            touchedField={touched.cityTown}
+            value={values.cityTown}
+          />
           <Grid templateColumns='repeat(2, 1fr)' gap={4}>
             <GridItem>
               <FormInput
-                name='state'
-                label='State'
-                errorMessage={errors.state}
-                touchedField={touched.state}
-                value={values.state}
+                name='lga'
+                id='lga'
+                label='L.G.A'
+                errorMessage={errors.lga}
+                touchedField={touched.lga}
+                value={values.lga}
                 handleChange={handleChange}
               />
             </GridItem>
             <GridItem>
               <FormInput
-                name='cityTown'
-                label='City/Town'
-                errorMessage={errors.cityTown}
+                name='state'
+                id='state'
+                label='State'
+                errorMessage={errors.state}
+                touchedField={touched.state}
+                value={values.state}
                 handleChange={handleChange}
-                touchedField={touched.cityTown}
-                value={values.cityTown}
               />
             </GridItem>
           </Grid>
@@ -116,4 +95,4 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
   );
 };
 
-export default BusinessInfoForm;
+export default AddressInfoForm;

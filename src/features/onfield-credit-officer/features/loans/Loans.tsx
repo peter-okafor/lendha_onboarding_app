@@ -1,4 +1,4 @@
-import { useLoanSearchQuery } from '@/app/services/misc';
+import { loanSearch } from '@/app/services/misc';
 import { useLoansQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { TransactionTable, TransactionTabList } from '@/components/common';
@@ -9,6 +9,7 @@ import {
   Box,
   Divider,
   Flex,
+  Skeleton,
   Stack,
   TableContainer,
   TabPanel,
@@ -21,7 +22,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
 
@@ -173,23 +174,67 @@ const LoanTable = (props: LoanTableProps) => {
   );
 };
 
+type LoanData = {
+  id: number;
+  application_id: string;
+  user_id: number;
+  created_at: string;
+  amount: number;
+  status: string;
+};
 const Loans = () => {
   const [value, setValue] = useState('');
-  const { data: response } = useLoansQuery();
+  const { data: response, isLoading } = useLoansQuery();
 
-  const { data: searchedLoan } = useLoanSearchQuery({ search: value });
-  console.log({ searchedLoan });
+  const [trigger] = loanSearch.useLazyQuerySubscription();
 
-  const loansTable: TableData[] = response
-    ? response?.data.map(({ id, application_id, user_id, created_at, amount, status }) => ({
-        id,
-        appId: application_id,
-        name: user_id.toString(),
-        date: created_at,
-        amount,
-        status
-      }))
-    : [];
+  const allLoans = useMemo(() => {
+    if (response) {
+      return response.data.map((loan: LoanData) => ({
+        id: loan.id,
+        appId: loan.application_id,
+        name: loan.user_id.toString(),
+        date: loan.created_at,
+        amount: loan.amount,
+        status: loan.status
+      }));
+    }
+    return [];
+  }, [response]);
+
+  const [loansTable, setLoansTable] = useState(allLoans);
+
+  useEffect(() => {
+    setLoansTable(allLoans);
+  }, [allLoans]);
+
+  useEffect(() => {
+    const fetchedLoan = setTimeout(() => {
+      if (value.length > 2) {
+        trigger(
+          {
+            search: value
+          },
+          true
+        ).then((res: any) => {
+          setLoansTable(
+            res?.data?.data?.map((loan: LoanData) => ({
+              id: loan.id,
+              appId: loan.application_id,
+              name: loan.user_id.toString(),
+              date: loan.created_at,
+              amount: loan.amount,
+              status: loan.status
+            }))
+          );
+        });
+      } else {
+        setLoansTable(allLoans);
+      }
+    }, 400);
+
+    return () => clearTimeout(fetchedLoan);
+  }, [allLoans, trigger, value]);
 
   const activeTable = loansTable.filter((loan) => loan.status === 'active');
   const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
@@ -202,15 +247,17 @@ const Loans = () => {
 
   return (
     <>
-      <Text
-        ml={{ base: 3, lg: 0 }}
-        fontFamily={['Nunito', 'Poppins']}
-        fontWeight={[700, 500]}
-        textStyle={['base', 'xl']}
-        color='black.DEFAULT'
-      >
-        Loans ({loansTable.length})
-      </Text>
+      <Skeleton isLoaded={!isLoading} h='40px' w='100px'>
+        <Text
+          ml={{ base: 3, lg: 0 }}
+          fontFamily={['Nunito', 'Poppins']}
+          fontWeight={[700, 500]}
+          textStyle={['base', 'xl']}
+          color='black.DEFAULT'
+        >
+          Loans ({loansTable.length})
+        </Text>
+      </Skeleton>
 
       <Tabs
         variant='unstyled'
@@ -222,135 +269,139 @@ const Loans = () => {
           }
         }}
       >
-        <TransactionTabList
-          tabs={['All', 'Active', 'Pending', 'Declined', 'Due', 'Closed', 'Default']}
-        />
+        <Skeleton isLoaded={!isLoading}>
+          <TransactionTabList
+            tabs={['All', 'Active', 'Pending', 'Declined', 'Due', 'Closed', 'Default']}
+          />
+        </Skeleton>
 
-        <TabPanels
-          className='lendha__container'
-          sx={{
-            '.chakra-tabs__tab-panel': {
-              pl: { base: 0, md: 7 },
-              pr: { base: 0, md: '18px' },
-              pt: { base: 0, md: 5 },
-              bgColor: 'white',
-              minH: '400px'
-            }
-          }}
-        >
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={loansTable} />
+        <Skeleton isLoaded={!isLoading}>
+          <TabPanels
+            className='lendha__container'
+            sx={{
+              '.chakra-tabs__tab-panel': {
+                pl: { base: 0, md: 7 },
+                pr: { base: 0, md: '18px' },
+                pt: { base: 0, md: 5 },
+                bgColor: 'white',
+                minH: '400px'
+              }
+            }}
+          >
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={loansTable} />
 
-            {loansTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={activeTable} />
+              {loansTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={activeTable} />
 
-            {activeTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={pendingTable} />
+              {activeTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={pendingTable} />
 
-            {pendingTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={declinedTable} />
+              {pendingTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={declinedTable} />
 
-            {declinedTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={dueTable} />
+              {declinedTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={dueTable} />
 
-            {dueTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={closedTable} />
+              {dueTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={closedTable} />
 
-            {closedTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
-            <LoanTable headers={tableHeaders} data={defaultTable} />
+              {closedTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+              <LoanTable headers={tableHeaders} data={defaultTable} />
 
-            {defaultTable.map((loan) => (
-              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
-                <LoanDetail
-                  name={loan.name}
-                  id={loan.id}
-                  appId={loan.appId}
-                  amount={loan.amount}
-                  status={loan.status}
-                />
-              </LoanLink>
-            ))}
-          </TabPanel>
-        </TabPanels>
+              {defaultTable.map((loan) => (
+                <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
+                  <LoanDetail
+                    name={loan.name}
+                    id={loan.id}
+                    appId={loan.appId}
+                    amount={loan.amount}
+                    status={loan.status}
+                  />
+                </LoanLink>
+              ))}
+            </TabPanel>
+          </TabPanels>
+        </Skeleton>
       </Tabs>
     </>
   );

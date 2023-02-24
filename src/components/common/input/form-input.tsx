@@ -1,4 +1,4 @@
-import { FormControl, Input, InputGroup, Text } from '@chakra-ui/react';
+import { Box, FormControl, Input, InputGroup, Text } from '@chakra-ui/react';
 import { LendhaFormInputProps } from './types';
 
 const FormInput = ({
@@ -14,6 +14,7 @@ const FormInput = ({
   name,
   isErrorLabel = false,
   label = '',
+  subLabel = '',
   placeholder = '',
   type = 'text',
   ...props
@@ -27,9 +28,23 @@ const FormInput = ({
         </Text>
       ) : (
         label && (
-          <Text as='label' htmlFor={id} className='lendha__form-text'>
-            {label}
-          </Text>
+          <Box display='inline-block'>
+            <Text as='label' htmlFor={id} className='lendha__form-text'>
+              {label}
+            </Text>
+            {subLabel && (
+              <Box
+                as='span'
+                sx={{
+                  color: 'darkblue.DEFAULT !important'
+                }}
+                className='lendha__form-text'
+              >
+                {' '}
+                {subLabel}
+              </Box>
+            )}
+          </Box>
         )
       )}
       <InputGroup>

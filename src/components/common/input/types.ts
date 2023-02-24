@@ -11,6 +11,7 @@ export interface LendhaFormInputProps extends InputProps {
   name?: string | undefined;
   isErrorLabel?: boolean;
   label?: string;
+  subLabel?: string;
   placeholder?: string;
   type?: HTMLInputTypeAttribute | undefined;
   handleChange?: (e: ChangeEvent<any>) => void;
