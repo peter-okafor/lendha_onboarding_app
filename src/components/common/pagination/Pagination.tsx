@@ -1,4 +1,5 @@
 import { Box, Flex } from '@chakra-ui/react';
+import { ReactNode } from 'react';
 
 const Pagination = () => {
   // TODO: hook logic to manage pagination
@@ -43,3 +44,13 @@ const Pagination = () => {
 };
 
 export default Pagination;
+
+export const PaginationWrapper = ({ children }: { children: ReactNode }) => {
+  return (
+    <Flex justifyContent='flex-end' mt='30px'>
+      <Box mt={0} pos='relative' bottom={0} mb={0}>
+        {children}
+      </Box>
+    </Flex>
+  );
+};
