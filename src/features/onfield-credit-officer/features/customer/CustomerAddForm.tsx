@@ -1,10 +1,9 @@
-import * as Yup from 'yup';
+import { isObjectPropsEmpty } from '@/utils/helpers/object.helpers';
 import {
   useAddBankMutation,
   useAddBusinessMutation,
   useCreateAddressMutation,
   useCreateUserMutation,
-  useEmploymentMutation,
   useNextOfKinMutation,
   useSocialHandlesMutation
 } from '@/app/services/onboardingOfficer';
@@ -21,11 +20,17 @@ import { useState } from 'react';
 import {
   RiArrowLeftLine,
   RiBriefcaseFill,
+  RiCellphoneFill,
   RiCheckLine,
   RiEmotionNormalFill,
+  RiFilePaper2Fill,
+  RiGroupFill,
+  RiHome2Fill,
+  RiInformationFill,
   RiUserFill
 } from 'react-icons/ri';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
 import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
 import AddressInfoForm from './components/AddressInfoForm';
@@ -34,7 +39,6 @@ import BusinessSocialHandlesForm, {
   SocialHandlesFormValues
 } from './components/BusinessSocialHandlesForm';
 import DocumentsForm, { DocumentsFormValues } from './components/DocumentsForm';
-import EmploymentForm, { EmploymentFormValues } from './components/EmploymentForm';
 import NextOfKinForm, { NextOfKinFormValues } from './components/NextOfKinForm';
 import { Stepper } from './components/Stepper';
 import {
@@ -67,7 +71,6 @@ const CustomerAddForm = () => {
   const [createAddress] = useCreateAddressMutation();
   const [createBank] = useAddBankMutation();
   const [createBusiness] = useAddBusinessMutation();
-  const [employment] = useEmploymentMutation();
   const [nextOfKin] = useNextOfKinMutation();
   const [socialHandles] = useSocialHandlesMutation();
 
@@ -103,7 +106,7 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-        setActiveStep(2);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -120,65 +123,6 @@ const CustomerAddForm = () => {
       }
     },
     validationSchema: CustomerSchema.Personal
-  });
-
-  const employmentFormik = useFormik<EmploymentFormValues>({
-    initialValues: {
-      address: '',
-      email: '',
-      name: '',
-      phone: '',
-      resumption_date: '',
-      site: ''
-    },
-    onSubmit: async (formValues) => {
-      const { address, email, name, phone, resumption_date, site } = sanitize(formValues);
-
-      try {
-        const response = await employment({
-          address,
-          email,
-          name,
-          phone,
-          resumption_date,
-          site,
-          user_id: userId
-        }).unwrap();
-
-        toast({
-          title: 'Success',
-          description: response.message || 'Account has been successfully registered',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-        setActiveStep(3);
-      } catch (err: any) {
-        toast({
-          title: err?.data?.message || 'An error occurred',
-          description: err?.data?.errors ? (
-            <ErrorMessages errors={err?.data?.errors} />
-          ) : (
-            err?.data?.message
-          ),
-          status: 'error',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-      }
-    },
-    validationSchema: Yup.object<Record<keyof EmploymentFormValues, Yup.AnySchema>>({
-      name: Yup.string().required('Name is required'),
-      email: Yup.string().email('Invalid email').required('Email is required'),
-      site: Yup.string().required('Site is required'),
-      address: Yup.string().required('Address is required'),
-      phone: Yup.string()
-        .matches(/^\+?\d{10,14}$/, 'Invalid phone number')
-        .required('Phone is required'),
-      resumption_date: Yup.string().required('Resumption date is required')
-    })
   });
 
   const addressInfoFormik = useFormik({
@@ -212,7 +156,7 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-        setActiveStep(4);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -258,7 +202,7 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-        setActiveStep(5);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -309,7 +253,7 @@ const CustomerAddForm = () => {
           position: 'top-right',
           isClosable: true
         });
-        setActiveStep(7);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -362,7 +306,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(6);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -417,7 +361,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(8);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -442,6 +386,9 @@ const CustomerAddForm = () => {
       cacDocument: ''
     },
     onSubmit: async (values) => {
+      if (isObjectPropsEmpty(values)) {
+        return setActiveStep(activeStep + 1);
+      }
       try {
         const formData = new FormData();
         formData.append('user_id', userId);
@@ -473,7 +420,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(9);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -578,7 +525,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
 
-        setActiveStep(10);
+        setActiveStep(activeStep + 1);
       } catch (err: any) {
         console.log({ err });
         toast({
@@ -604,7 +551,7 @@ const CustomerAddForm = () => {
 
   return (
     <>
-      {activeStep !== 10 && (
+      {activeStep !== 9 && (
         <Flex
           alignItems='center'
           gap={3}
@@ -638,14 +585,14 @@ const CustomerAddForm = () => {
           activeStep={activeStep}
           steps={[
             { icon: RiUserFill, text: 'Personal Info' },
-            { icon: RiUserFill, text: 'Employment' },
-            { icon: RiUserFill, text: 'Address' },
-            { icon: RiUserFill, text: 'Next of Kin' },
+            // { icon: RiUserFill, text: 'Employment' },
+            { icon: RiHome2Fill, text: 'Address' },
+            { icon: RiGroupFill, text: 'Next of Kin' },
             { icon: RiEmotionNormalFill, text: 'Verification' },
-            { icon: RiBriefcaseFill, text: 'Social Handles' },
+            { icon: RiCellphoneFill, text: 'Social Handles' },
             { icon: RiBriefcaseFill, text: 'Business Info' },
-            { icon: RiBriefcaseFill, text: 'Business Reg.' },
-            { icon: RiBriefcaseFill, text: 'Documents' }
+            { icon: RiInformationFill, text: 'Business Reg.' },
+            { icon: RiFilePaper2Fill, text: 'Documents' }
           ]}
         />
       </Flex>
@@ -676,7 +623,7 @@ const CustomerAddForm = () => {
           px={[3, 0]}
         >
           {activeStep === 1 && 'Personal Information'}
-          {activeStep === 2 && 'Employment Information'}
+          {/* {activeStep === 2 && 'Employment Information'} */}
           {activeStep === 3 && 'Address Information'}
           {activeStep === 4 && 'Next of Kin Information'}
           {activeStep === 5 && 'Verification Information'}
@@ -692,46 +639,46 @@ const CustomerAddForm = () => {
           {activeStep === 1 && (
             <PersonalInfoForm formik={personalInfoFormik} onBack={() => navigate(path.CUSTOMERS)} />
           )}
-          {activeStep === 2 && (
+          {/* {activeStep === 2 && (
             <EmploymentForm
               formik={employmentFormik}
               onBack={() => setActiveStep(activeStep - 1)}
             />
-          )}
-          {activeStep === 3 && (
+          )} */}
+          {activeStep === 2 && (
             <AddressInfoForm
               formik={addressInfoFormik}
               onBack={() => setActiveStep(activeStep - 1)}
             />
           )}
-          {activeStep === 4 && (
+          {activeStep === 3 && (
             <NextOfKinForm formik={nextOfKinFormik} onBack={() => setActiveStep(activeStep - 1)} />
           )}
-          {activeStep === 5 && (
+          {activeStep === 4 && (
             <VerificationInfoForm formik={verificationInfoFormik} onBack={() => setActiveStep(2)} />
           )}
-          {activeStep === 6 && (
+          {activeStep === 5 && (
             <BusinessSocialHandlesForm
               formik={socialHandlesFormik}
               onBack={() => setActiveStep(activeStep - 1)}
             />
           )}
-          {activeStep === 7 && (
+          {activeStep === 6 && (
             <BusinessInfoForm
               formik={businessInfoFormik}
               onBack={() => setActiveStep(activeStep - 1)}
             />
           )}
-          {activeStep === 8 && (
+          {activeStep === 7 && (
             <BusinessRegForm
               formik={businessRegFormik}
               onBack={() => setActiveStep(activeStep - 1)}
             />
           )}
-          {activeStep === 9 && (
+          {activeStep === 8 && (
             <DocumentsForm formik={documentsFormik} onBack={() => setActiveStep(activeStep - 1)} />
           )}
-          {activeStep === 10 && (
+          {activeStep === 9 && (
             <Alert
               icon={<RiCheckLine color={`${globalStyles.colors.yellow.DEFAULT}`} fontSize='70px' />}
               description={

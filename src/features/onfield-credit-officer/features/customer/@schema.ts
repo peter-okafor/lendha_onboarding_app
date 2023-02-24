@@ -78,10 +78,8 @@ const BusinessInfoFormSchema = Yup.object<Record<keyof BusinessInfoFormValues, Y
 });
 
 const BusinessRegFormSchema = Yup.object<Record<keyof BusRegFormValues, Yup.AnySchema>>({
-  busRegNumber: Yup.string()
-    .matches(REG_NUMBER_REGEX, 'Please enter a valid registration number')
-    .required('Registration number is required'),
-  cacDocument: Yup.mixed().required('CAC document is required')
+  busRegNumber: Yup.string().matches(REG_NUMBER_REGEX, 'Please enter a valid registration number'),
+  cacDocument: Yup.mixed()
 });
 
 export const CustomerSchema = {
