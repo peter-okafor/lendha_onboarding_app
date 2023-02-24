@@ -19,8 +19,7 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
-  useMediaQuery
+  Tr
 } from '@chakra-ui/react';
 import { ReactNode, useEffect, useState } from 'react';
 import { RiAddFill } from 'react-icons/ri';
@@ -210,7 +209,6 @@ const Customers = () => {
   const activeTable = customersTable.filter((customer) => customer.status === 'active');
   const pendingTable = customersTable.filter((customer) => customer.status === 'pending');
   const blockedTable = customersTable.filter((customer) => customer.status === 'blocked');
-
 
   const tableHeaders = ['Customer name', '#ID', 'Date', 'Phone number', 'Account Status'];
 
