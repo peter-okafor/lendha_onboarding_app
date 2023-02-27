@@ -1,6 +1,6 @@
 import { globalStyles } from '@/theme/styles';
 import { Box, Input, InputGroup, InputProps, InputRightElement, Text } from '@chakra-ui/react';
-import { addDays, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { RiCalendar2Fill } from 'react-icons/ri';
