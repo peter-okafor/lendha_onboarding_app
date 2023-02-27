@@ -263,7 +263,7 @@ const Customers = () => {
             }}
           >
             <TabPanel>
-              <SearchInput />
+              <SearchInput isDisabled={true} />
               <CustomerTable headers={tableHeaders} data={customersTable} />
 
               {customersTable?.map((customer) => (
@@ -299,7 +299,7 @@ const Customers = () => {
               </PaginationWrapper>
             </TabPanel>
             <TabPanel>
-              <SearchInput />
+              <SearchInput isDisabled={true} />
               <CustomerTable headers={tableHeaders} data={activeTable} />
 
               {activeTable.map((customer) => (
@@ -314,7 +314,7 @@ const Customers = () => {
               ))}
             </TabPanel>
             <TabPanel>
-              <SearchInput />
+              <SearchInput isDisabled={true} />
               <CustomerTable headers={tableHeaders} data={pendingTable} />
 
               {pendingTable.map((customer) => (
@@ -329,7 +329,7 @@ const Customers = () => {
               ))}
             </TabPanel>
             <TabPanel>
-              <SearchInput />
+              <SearchInput isDisabled={true} />
               <CustomerTable headers={tableHeaders} data={blockedTable} />
 
               {blockedTable.map((customer) => (

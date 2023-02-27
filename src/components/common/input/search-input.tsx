@@ -6,8 +6,9 @@ import { RiSearchLine } from 'react-icons/ri';
 interface Props extends InputGroupProps {
   value?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  isDisabled?: boolean;
 }
-const SearchInput = (props: Props) => {
+const SearchInput = ({ isDisabled = false, ...props }: Props) => {
   const { colors } = globalStyles;
 
   return (
@@ -27,6 +28,7 @@ const SearchInput = (props: Props) => {
           placeholder='Search name, ID etc'
           w='352px'
           fontSize='base'
+          disabled={isDisabled}
         />
       </InputGroup>
     </>
