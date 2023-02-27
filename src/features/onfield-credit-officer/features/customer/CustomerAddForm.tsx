@@ -223,8 +223,9 @@ const CustomerAddForm = () => {
       relationship: Yup.string().required('Relatioship is required'),
       address: Yup.string().required('Address is required'),
       phone: Yup.string()
-        .matches(/^\+?\d{10,14}$/, 'Invalid phone number')
-        .required('Phone is required')
+        .matches(/^[0-9]+$/, 'Enter a valid phone number')
+        .length(11, 'Phone number must be 11 characters')
+        .required('Phone number is required')
     })
   });
 

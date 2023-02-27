@@ -22,7 +22,7 @@ const PersonalInfoFormSchema = Yup.object<Record<keyof PersonalInfoFormValues, Y
   email: Yup.string().email('Enter a valid email').required('Email is required'),
   phone: Yup.string()
     .matches(/^[0-9]+$/, 'Enter a valid phone number')
-    .min(10, 'Phone number must be at least 10 characters')
+    .length(11, 'Phone number must be 11 characters')
     .required('Phone number is required'),
   dateOfBirth: Yup.string().required('Date of Birth is required')
 });
