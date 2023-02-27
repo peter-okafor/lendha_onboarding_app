@@ -51,7 +51,7 @@ const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(1);
+  const [activeStep, setActiveStep] = useState<number>(8);
 
   const navigate = useNavigate();
 
@@ -270,9 +270,15 @@ const CustomerAddForm = () => {
       }
     },
     validationSchema: Yup.object<Record<keyof SocialHandlesFormValues, Yup.AnySchema>>({
-      facebook: Yup.string().required('Facebook handle is required'),
-      instagram: Yup.string().required('Instagram handle is required'),
-      linkedin: Yup.string().required('linkedin handle is required')
+      facebook: Yup.string()
+        .matches(/^(https?:\/\/)?(www\.)?facebook.com\/?$/, 'Please enter a valid Facebook URL')
+        .required('Facebook handle is required'),
+      instagram: Yup.string()
+        .matches(/^(https?:\/\/)?(www\.)?instagram.com\/?$/, 'Please enter a valid Instagram URL')
+        .required('Instagram handle is required'),
+      linkedin: Yup.string()
+        .matches(/^(https?:\/\/)?(www\.)?linkedin.com\/?$/, 'Please enter a valid LinkedIn URL')
+        .required('LinkedIn handle is required')
     })
   });
 

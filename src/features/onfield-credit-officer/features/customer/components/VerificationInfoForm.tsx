@@ -95,6 +95,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.accountNumber}
             touchedField={touched.accountNumber}
+            maxLength={10}
           />
           <FormInput
             disabled
