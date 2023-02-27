@@ -76,7 +76,7 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.bvn}
             touchedField={touched.bvn}
-            maxLength={10}
+            maxLength={11}
           />
           <FormSelect
             label='Bank name'

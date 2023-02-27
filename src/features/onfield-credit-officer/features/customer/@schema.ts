@@ -52,8 +52,8 @@ const VerificationInfoFormSchema = Yup.object<
     .matches(/^\d+$/, 'Please enter a valid NIN')
     .required('NIN is required'),
   bvn: Yup.string()
-    .length(10, 'BVN must be 10 characters')
-    .matches(/^\d+$/, 'Please enter a valid NIN')
+    .length(11, 'BVN must be 11 characters')
+    .matches(/^\d+$/, 'Please enter a valid BVN')
     .required('BVN is required'),
   bankName: Yup.string().required('Bank name is required'),
   accountNumber: Yup.string().required('Account number is required'),
