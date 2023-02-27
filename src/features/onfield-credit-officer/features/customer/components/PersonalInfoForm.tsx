@@ -7,6 +7,7 @@ import {
 } from '@/components/common';
 import { dateInSlashFormat } from '@/utils/helpers';
 import { Stack, useMediaQuery } from '@chakra-ui/react';
+import { subDays } from 'date-fns';
 import { Form, FormikProps, FormikProvider } from 'formik';
 import { useState } from 'react';
 import { PersonalInfoFormValues } from '../types';
@@ -18,7 +19,7 @@ interface Props {
 const PersonalInfoForm = ({ formik, ...props }: Props) => {
   const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [dateOfBirth, setDateOfBirth] = useState(subDays(new Date(), 6570));
   const handleOnDateOfBirth = (date: Date) => {
     setDateOfBirth(date);
     setFieldValue('dateOfBirth', dateInSlashFormat(date));

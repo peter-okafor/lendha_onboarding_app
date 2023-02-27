@@ -1,5 +1,6 @@
 import { globalStyles } from '@/theme/styles';
 import { Box, Input, InputGroup, InputProps, InputRightElement, Text } from '@chakra-ui/react';
+import { addDays, subDays } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { RiCalendar2Fill } from 'react-icons/ri';
@@ -14,7 +15,7 @@ interface Props {
 }
 const FormDatePicker = ({
   disabled = false,
-  selected,
+  selected = subDays(new Date(), 6570),
   onChange,
   inputProps,
   errorMessage,
@@ -49,6 +50,7 @@ const FormDatePicker = ({
             </InputRightElement>
           </InputGroup>
         }
+        maxDate={subDays(new Date(), 6570)}
       />
       {touched && errorMessage ? (
         <Text as='small' color='error' textStyle='xs' mt={0}>
