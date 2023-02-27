@@ -56,7 +56,9 @@ const VerificationInfoFormSchema = Yup.object<
     .matches(/^\d+$/, 'Please enter a valid BVN')
     .required('BVN is required'),
   bankName: Yup.string().required('Bank name is required'),
-  accountNumber: Yup.string().required('Account number is required'),
+  accountNumber: Yup.string()
+    .length(10, 'Account number must be 10 characters')
+    .required('Account number is required'),
   accountName: Yup.string().required('Account name is required')
 });
 
