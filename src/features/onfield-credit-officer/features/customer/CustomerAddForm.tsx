@@ -19,15 +19,15 @@ import Cookies from 'js-cookie';
 import { useState } from 'react';
 import {
   RiArrowLeftLine,
-  RiBriefcaseFill,
-  RiCellphoneFill,
-  RiCheckLine,
-  RiEmotionNormalFill,
-  RiFilePaper2Fill,
-  RiGroupFill,
-  RiHome2Fill,
-  RiInformationFill,
-  RiUserFill
+  // RiBriefcaseFill,
+  // RiCellphoneFill,
+  RiCheckLine
+  // RiEmotionNormalFill,
+  // RiFilePaper2Fill,
+  // RiGroupFill,
+  // RiHome2Fill,
+  // RiInformationFill,
+  // RiUserFill
 } from 'react-icons/ri';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -661,15 +661,15 @@ const CustomerAddForm = () => {
         <Stepper
           activeStep={activeStep}
           steps={[
-            { icon: RiUserFill, text: 'Personal Info' },
+            { icon: 1, text: 'Personal Info' },
             // { icon: RiUserFill, text: 'Employment' },
-            { icon: RiHome2Fill, text: 'Address' },
-            { icon: RiBriefcaseFill, text: 'Business Info' },
-            { icon: RiInformationFill, text: 'Business Reg.' },
-            { icon: RiEmotionNormalFill, text: 'Verification' },
-            { icon: RiFilePaper2Fill, text: 'Documents' },
-            { icon: RiGroupFill, text: 'Guarantor' },
-            { icon: RiCellphoneFill, text: 'Social Media Handles' }
+            { icon: 2, text: 'Address' },
+            { icon: 3, text: 'Business Info' },
+            { icon: 4, text: 'Business Reg.' },
+            { icon: 5, text: 'Verification' },
+            { icon: 6, text: 'Documents' },
+            { icon: 7, text: 'Guarantor' },
+            { icon: 8, text: 'Social Media Handles' }
           ]}
         />
       </Flex>

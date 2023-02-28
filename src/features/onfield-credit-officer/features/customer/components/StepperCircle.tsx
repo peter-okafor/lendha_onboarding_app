@@ -3,7 +3,7 @@ import { IconType } from 'react-icons';
 import { RiCheckLine } from 'react-icons/ri';
 
 interface CircleProps extends BoxProps {
-  icon: IconType;
+  icon: number | IconType;
   props?: BoxProps;
   isCompleted: boolean;
   text: string;
@@ -22,7 +22,14 @@ export const StepperCircle = ({ bgColor, color, icon, isCompleted, ...props }: C
         color={color}
         {...props}
       >
-        <Icon as={isCompleted ? RiCheckLine : icon} />
+        {/* <Icon as={isCompleted ? RiCheckLine : icon} /> */}
+        {isCompleted ? (
+          <Icon as={RiCheckLine} />
+        ) : typeof icon === 'number' ? (
+          icon
+        ) : (
+          <Icon as={icon} />
+        )}
       </Box>
       <Box pos='relative'>
         <Text fontWeight={500} textStyle='xs' pos='absolute' whiteSpace='nowrap'>

@@ -7,7 +7,7 @@ import { StepperCircle } from './StepperCircle';
 interface StepperProps {
   activeStep: number;
   steps: {
-    icon: IconType;
+    icon: IconType | number;
     text: string;
   }[];
 }
