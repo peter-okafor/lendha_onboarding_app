@@ -235,7 +235,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
                     value: ''
                   },
                   {
-                    label: '1 months',
+                    label: '1 month',
                     value: '1'
                   },
                   {

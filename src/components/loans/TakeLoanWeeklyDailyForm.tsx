@@ -41,7 +41,7 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
     initialValues: {
       paymentType: 1,
       amount: 0,
-      loanPeriod: 1,
+      loanPeriod: 31,
       interestRate: 5
     },
     onSubmit: async (formValues) => {
