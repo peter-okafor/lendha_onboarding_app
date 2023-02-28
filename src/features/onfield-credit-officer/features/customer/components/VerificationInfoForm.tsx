@@ -15,12 +15,21 @@ const VerificationInfoForm = ({ formik, ...props }: Props) => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
 
   const { data } = useBankListQuery();
-  // const banks = data?.data.list
-  //   .map(({ code, name }) => ({ value: code, label: name }))
-  //   .sort((a, b) => (a.label > b.label ? 1 : b.label > a.label ? -1 : 0));
+
   const banks = data?.data.list
     .map(({ code, name }) => ({ value: code, label: name }))
-    .sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
+    .sort((a, b) => {
+      const aLabel = a.label.toLowerCase();
+      const bLabel = b.label.toLowerCase();
+
+      if (aLabel.match(/^\d/) && !bLabel.match(/^\d/)) {
+        return -1; // a starts with number, b doesn't, so a comes first
+      } else if (!aLabel.match(/^\d/) && bLabel.match(/^\d/)) {
+        return 1; // b starts with number, a doesn't, so b comes first
+      } else {
+        return aLabel > bLabel ? 1 : -1; // both start with number or both don't, sort normally
+      }
+    });
 
   const fallbackBanks = [
     {
