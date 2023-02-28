@@ -47,11 +47,13 @@ import {
   VerificationInfoFormValues
 } from './types';
 
+const socialHandleMatcher = /^(https?):\/\/[^\s/$.?#].[^\s]*$/gm;
+
 const CustomerAddForm = () => {
   const [userId, setUserId] = useState('');
   const toast = useToast();
 
-  const [activeStep, setActiveStep] = useState<number>(1);
+  const [activeStep, setActiveStep] = useState<number>(8);
 
   const navigate = useNavigate();
 
@@ -272,13 +274,13 @@ const CustomerAddForm = () => {
     },
     validationSchema: Yup.object<Record<keyof SocialHandlesFormValues, Yup.AnySchema>>({
       facebook: Yup.string()
-        .matches(/^(https?:\/\/)?(www\.)?facebook.com\/?$/, 'Please enter a valid Facebook URL')
+        .matches(socialHandleMatcher, 'Please enter a valid URL')
         .required('Facebook handle is required'),
       instagram: Yup.string()
-        .matches(/^(https?:\/\/)?(www\.)?instagram.com\/?$/, 'Please enter a valid Instagram URL')
+        .matches(socialHandleMatcher, 'Please enter a valid Instagram URL')
         .required('Instagram handle is required'),
       linkedin: Yup.string()
-        .matches(/^(https?:\/\/)?(www\.)?linkedin.com\/?$/, 'Please enter a valid LinkedIn URL')
+        .matches(socialHandleMatcher, 'Please enter a valid LinkedIn URL')
         .required('LinkedIn handle is required')
     })
   });
