@@ -19,7 +19,7 @@ interface Props {
 const PersonalInfoForm = ({ formik, ...props }: Props) => {
   const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
-  const [dateOfBirth, setDateOfBirth] = useState(subDays(new Date(), 6570));
+  const [dateOfBirth, setDateOfBirth] = useState(subDays(new Date(), 6935));
   const handleOnDateOfBirth = (date: Date) => {
     setDateOfBirth(date);
     setFieldValue('dateOfBirth', dateInSlashFormat(date));
