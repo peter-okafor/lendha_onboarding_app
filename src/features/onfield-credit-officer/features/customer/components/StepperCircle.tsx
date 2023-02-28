@@ -31,8 +31,8 @@ export const StepperCircle = ({ bgColor, color, icon, isCompleted, ...props }: C
           <Icon as={icon} />
         )}
       </Box>
-      <Box pos='relative'>
-        <Text fontWeight={500} textStyle='xs' pos='absolute' whiteSpace='nowrap'>
+      <Box pos='relative' >
+        <Text fontWeight={500} textStyle='xs' pos='absolute' whiteSpace='nowrap' ml='-15px'>
           {props.text}
         </Text>
       </Box>
