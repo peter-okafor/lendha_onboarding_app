@@ -3,7 +3,7 @@ import { Alert, Card } from '@/components/common';
 import { LoanCalculator } from '@/components/loans';
 import {
   TakeLoanDetails,
-  TakeLoanGuarantorForm,
+  // TakeLoanGuarantorForm,
   TakeLoanLinkBankStatement
 } from '@/components/loans';
 import { path } from '@/routes/path';
@@ -128,13 +128,13 @@ const LoanApply = () => {
             {step === 'bank' && (
               <TakeLoanLinkBankStatement
                 onBack={() => setStep('form')}
-                onSubmit={() => setStep('guarantor')}
+                onSubmit={() => setStep('confirm')}
                 showCancelBtn={!isLargerThan810 ? true : false}
                 showSocialHandles={false}
               />
             )}
 
-            {step === 'guarantor' && (
+            {/* {step === 'guarantor' && (
               <TakeLoanGuarantorForm
                 onBack={() => setStep('bank')}
                 onSubmit={() => setStep('confirm')}
@@ -147,7 +147,7 @@ const LoanApply = () => {
                 }}
                 showCancelBtn={!isLargerThan810 ? true : false}
               />
-            )}
+            )} */}
 
             {step === 'confirm' && (
               <TakeLoanDetails
