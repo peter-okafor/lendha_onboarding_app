@@ -52,7 +52,7 @@ interface TakeLoanValues {
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
-  const userId = useAppSelector((state) => state.customer.userId);
+  const userId = useAppSelector((state) => state.customer.userId) || localStorage.getItem('userId');
   const toast = useToast();
 
   const { data: interests, isLoading } = useLoanInterestsQuery();

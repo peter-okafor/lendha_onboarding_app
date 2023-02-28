@@ -30,7 +30,7 @@ interface TakeLoanValues {
 }
 
 const TakeLoanWeeklyDailyForm = (props: Props) => {
-  const userId = useAppSelector((state) => state.customer.userId);
+  const userId = useAppSelector((state) => state.customer.userId) || localStorage.getItem('userId');
   const toast = useToast();
 
   const floatInterests = useAppSelector((state) => state.loan.loanInterests.slice(3));

@@ -16,7 +16,7 @@ import { isObjectPropsEmpty } from '@/utils/helpers/object.helpers';
 import { Box, Button, Divider, Flex, Icon, Link, Text, useToast } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import Cookies from 'js-cookie';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   RiArrowLeftLine,
   // RiBriefcaseFill,
@@ -50,10 +50,15 @@ import {
 const socialHandleMatcher = /^(https?):\/\/[^\s/$.?#].[^\s]*$/gm;
 
 const CustomerAddForm = () => {
+  const userIdFromLS = localStorage.getItem('userId');
   const [userId, setUserId] = useState('');
+  useEffect(() => {
+    if (userIdFromLS) setUserId(userIdFromLS);
+  }, [userIdFromLS]);
   const toast = useToast();
 
   const [activeStep, setActiveStep] = useState<number>(1);
+  const [visitedStep, setVisitedStep] = useState<number>(0); // using this to track forms that've been submitted, TODO: probably use HOC to handle this
 
   const navigate = useNavigate();
 
@@ -86,6 +91,7 @@ const CustomerAddForm = () => {
       dateOfBirth: ''
     },
     onSubmit: async (formValues) => {
+      if (visitedStep >= 1) return setActiveStep(activeStep + 1);
       const values = sanitize(formValues);
 
       try {
@@ -109,6 +115,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
         setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       } catch (err: any) {
         toast({
           title: 'An error occurred',
@@ -137,6 +144,7 @@ const CustomerAddForm = () => {
       state: ''
     },
     onSubmit: async (formValues) => {
+      if (visitedStep > 1) return setActiveStep(activeStep + 1);
       const values = sanitize(formValues);
 
       try {
@@ -159,6 +167,7 @@ const CustomerAddForm = () => {
           isClosable: true
         });
         setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -177,163 +186,6 @@ const CustomerAddForm = () => {
     validationSchema: CustomerSchema.Address
   });
 
-  const nextOfKinFormik = useFormik({
-    initialValues: {
-      name: '',
-      phone: '',
-      address: '',
-      relationship: ''
-    },
-    onSubmit: async (formValues) => {
-      const { name, phone, relationship, address } = sanitize(formValues);
-
-      try {
-        const response = await nextOfKin({
-          address,
-          name,
-          phone,
-          relationship,
-          user_id: userId
-        }).unwrap();
-
-        toast({
-          title: 'Success',
-          description: response.message || 'Account has been successfully registered',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-        setActiveStep(activeStep + 1);
-      } catch (err: any) {
-        toast({
-          title: err?.data?.message || 'An error occurred',
-          description: err?.data?.errors ? (
-            <ErrorMessages errors={err?.data?.errors} />
-          ) : (
-            err?.data?.message
-          ),
-          status: 'error',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-      }
-    },
-    validationSchema: Yup.object<Record<keyof NextOfKinFormValues, Yup.AnySchema>>({
-      name: Yup.string().required('Name is required'),
-      relationship: Yup.string().required('Relatioship is required'),
-      address: Yup.string().required('Address is required'),
-      phone: Yup.string()
-        .matches(/^[0-9]+$/, 'Enter a valid phone number')
-        .length(11, 'Phone number must be 11 characters')
-        .required('Phone number is required')
-    })
-  });
-
-  const socialHandlesFormik = useFormik({
-    initialValues: {
-      facebook: '',
-      instagram: '',
-      linkedin: ''
-    },
-    onSubmit: async (formValues) => {
-      const { facebook, instagram, linkedin } = sanitize(formValues);
-
-      try {
-        const response = await socialHandles({
-          facebook,
-          instagram,
-          linkedin,
-          user_id: userId
-        }).unwrap();
-
-        toast({
-          title: 'Success',
-          description: response.message || 'Social media handles validated',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-        setActiveStep(activeStep + 1);
-      } catch (err: any) {
-        toast({
-          title: err?.data?.message || 'An error occurred',
-          description: err?.data?.errors ? (
-            <ErrorMessages errors={err?.data?.errors} />
-          ) : (
-            err?.data?.message
-          ),
-          status: 'error',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-      }
-    },
-    validationSchema: Yup.object<Record<keyof SocialHandlesFormValues, Yup.AnySchema>>({
-      facebook: Yup.string()
-        .matches(socialHandleMatcher, 'Please enter a valid URL')
-        .required('Facebook handle is required'),
-      instagram: Yup.string()
-        .matches(socialHandleMatcher, 'Please enter a valid Instagram URL')
-        .required('Instagram handle is required'),
-      linkedin: Yup.string()
-        .matches(socialHandleMatcher, 'Please enter a valid LinkedIn URL')
-        .required('LinkedIn handle is required')
-    })
-  });
-
-  const verificationInfoFormik = useFormik<VerificationInfoFormValues>({
-    initialValues: {
-      nin: '',
-      bvn: '',
-      bankName: '',
-      accountNumber: '',
-      accountName: ''
-    },
-    onSubmit: async (formValues) => {
-      const values = sanitize(formValues);
-
-      try {
-        const bankResponse = await createBank({
-          account_number: values.accountNumber,
-          bank: 'Zenith Bank',
-          bank_code: values.bankName,
-          bvn: values.bvn,
-          nin: values.nin,
-          user_id: userId
-        }).unwrap();
-
-        toast({
-          title: 'Success',
-          description: bankResponse.message || 'Bank has been successfully added',
-          status: 'success',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-
-        setActiveStep(activeStep + 1);
-      } catch (err: any) {
-        toast({
-          title: err?.data?.message || 'An error occurred',
-          description: err?.data?.errors ? (
-            <ErrorMessages errors={err?.data?.errors} />
-          ) : (
-            err?.data?.message
-          ),
-          status: 'error',
-          duration: 4000,
-          position: 'top-right',
-          isClosable: true
-        });
-      }
-    },
-    validationSchema: CustomerSchema.Verification
-  });
-
   const businessInfoFormik = useFormik<BusinessInfoFormValues>({
     initialValues: {
       addressNumber: '',
@@ -346,6 +198,7 @@ const CustomerAddForm = () => {
       streetName: ''
     },
     onSubmit: async (formValues) => {
+      if (visitedStep > 2) return setActiveStep(activeStep + 1);
       const values = sanitize(formValues);
 
       try {
@@ -371,6 +224,7 @@ const CustomerAddForm = () => {
         });
 
         setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -395,8 +249,11 @@ const CustomerAddForm = () => {
       cacDocument: ''
     },
     onSubmit: async (values) => {
+      if (visitedStep > 3) return setActiveStep(activeStep + 1);
+
       if (isObjectPropsEmpty(values)) {
         return setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       }
       try {
         const formData = new FormData();
@@ -430,6 +287,7 @@ const CustomerAddForm = () => {
         });
 
         setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       } catch (err: any) {
         toast({
           title: err?.data?.message || 'An error occurred',
@@ -448,6 +306,57 @@ const CustomerAddForm = () => {
     validationSchema: CustomerSchema.BusinessReg
   });
 
+  const verificationInfoFormik = useFormik<VerificationInfoFormValues>({
+    initialValues: {
+      nin: '',
+      bvn: '',
+      bankName: '',
+      accountNumber: '',
+      accountName: ''
+    },
+    onSubmit: async (formValues) => {
+      if (visitedStep > 4) return setActiveStep(activeStep + 1);
+      const values = sanitize(formValues);
+
+      try {
+        const bankResponse = await createBank({
+          account_number: values.accountNumber,
+          bank: 'Zenith Bank',
+          bank_code: values.bankName,
+          bvn: values.bvn,
+          nin: values.nin,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: bankResponse.message || 'Bank has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: CustomerSchema.Verification
+  });
+
   const documentsFormik = useFormik({
     initialValues: {
       passport_photo: '',
@@ -455,6 +364,7 @@ const CustomerAddForm = () => {
       valid_id: ''
     },
     onSubmit: async (values) => {
+      if (visitedStep > 5) return setActiveStep(activeStep + 1);
       const { passport_photo, valid_id } = values;
 
       try {
@@ -510,6 +420,7 @@ const CustomerAddForm = () => {
         });
 
         setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
       } catch (err: any) {
         console.log({ err });
         toast({
@@ -529,6 +440,118 @@ const CustomerAddForm = () => {
     validationSchema: Yup.object<Record<keyof DocumentsFormValues, Yup.AnySchema>>({
       passport_photo: Yup.mixed().required('Passport photo is required'),
       valid_id: Yup.mixed().required('Valid ID is required')
+    })
+  });
+
+  const nextOfKinFormik = useFormik({
+    initialValues: {
+      name: '',
+      phone: '',
+      address: '',
+      relationship: ''
+    },
+    onSubmit: async (formValues) => {
+      if (visitedStep > 6) return setActiveStep(activeStep + 1);
+      const { name, phone, relationship, address } = sanitize(formValues);
+
+      try {
+        const response = await nextOfKin({
+          address,
+          name,
+          phone,
+          relationship,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: response.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof NextOfKinFormValues, Yup.AnySchema>>({
+      name: Yup.string().required('Name is required'),
+      relationship: Yup.string().required('Relatioship is required'),
+      address: Yup.string().required('Address is required'),
+      phone: Yup.string()
+        .matches(/^[0-9]+$/, 'Enter a valid phone number')
+        .length(11, 'Phone number must be 11 characters')
+        .required('Phone number is required')
+    })
+  });
+
+  const socialHandlesFormik = useFormik({
+    initialValues: {
+      facebook: '',
+      instagram: '',
+      linkedin: ''
+    },
+    onSubmit: async (formValues) => {
+      if (visitedStep > 7) return setActiveStep(activeStep + 1);
+      const { facebook, instagram, linkedin } = sanitize(formValues);
+
+      try {
+        const response = await socialHandles({
+          facebook,
+          instagram,
+          linkedin,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: response.message || 'Social media handles validated',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        setActiveStep(activeStep + 1);
+        setVisitedStep(visitedStep + 1);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+    },
+    validationSchema: Yup.object<Record<keyof SocialHandlesFormValues, Yup.AnySchema>>({
+      facebook: Yup.string()
+        .matches(socialHandleMatcher, 'Please enter a valid URL')
+        .required('Facebook handle is required'),
+      instagram: Yup.string()
+        .matches(socialHandleMatcher, 'Please enter a valid Instagram URL')
+        .required('Instagram handle is required'),
+      linkedin: Yup.string()
+        .matches(socialHandleMatcher, 'Please enter a valid LinkedIn URL')
+        .required('LinkedIn handle is required')
     })
   });
 
