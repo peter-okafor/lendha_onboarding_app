@@ -1,4 +1,5 @@
 import authReducer from '@/features/auth/authSlice';
+import customerReducer from '@/features/onfield-credit-officer/features/customer/customerSlice';
 import loanReducer from '@/features/onfield-credit-officer/features/loans/loanSlice';
 import { configureStore } from '@reduxjs/toolkit';
 import appReducer from './appSlice';
@@ -9,7 +10,8 @@ export const store = configureStore({
     [api.reducerPath]: api.reducer,
     auth: authReducer,
     app: appReducer,
-    loan: loanReducer
+    loan: loanReducer,
+    customer: customerReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware)
 });

@@ -1,7 +1,8 @@
-import { useUsersQuery } from '@/app/services/onboardingOfficer';
+import { users, useUsersQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { IconButton, TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
+import { PaginationWrapper } from '@/components/common/pagination/Pagination';
 import { path } from '@/routes/path';
 import {
   Box,
@@ -18,11 +19,11 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
-  useMediaQuery
+  Tr
 } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { RiAddFill } from 'react-icons/ri';
+import ReactPaginate from 'react-paginate';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
 
@@ -101,9 +102,8 @@ interface TableData {
 interface CustomerTableProps {
   headers: string[];
   data: TableData[];
-  isLoading?: boolean;
 }
-const CustomerTable = ({ isLoading = false, ...props }: CustomerTableProps) => {
+const CustomerTable = (props: CustomerTableProps) => {
   const { data } = props;
   const navigate = useNavigate();
 
@@ -125,52 +125,32 @@ const CustomerTable = ({ isLoading = false, ...props }: CustomerTableProps) => {
             </Tr>
           </Thead>
           <Tbody>
-            {isLoading
-              ? Array.from({ length: 10 }, () => (
-                  <Tr key={key()}>
-                    <Td>
-                      <Skeleton height='50px'></Skeleton>
-                    </Td>
-                    <Td>
-                      <Skeleton height='50px'></Skeleton>
-                    </Td>
-                    <Td>
-                      <Skeleton height='50px'></Skeleton>
-                    </Td>
-                    <Td>
-                      <Skeleton height='50px'></Skeleton>
-                    </Td>
-                    <Td>
-                      <Skeleton height='50px'></Skeleton>
-                    </Td>
-                  </Tr>
-                ))
-              : data.map((customer) => (
-                  <Tr
-                    key={key()}
-                    _hover={{
-                      bgColor: '#f3f3f3',
-                      cursor: 'pointer',
-                      transition: 'all .1s ease-in'
-                    }}
-                    onClick={() => navigate(`/customers/profile/${customer.id}`)}
-                  >
-                    <Td>{customer.name}</Td>
-                    <Td>{customer.id}</Td>
-                    <Td>{customer.created_at}</Td>
-                    <Td>{customer.phone_number}</Td>
-                    <Td>
-                      <TableBadge
-                        bgColor={statusColor(customer.status || 'pending').bgColor}
-                        color={statusColor(customer.status || 'pending').color}
-                        text={customer.status}
-                        textTransform='uppercase'
-                      />
-                    </Td>
-                  </Tr>
-                ))}
-
-            {!isLoading && data.length < 1 && (
+            {data.length > 0 ? (
+              data.map((customer) => (
+                <Tr
+                  key={key()}
+                  _hover={{
+                    bgColor: '#f3f3f3',
+                    cursor: 'pointer',
+                    transition: 'all .1s ease-in'
+                  }}
+                  onClick={() => navigate(`/customers/profile/${customer.id}`)}
+                >
+                  <Td>{customer.name}</Td>
+                  <Td>{customer.id}</Td>
+                  <Td>{customer.created_at}</Td>
+                  <Td>{customer.phone_number}</Td>
+                  <Td>
+                    <TableBadge
+                      bgColor={statusColor(customer.status || 'pending').bgColor}
+                      color={statusColor(customer.status || 'pending').color}
+                      text={customer.status}
+                      textTransform='uppercase'
+                    />
+                  </Td>
+                </Tr>
+              ))
+            ) : (
               <Tr>
                 <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
                   <Text as='span' textStyle='2xl' fontWeight={700}>
@@ -187,19 +167,48 @@ const CustomerTable = ({ isLoading = false, ...props }: CustomerTableProps) => {
 };
 
 const Customers = () => {
-  const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
+  const [pageNumber, setPageNumber] = useState(1);
+  const { data: response, isLoading } = useUsersQuery({ page: pageNumber });
+  const [trigger] = users.useLazyQuerySubscription();
 
-  const { data: response, isLoading } = useUsersQuery();
+  const [pageCount, setPageCount] = useState(0);
+  const [itemsPerPage] = useState(response?.data?.per_page || 50);
 
-  const usersTable: TableData[] = response
-    ? response?.data.data.map(({ name, id, created_at, phone_number, profile_status }) => ({
-        name,
-        id,
-        created_at,
-        phone_number,
-        status: profile_status
-      }))
-    : [];
+  const [customersTable, setCustomersTable] = useState<TableData[]>([]);
+
+  useEffect(() => {
+    trigger(
+      {
+        page: pageNumber
+      },
+      true
+    ).then((res) => {
+      const customers = res.data?.data?.data || [];
+      setCustomersTable(
+        customers?.map(({ name, id, created_at, phone_number, profile_status }) => ({
+          name,
+          id,
+          created_at,
+          phone_number,
+          status: profile_status
+        }))
+      );
+    });
+  }, [pageNumber, trigger]);
+
+  useEffect(() => {
+    if (response?.data) {
+      setPageCount(Math.ceil(response?.data?.total / itemsPerPage));
+    }
+  }, [itemsPerPage, response?.data]);
+
+  const handlePageClick = (event: { selected: number }) => {
+    setPageNumber(event.selected + 1);
+  };
+
+  const activeTable = customersTable.filter((customer) => customer.status === 'active');
+  const pendingTable = customersTable.filter((customer) => customer.status === 'pending');
+  const blockedTable = customersTable.filter((customer) => customer.status === 'blocked');
 
   const tableHeaders = ['Customer name', '#ID', 'Date', 'Phone number', 'Account Status'];
 
@@ -210,20 +219,21 @@ const Customers = () => {
         justifyContent='space-between'
         className='lendha__container'
       >
-        <Text
-          fontFamily={['Nunito', 'Poppins']}
-          fontWeight={[700, 500]}
-          textStyle={['base', 'xl']}
-          color='black.DEFAULT'
-        >
-          Customers ({usersTable.length})
-        </Text>
-        <Link to={path.CUSTOMER_NEW}>
-          <IconButton
-            icon={<RiAddFill style={{ fontSize: '20px' }} />}
-            text={isLargerThan810 ? 'Add Customer' : 'Add'}
-          />
-        </Link>
+        <Skeleton isLoaded={!isLoading}>
+          <Text
+            fontFamily={['Nunito', 'Poppins']}
+            fontWeight={[700, 500]}
+            textStyle={['base', 'xl']}
+            color='black.DEFAULT'
+          >
+            Customers ({response?.data?.total})
+          </Text>
+        </Skeleton>
+        <Skeleton isLoaded={!isLoading}>
+          <Link to={path.CUSTOMER_NEW}>
+            <IconButton icon={<RiAddFill style={{ fontSize: '20px' }} />} text='Add Customer' />
+          </Link>
+        </Skeleton>
       </Flex>
 
       <Tabs
@@ -236,81 +246,105 @@ const Customers = () => {
           }
         }}
       >
-        <TransactionTabList tabs={['All', 'Active', 'Blocked', 'Pending']} />
+        <Skeleton isLoaded={!isLoading}>
+          <TransactionTabList tabs={['All', 'Active', 'Blocked', 'Pending']} />
+        </Skeleton>
+        <Skeleton isLoaded={!isLoading}>
+          <TabPanels
+            sx={{
+              '.chakra-tabs__tab-panel': {
+                mt: { base: 0, md: 2 },
+                pl: { base: '0', md: 7 },
+                pr: { base: '0', md: '18px' },
+                pt: { base: 0, md: 5 },
+                bgColor: 'white',
+                minH: '400px'
+              }
+            }}
+          >
+            <TabPanel>
+              <SearchInput isDisabled={true} />
+              <CustomerTable headers={tableHeaders} data={customersTable} />
 
-        <TabPanels
-          sx={{
-            '.chakra-tabs__tab-panel': {
-              mt: { base: 0, md: 2 },
-              pl: { base: '0', md: 7 },
-              pr: { base: '0', md: '18px' },
-              pt: { base: 0, md: 5 },
-              bgColor: 'white',
-              minH: '400px'
-            }
-          }}
-        >
-          <TabPanel>
-            <SearchInput />
-            <CustomerTable headers={tableHeaders} data={usersTable} isLoading={isLoading} />
+              {customersTable?.map((customer) => (
+                <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
+                  <CustomerDetail
+                    name={customer.name}
+                    id={customer.id}
+                    phoneNumber={customer.phone_number}
+                    status={customer.status || ''}
+                  />
+                </CustomerLink>
+              ))}
 
-            {usersTable.map((customer) => (
-              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
-                <CustomerDetail
-                  name={customer.name}
-                  id={customer.id}
-                  phoneNumber={customer.phone_number}
-                  status={customer.status || ''}
+              <PaginationWrapper>
+                <ReactPaginate
+                  nextLabel='>'
+                  onPageChange={handlePageClick}
+                  pageRangeDisplayed={3}
+                  marginPagesDisplayed={2}
+                  pageCount={pageCount}
+                  previousLabel='<'
+                  pageClassName='pagination__item'
+                  previousClassName='page-item'
+                  previousLinkClassName='pagination__item'
+                  nextClassName='page-item'
+                  nextLinkClassName='pagination__item'
+                  breakLabel='...'
+                  breakLinkClassName='pagination__item'
+                  containerClassName='pagination__container'
+                  activeClassName='active'
+                  renderOnZeroPageCount={() => null}
                 />
-              </CustomerLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput />
-            <CustomerTable headers={tableHeaders} data={usersTable} />
+              </PaginationWrapper>
+            </TabPanel>
+            <TabPanel>
+              <SearchInput isDisabled={true} />
+              <CustomerTable headers={tableHeaders} data={activeTable} />
 
-            {usersTable.map((customer) => (
-              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
-                <CustomerDetail
-                  name={customer.name}
-                  id={customer.id}
-                  phoneNumber={customer.phone_number}
-                  status={customer.status || ''}
-                />
-              </CustomerLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput />
-            <CustomerTable headers={tableHeaders} data={usersTable} />
+              {activeTable.map((customer) => (
+                <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
+                  <CustomerDetail
+                    name={customer.name}
+                    id={customer.id}
+                    phoneNumber={customer.phone_number}
+                    status={customer.status || ''}
+                  />
+                </CustomerLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput isDisabled={true} />
+              <CustomerTable headers={tableHeaders} data={pendingTable} />
 
-            {usersTable.map((customer) => (
-              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
-                <CustomerDetail
-                  name={customer.name}
-                  id={customer.id}
-                  phoneNumber={customer.phone_number}
-                  status={customer.status || ''}
-                />
-              </CustomerLink>
-            ))}
-          </TabPanel>
-          <TabPanel>
-            <SearchInput />
-            <CustomerTable headers={tableHeaders} data={usersTable} />
+              {pendingTable.map((customer) => (
+                <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
+                  <CustomerDetail
+                    name={customer.name}
+                    id={customer.id}
+                    phoneNumber={customer.phone_number}
+                    status={customer.status || ''}
+                  />
+                </CustomerLink>
+              ))}
+            </TabPanel>
+            <TabPanel>
+              <SearchInput isDisabled={true} />
+              <CustomerTable headers={tableHeaders} data={blockedTable} />
 
-            {usersTable.map((customer) => (
-              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
-                <CustomerDetail
-                  name={customer.name}
-                  id={customer.id}
-                  phoneNumber={customer.phone_number}
-                  status={customer.status || ''}
-                />
-              </CustomerLink>
-            ))}
-          </TabPanel>
-        </TabPanels>
+              {blockedTable.map((customer) => (
+                <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
+                  <CustomerDetail
+                    name={customer.name}
+                    id={customer.id}
+                    phoneNumber={customer.phone_number}
+                    status={customer.status || ''}
+                  />
+                </CustomerLink>
+              ))}
+            </TabPanel>
+          </TabPanels>
+        </Skeleton>
       </Tabs>
     </>
   );

@@ -142,6 +142,29 @@ const DashboardLayout = () => {
             color: 'darkblue.DEFAULT',
             fontFamily: 'Poppins',
             fontWeight: '500 !important'
+          },
+          '.pagination__item': {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            w: '25px',
+            h: '25px',
+            textStyle: 'sm',
+            fontWeight: 600,
+            color: 'black.DEFAULT',
+            border: '1.5px solid',
+            borderColor: 'gray.100',
+            borderRadius: '2px',
+            cursor: 'pointer',
+            userSelect: 'none',
+            my: 'auto'
+          },
+          '.pagination__item.active': {
+            bgColor: 'darkblue.DEFAULT',
+            color: 'white'
+          },
+          '.pagination__container': {
+            display: 'flex !important'
           }
         }}
       >

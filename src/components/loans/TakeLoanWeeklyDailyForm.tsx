@@ -30,6 +30,7 @@ interface TakeLoanValues {
 }
 
 const TakeLoanWeeklyDailyForm = (props: Props) => {
+  const userId = useAppSelector((state) => state.customer.userId) || localStorage.getItem('userId');
   const toast = useToast();
 
   const floatInterests = useAppSelector((state) => state.loan.loanInterests.slice(3));
@@ -50,7 +51,7 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
           loan_amount: values.amount,
           loan_interest_id: values.interestRate,
           loan_term: values.loanPeriod,
-          user_id: 21 //TODO: remove after getting user creation flow from Peter
+          user_id: Number(userId)
         }).unwrap();
 
         toast({

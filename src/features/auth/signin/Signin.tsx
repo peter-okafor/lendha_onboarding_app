@@ -44,7 +44,7 @@ const Signin = () => {
           description: err?.data?.errors ? (
             <ErrorMessages errors={err?.data?.errors} />
           ) : (
-            err?.data?.message
+            err?.data?.message || err?.data?.error
           ),
           status: 'info',
           duration: 4000,

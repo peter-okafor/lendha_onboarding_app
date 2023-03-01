@@ -1,3 +1,6 @@
+import { SocialHandlesFormValues } from '@/features/onfield-credit-officer/features/customer/components/BusinessSocialHandlesForm';
+import { EmploymentFormValues } from '@/features/onfield-credit-officer/features/customer/components/EmploymentForm';
+import { NextOfKinFormValues } from '@/features/onfield-credit-officer/features/customer/components/NextOfKinForm';
 import { api } from './api';
 import { Officer } from './auth';
 import { ENDPOINTS as e } from './_endpoints';
@@ -6,18 +9,18 @@ type Business = {
   id: number;
   name: string;
   email: string;
-  category: any;
-  description: any;
-  address_number: any;
-  street: any;
-  city: any;
-  state: any;
-  landmark: any;
+  category: string;
+  description: string;
+  address_number: string;
+  street: string;
+  city: string;
+  state: string;
+  landmark: string;
   user_id: number;
   created_at: string;
   updated_at: string;
   registration_status: false;
-  business_registration: any;
+  business_registration: string;
 };
 
 export type Customer = {
@@ -72,15 +75,15 @@ export interface UserResponse {
     current_page: number;
     data: Customer[];
     first_page_url: string;
-    from: 1;
-    last_page: 1;
+    from: number;
+    last_page: number;
     last_page_url: string;
-    next_page_url: any;
+    next_page_url: string;
     path: string;
-    per_page: 50;
-    prev_page_url: any;
-    to: 2;
-    total: 2;
+    per_page: number;
+    prev_page_url: string;
+    to: number;
+    total: number;
   };
   message: string;
 }
@@ -202,10 +205,18 @@ interface LoanDetail {
   message: string;
 }
 
+export type GenericCreateResponse = {
+  step: number;
+  message: string;
+};
+
 export const onboardingOfficerApi = api.injectEndpoints({
   endpoints: (build) => ({
-    users: build.query<UserResponse, void>({
-      query: () => e.users
+    users: build.query<UserResponse, { page: number }>({
+      query: (params) => ({
+        url: e.users({ page: params.page }),
+        method: 'GET'
+      })
     }),
     loans: build.query<LoanResponse, void>({
       query: () => e.loans
@@ -241,13 +252,31 @@ export const onboardingOfficerApi = api.injectEndpoints({
         body: credentials
       })
     }),
-    addBusiness: build.mutation<
-      {
-        step: number;
-        message: string;
-      },
-      CreateBusinessRequest
+    employment: build.mutation<GenericCreateResponse, EmploymentFormValues & { user_id: string }>({
+      query: (credentials) => ({
+        url: e.employment,
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    nextOfKin: build.mutation<GenericCreateResponse, NextOfKinFormValues & { user_id: string }>({
+      query: (credentials) => ({
+        url: e.nextOfKin,
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    socialHandles: build.mutation<
+      GenericCreateResponse,
+      SocialHandlesFormValues & { user_id: string }
     >({
+      query: (credentials) => ({
+        url: e.socialHandles,
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    addBusiness: build.mutation<GenericCreateResponse, CreateBusinessRequest>({
       query: (credentials) => ({
         url: e.addBusiness,
         method: 'POST',
@@ -271,37 +300,6 @@ export const onboardingOfficerApi = api.injectEndpoints({
         url: e.loanDetail({ loan_id: params.loan_id.toString() }),
         method: 'GET'
       })
-    }),
-
-    proofOfResidence: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadProofOfResidence,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-    }),
-    uploadValidId: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadValidId,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-    }),
-    uploadPhotograph: build.mutation<{ step: number; message: string }, FormData>({
-      query: (formData) => ({
-        url: e.uploadPhotograph,
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
     })
   })
 });
@@ -318,11 +316,11 @@ export const {
   useGetUserDetailQuery,
   useLazyGetUserDetailQuery,
   useGetLoanDetailQuery,
-  useProofOfResidenceMutation,
-  useUploadValidIdMutation,
-  useUploadPhotographMutation
+  useEmploymentMutation,
+  useNextOfKinMutation,
+  useSocialHandlesMutation
 } = onboardingOfficerApi;
 
 export const {
-  endpoints: { profile, loanApply, createUser, createAddress, getUserDetail }
+  endpoints: { profile, loanApply, createUser, createAddress, getUserDetail, users }
 } = onboardingOfficerApi;

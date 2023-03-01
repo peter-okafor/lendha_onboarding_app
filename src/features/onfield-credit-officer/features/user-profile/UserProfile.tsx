@@ -72,7 +72,7 @@ const UserProfile = () => {
                     }}
                   />
                 </Flex>
-                <LoanInfo label='Proof of residence' hasImg onImgClick={onOpen} />
+                {/* <LoanInfo label='Proof of residence' hasImg onImgClick={onOpen} /> */}
               </Flex>
             </Stack>
           }
@@ -140,7 +140,7 @@ const UserProfile = () => {
                   <LoanInfo label='Business place' hasImg onImgClick={onOpen} />
                   <LoanInfo label='Certificate of Incorporation' hasImg onImgClick={onOpen} />
                 </Flex>
-                <LoanInfo label='Proof of residence' hasImg onImgClick={onOpen} />
+                <LoanInfo label='Business Place Receipt' hasImg onImgClick={onOpen} />
               </Flex>
               <Flex
                 gap={[5, '34px']}

@@ -30,14 +30,14 @@
       }
     ],
 
-    "max-lines": [
-      "warn",
-      {
-        "max": 500,
-        "skipBlankLines": true,
-        "skipComments": true
-      }
-    ],
+    // "max-lines": [
+    //   "warn",
+    //   {
+    //     "max": 500,
+    //     "skipBlankLines": true,
+    //     "skipComments": true
+    //   }
+    // ],
 
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
