@@ -21,6 +21,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
+import { format } from 'date-fns';
 import { ReactNode, useEffect, useState } from 'react';
 import { RiAddFill } from 'react-icons/ri';
 import ReactPaginate from 'react-paginate';
@@ -138,7 +139,9 @@ const CustomerTable = (props: CustomerTableProps) => {
                 >
                   <Td>{customer.name}</Td>
                   <Td>{customer.id}</Td>
-                  <Td>{customer.created_at}</Td>
+                  <Td title={format(new Date(customer.created_at), 'MMMM d, yyyy h:mm a')}>
+                    {format(new Date(customer.created_at), 'MMMM d, yyyy h:mm a')}
+                  </Td>
                   <Td>{customer.phone_number}</Td>
                   <Td>
                     <TableBadge
@@ -185,13 +188,15 @@ const Customers = () => {
     ).then((res) => {
       const customers = res.data?.data?.data || [];
       setCustomersTable(
-        customers?.map(({ name, id, created_at, phone_number, profile_status }) => ({
-          name,
-          id,
-          created_at,
-          phone_number,
-          status: profile_status
-        }))
+        customers
+          ?.map(({ name, id, created_at, phone_number, profile_status }) => ({
+            name,
+            id,
+            created_at,
+            phone_number,
+            status: profile_status
+          }))
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       );
     });
   }, [pageNumber, trigger]);

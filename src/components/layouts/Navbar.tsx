@@ -108,7 +108,7 @@ const Navbar = () => {
             <Flex>
               <Box as='button' onClick={handleClickInside}>
                 <BadgeIconLabel
-                  label='22'
+                  label='0'
                   icon={
                     <RiNotification2Fill fontSize='24px' color={globalStyles.colors.gray[300]} />
                   }
