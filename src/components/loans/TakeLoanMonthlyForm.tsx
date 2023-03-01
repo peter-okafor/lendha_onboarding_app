@@ -1,7 +1,8 @@
-import { useAppSelector } from '@/app/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
 import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
+import { setLoanRequest } from '@/features/onfield-credit-officer/features/loans/loanSlice';
 import ErrorMessages from '@/utils/components/ErrorMessages';
 import {
   formatNumber,
@@ -52,6 +53,8 @@ interface TakeLoanValues {
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
+  const dispatch = useAppDispatch();
+
   const userId = useAppSelector((state) => state.customer.userId) || localStorage.getItem('userId');
   const toast = useToast();
 
@@ -106,12 +109,13 @@ const TakeLoanMonthlyForm = (props: Props) => {
     onSubmit: async (formValues) => {
       const values = sanitize<TakeLoanValues>(formValues);
       try {
-        const response = await loanApply({
+        const payload = {
           loan_amount: values.amount,
           loan_interest_id: selectedLoanCategory,
           loan_term: values.loanPeriod,
           user_id: Number(userId)
-        }).unwrap();
+        };
+        const response = await loanApply(payload).unwrap();
 
         toast({
           title: 'Loan Application',
@@ -121,6 +125,8 @@ const TakeLoanMonthlyForm = (props: Props) => {
           position: 'top-right',
           isClosable: true
         });
+
+        dispatch(setLoanRequest(payload));
         props.onSubmit();
       } catch (err: any) {
         toast({
@@ -235,7 +241,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
                     value: ''
                   },
                   {
-                    label: '1 months',
+                    label: '1 month',
                     value: '1'
                   },
                   {
