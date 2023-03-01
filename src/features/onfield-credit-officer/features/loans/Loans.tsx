@@ -25,6 +25,8 @@ import {
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
+import { format } from 'date-fns';
+
 
 type Status = 'active' | 'pending' | 'declined' | 'due' | 'closed' | 'default' | string;
 interface Color {
@@ -147,7 +149,7 @@ const LoanTable = (props: LoanTableProps) => {
               >
                 <Td>{loan.appId}</Td>
                 <Td>{loan.name}</Td>
-                <Td>{loan.date}</Td>
+                <Td>{format(new Date(loan.date), 'MMMM d, yyyy h:mma')}</Td>
                 <Td>N{formatNumber(loan.amount)}</Td>
                 <Td>
                   <TableBadge
