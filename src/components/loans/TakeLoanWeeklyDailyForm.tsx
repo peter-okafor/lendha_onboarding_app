@@ -1,6 +1,7 @@
-import { useAppSelector } from '@/app/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormInput, FormSelect, NextCancelButton } from '@/components/common';
+import { setLoanRequest } from '@/features/onfield-credit-officer/features/loans/loanSlice';
 import {
   formatNumber,
   isObjectPropsEmpty,
@@ -30,6 +31,8 @@ interface TakeLoanValues {
 }
 
 const TakeLoanWeeklyDailyForm = (props: Props) => {
+  const dispatch = useAppDispatch();
+
   const userId = useAppSelector((state) => state.customer.userId) || localStorage.getItem('userId');
   const toast = useToast();
 
@@ -47,12 +50,13 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
     onSubmit: async (formValues) => {
       const values = sanitize<TakeLoanValues>(formValues);
       try {
-        const response = await loanApply({
+        const payload = {
           loan_amount: values.amount,
           loan_interest_id: values.interestRate,
           loan_term: values.loanPeriod,
           user_id: Number(userId)
-        }).unwrap();
+        };
+        const response = await loanApply(payload).unwrap();
 
         toast({
           title: 'Loan Application',
@@ -62,6 +66,8 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
           position: 'top-right',
           isClosable: true
         });
+
+        dispatch(setLoanRequest(payload));
         props.onSubmit();
       } catch (err: any) {
         toast({
