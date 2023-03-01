@@ -1,7 +1,8 @@
+import { Customer, getUserDetail, useGetLoanDetailQuery } from '@/app/services/onboardingOfficer';
 import { CopyToClipboard, DropzoneFileUpload, FormInput, LendhaModal } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
-import { maskCurrency } from '@/utils/helpers';
+import { formatCurrency, maskCurrency } from '@/utils/helpers';
 import { ACCOUNT_NAME, ACCOUNT_NUMBER, BANK_NAME } from '@/variables/general';
 import {
   Box,
@@ -15,9 +16,9 @@ import {
   Text
 } from '@chakra-ui/react';
 import { Form, FormikProps, FormikProvider, useFormik } from 'formik';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { RiCheckLine } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useReadLocalStorage } from 'usehooks-ts';
 import * as Yup from 'yup';
 import {
@@ -45,26 +46,6 @@ const PayLoan = () => {
   >('form');
 
   const isPaymentTypeSet = paymentStep !== 'form';
-
-  // const payViaWalletFormik: FormikProps<PayLoanViaWalletValues> = useFormik<PayLoanViaWalletValues>(
-  //   {
-  //     initialValues: {
-  //       amount: ''
-  //     },
-  //     onSubmit: async (values) => {
-  //       if (userEmail !== 'creditofficer@email.com') {
-  //         return setFieldError('amount', 'Insufficient funds');
-  //       }
-  //       console.log(values);
-  //       setPaymentStep('details');
-  //     },
-  //     validationSchema: Yup.object<Record<keyof PayLoanViaWalletValues, Yup.AnySchema>>({
-  //       amount: Yup.string().required('Amount is required')
-  //     })
-  //   }
-  // );
-
-  // const { values, errors, touched, setFieldValue, setFieldError, resetForm } = payViaWalletFormik;
 
   const payViaTransferFormik: FormikProps<PayLoanViaTransferValues> =
     useFormik<PayLoanViaTransferValues>({
@@ -104,6 +85,25 @@ const PayLoan = () => {
   const navigate = useNavigate();
   const mx = { base: 3, lg: 0 };
 
+  const { id } = useParams();
+  const { data: response, isSuccess } = useGetLoanDetailQuery({ loan_id: Number(id) });
+  const loan = response?.data;
+
+  const [customer, setCustomer] = useState<Customer>();
+
+  const [trigger] = getUserDetail.useLazyQuerySubscription();
+
+  useEffect(() => {
+    if (isSuccess) {
+      trigger(
+        {
+          user_id: Number(loan?.user_id)
+        },
+        true
+      ).then((res) => setCustomer(res?.data?.data));
+    }
+  }, [isSuccess, loan?.user_id, trigger]);
+
   return (
     <>
       <LoanAction mx={mx} onPayLoan={onPayLoan} />
@@ -115,14 +115,14 @@ const PayLoan = () => {
           w='full'
         >
           <GridItem>
-            <LoanInfo label='Application ID' text='#34KV-RT' />
+            <LoanInfo label='Application ID' text={loan?.application_id || 'N/A'} />
           </GridItem>
           <GridItem>
             <LoanInfo
               isLink
               label='Customer name'
-              text='John Orukpe'
-              linkPath={path.CREDIT_OFFICER_USER_PROFILE}
+              text={customer?.name}
+              linkPath={path.CUSTOMER_PROFILE}
               linkProps={{
                 textDecor: 'underline'
               }}
@@ -130,16 +130,19 @@ const PayLoan = () => {
             />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Loan amount' text='N120,000' />
+            <LoanInfo
+              label='Loan amount'
+              text={formatCurrency(loan?.approved_amount || 0).toString()}
+            />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Application date' text='12th Dec 2022' />
+            <LoanInfo label='Application date' text={loan?.request_date} />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Current Status' text='Reviewing' />
+            <LoanInfo label='Current Status' text={loan?.status} />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Loan type' text='Wholesale (3 months)' />
+            <LoanInfo label='Loan type' text={loan?.purpose} />
           </GridItem>
         </Grid>
       </LoanInfoContainer>
@@ -182,75 +185,6 @@ const PayLoan = () => {
           </Stack>
         ) : (
           <>
-            {/* {paymentStep === 'wallet' && (
-              <>
-                <Stack spacing='2px'>
-                  <Text color='black'>Account name</Text>
-                  <Text color='darkblue.DEFAULT' fontWeight={600} textStyle='base'>
-                    John Suzan Okoro
-                  </Text>
-                </Stack>
-                <Stack spacing='2px' mt={4}>
-                  <Text color='black'>Wallet Balance</Text>
-                  <Text color='darkblue.DEFAULT' fontWeight={800} textStyle='xl'>
-                    N250,000
-                  </Text>
-                </Stack>
-
-                <Box mt={5}>
-                  <FormikProvider value={payViaWalletFormik}>
-                    <Form>
-                      <FormInput
-                        disabled={userEmail !== 'creditofficer@email.com'}
-                        pr={8}
-                        label='Enter amount'
-                        rightAddon={
-                          <InputRightElement>
-                            <Text
-                              as='span'
-                              color='gray.300'
-                              fontWeight={600}
-                              textStyle='base'
-                              userSelect='none'
-                            >
-                              N
-                            </Text>
-                          </InputRightElement>
-                        }
-                        id='amount'
-                        name='amount'
-                        errorMessage={errors.amount}
-                        touchedField={touched.amount}
-                        value={values.amount}
-                        handleChange={(e: FormEvent<HTMLInputElement>) => {
-                          let value = Number(e.currentTarget.value) || '';
-                          value = maskCurrency(e.currentTarget.value);
-
-                          setFieldValue('amount', value);
-                        }}
-                      />
-                      {userEmail !== 'creditofficer@email.com' ? (
-                        <Button
-                          fontWeight={700}
-                          fontSize='16px'
-                          mt={5}
-                          onClick={() => navigate(path.WALLET)}
-                          w='full'
-                          variant='secondary'
-                        >
-                          Fund wallet
-                        </Button>
-                      ) : (
-                        <Button fontWeight={700} mt={5} fontSize='16px' w='full' type='submit'>
-                          Pay Loan
-                        </Button>
-                      )}
-                    </Form>
-                  </FormikProvider>
-                </Box>
-              </>
-            )} */}
-
             {paymentStep === 'details' && (
               <>
                 <Stack

@@ -1,6 +1,14 @@
+import { LoanInterest, useLoanInterestsQuery } from '@/app/services/misc';
+import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormError, FormInput, FormSelect, NextCancelButton } from '@/components/common';
-import { LoanCategory } from '@/features/wallet/types';
-import { formatNumber, isObjectPropsEmpty, maskCurrency, stripCommas } from '@/utils/helpers';
+import ErrorMessages from '@/utils/components/ErrorMessages';
+import {
+  formatNumber,
+  isObjectPropsEmpty,
+  maskCurrency,
+  sanitize,
+  stripCommas
+} from '@/utils/helpers';
 import {
   Box,
   Button,
@@ -8,26 +16,27 @@ import {
   GridItem,
   Icon,
   InputRightElement,
+  Skeleton,
   Stack,
-  Text
+  Text,
+  useToast
 } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { RiCommunityFill, RiShoppingBagFill, RiStore2Fill } from 'react-icons/ri';
 import * as Yup from 'yup';
-import { LOAN_AMOUNTS } from './constants';
 
-const { retail, wholesalers, smes } = LOAN_AMOUNTS;
+export type LoanValues = {
+  amount: string;
+  duration: string;
+  loanType: string;
+  interestRate: string;
+};
 
-const loanCategories = {
-  retail: { rate: 7, minAmount: retail.min, maxAmount: retail.max },
-  wholesalers: {
-    category: 'wholesalers',
-    rate: 6,
-    minAmount: wholesalers.min,
-    maxAmount: wholesalers.max
-  },
-  smes: { rate: 5, minAmount: smes.min, maxAmount: smes.max }
+const getCategoryIcon = (id: number) => {
+  if (id === 1) return RiShoppingBagFill;
+  else if (id === 2) return RiStore2Fill;
+  else return RiCommunityFill;
 };
 
 interface Props {
@@ -37,36 +46,90 @@ interface Props {
   showCancelBtn?: boolean;
 }
 interface TakeLoanValues {
-  amount: string;
-  loanPeriod: string;
+  amount: number;
+  loanPeriod: number;
   interestRate: string;
 }
 const TakeLoanMonthlyForm = (props: Props) => {
-  const [selectedLoanCategory, setSelectedLoanCategory] = useState<LoanCategory | ''>('');
+  const toast = useToast();
+
+  const { data: interests, isLoading } = useLoanInterestsQuery();
+
+  const [loanCategories, setLoanCategories] = useState<LoanInterest[]>([]);
+
+  useEffect(() => {
+    if (interests?.data) {
+      setLoanCategories(() =>
+        interests.data.map(
+          ({
+            id,
+            interest,
+            purpose,
+            minimum_amount,
+            maximum_amount,
+            repayment_duration,
+            moratorium
+          }) => ({
+            id,
+            interest,
+            purpose,
+            minimum_amount,
+            maximum_amount,
+            repayment_duration,
+            moratorium
+          })
+        )
+      );
+    }
+  }, [interests?.data]);
+
+  const [selectedLoanCategory, setSelectedLoanCategory] = useState<number>(0);
 
   const [loanMinAmount, setLoanMinAmount] = useState(50_000);
   const [loanMaxAmount, setLoanMaxAmount] = useState(1_000_000);
 
   useEffect(() => {
-    if (
-      selectedLoanCategory === 'retail' ||
-      selectedLoanCategory === 'wholesalers' ||
-      selectedLoanCategory === 'smes'
-    ) {
-      setLoanMinAmount(loanCategories[selectedLoanCategory].minAmount);
-      setLoanMaxAmount(loanCategories[selectedLoanCategory].maxAmount);
-    }
-  }, [selectedLoanCategory]);
+    setLoanMinAmount(loanCategories[selectedLoanCategory - 1]?.minimum_amount);
+    setLoanMaxAmount(loanCategories[selectedLoanCategory - 1]?.maximum_amount);
+  }, [loanCategories, selectedLoanCategory]);
+
+  const [loanApply] = useLoanApplyMutation();
 
   const formik = useFormik<TakeLoanValues>({
     initialValues: {
-      amount: '',
-      loanPeriod: '',
+      amount: 0,
+      loanPeriod: 0,
       interestRate: ''
     },
-    onSubmit: async (values) => {
-      console.log(values);
-      props.onSubmit();
+    onSubmit: async (formValues) => {
+      const values = sanitize<TakeLoanValues>(formValues);
+      try {
+        const response = await loanApply({
+          loan_amount: values.amount,
+          loan_interest_id: selectedLoanCategory,
+          loan_term: values.loanPeriod,
+          user_id: 22 //TODO: remove after getting user creation flow from Peter
+        }).unwrap();
+
+        toast({
+          title: 'Loan Application',
+          description: response?.message,
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        props.onSubmit();
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: <ErrorMessages errors={err?.data.errors} />,
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: Yup.object<Record<keyof TakeLoanValues, Yup.AnySchema>>({
       amount: Yup.number()
@@ -78,7 +141,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
     })
   });
 
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const handleInputChange = (e: any /**TODO: fix this type**/) => {
     const amount: number | '' = Number(stripCommas(maskCurrency(e.target.value))) || '';
@@ -86,49 +149,16 @@ const TakeLoanMonthlyForm = (props: Props) => {
     setFieldValue('amount', Number(amount) || '');
   };
 
-  const loanCategoryOptions = [
-    {
-      value: 'retail',
-      label: 'Retail Merchants',
-      icon: RiShoppingBagFill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('retail');
-      }
-    },
-    {
-      value: 'wholesalers',
-      label: 'Wholesalers',
-      icon: RiStore2Fill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('wholesalers');
-      }
-    },
-    {
-      value: 'smes',
-      label: 'SMEs',
-      icon: RiCommunityFill,
-      onClick: () => {
-        setFieldValue('amount', '');
-        setSelectedLoanCategory('smes');
-      }
+  const loanCategoryOptions = loanCategories.slice(0, 3).map((category) => ({
+    value: category.id,
+    label: category.purpose,
+    icon: getCategoryIcon(category.id),
+    onClick: () => {
+      setFieldValue('amount', '');
+      setFieldValue('interestRate', category.interest);
+      setSelectedLoanCategory(category.id);
     }
-  ];
-
-  useEffect(() => {
-    switch (selectedLoanCategory) {
-      case 'retail':
-        setFieldValue('interestRate', '7%');
-        break;
-      case 'wholesalers':
-        setFieldValue('interestRate', '6%');
-        break;
-      case 'smes':
-        setFieldValue('interestRate', '5%');
-        break;
-    }
-  }, [selectedLoanCategory, setFieldValue]);
+  }));
 
   return (
     <>
@@ -137,24 +167,30 @@ const TakeLoanMonthlyForm = (props: Props) => {
         columnGap={[2, 5]}
         rowGap='10px'
       >
-        {loanCategoryOptions.map((option) => (
-          <GridItem key={option.value}>
-            <Button
-              onClick={option.onClick}
-              variant={option.value === selectedLoanCategory ? 'primary' : 'secondary'}
-              className={
-                option.value === selectedLoanCategory
-                  ? 'selected loan-category-option'
-                  : 'loan-category-option'
-              }
-            >
-              <Box as='span'>
-                <Icon as={option.icon} fontSize='20px' />
-                {option.label}
-              </Box>
-            </Button>
-          </GridItem>
-        ))}
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, index) => (
+              <GridItem key={index}>
+                <Skeleton key={index} height='30px' isLoaded={!!interests} />
+              </GridItem>
+            ))
+          : loanCategoryOptions.map((option) => (
+              <GridItem key={option.value}>
+                <Button
+                  onClick={option.onClick}
+                  variant={option.value === selectedLoanCategory ? 'primary' : 'secondary'}
+                  className={
+                    option.value === selectedLoanCategory
+                      ? 'selected loan-category-option'
+                      : 'loan-category-option'
+                  }
+                >
+                  <Box as='span'>
+                    <Icon as={option.icon} fontSize='20px' />
+                    {option.label}
+                  </Box>
+                </Button>
+              </GridItem>
+            ))}
         <FormError error={errors.interestRate} touched={touched.interestRate} />
       </Grid>
       <Box mt={4}>
@@ -194,27 +230,27 @@ const TakeLoanMonthlyForm = (props: Props) => {
                   },
                   {
                     label: '1 months',
-                    value: '10'
+                    value: '1'
                   },
                   {
                     label: '2 months',
-                    value: '20'
+                    value: '2'
                   },
                   {
                     label: '3 months',
-                    value: '30'
+                    value: '3'
                   },
                   {
                     label: '4 months',
-                    value: '40'
+                    value: '4'
                   },
                   {
                     label: '5 months',
-                    value: '50'
+                    value: '5'
                   },
                   {
                     label: '5 months',
-                    value: '60'
+                    value: '6'
                   }
                 ]}
                 value={values.loanPeriod}
@@ -241,6 +277,7 @@ const TakeLoanMonthlyForm = (props: Props) => {
                 </Button>
               ) : (
                 <NextCancelButton
+                  isSubmitting={isSubmitting}
                   showCancelBtn={props.showCancelBtn}
                   onCancel={props.onGoBack}
                   hasErrors={Object.keys(errors).length > 0 || isObjectPropsEmpty(values)}

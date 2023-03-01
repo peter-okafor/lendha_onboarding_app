@@ -7,6 +7,9 @@ import * as Yup from 'yup';
 import { REG_NUMBER_REGEX } from '@/variables/general';
 
 const PersonalInfoFormSchema = Yup.object<Record<keyof PersonalInfoFormValues, Yup.AnySchema>>({
+  businessName: Yup.string()
+    .matches(/^[aA-zZ\s]+$/, 'Please enter a valid busines name')
+    .required('First name is required'),
   firstName: Yup.string()
     .matches(/^[aA-zZ\s]+$/, 'Please enter a valid first name')
     .required('First name is required'),
@@ -60,9 +63,8 @@ const VerificationInfoFormSchema = Yup.object<
 });
 
 const BusinessInfoFormSchema = Yup.object<Record<keyof BusinessInfoFormValues, Yup.AnySchema>>({
-  businessName: Yup.string()
-    // .matches(/^[aA-zZ\s]+$/, 'Please enter a valid business name')
-    .required('Business Name is required'),
+  businessName: Yup.string().required('Business Name is required'),
+  email: Yup.string().required('Email is required'),
   businessCategory: Yup.string().required('Please select a business category'),
   businessDesc: Yup.string()
     .matches(/^[aA-zZ\s]+$/, 'Please enter a valid business name')
@@ -93,21 +95,21 @@ const BusinessInfoFormSchema = Yup.object<Record<keyof BusinessInfoFormValues, Y
       }
       return schema;
     }),
-  certOfIncorporationFile: Yup.mixed().when(
-    'isBusinessRegistered',
-    (isBusinessRegistered, schema) => {
-      if (isBusinessRegistered === 'yes') {
-        return schema.required('Certificate of incorporation is required');
-      }
-      return schema;
-    }
-  ),
-  memorandumFile: Yup.mixed().when('isBusinessRegistered', (isBusinessRegistered, schema) => {
-    if (isBusinessRegistered === 'yes') {
-      return schema.required('Memorandum and AoA file is required');
-    }
-    return schema;
-  }),
+  // certOfIncorporationFile: Yup.mixed().when(
+  //   'isBusinessRegistered',
+  //   (isBusinessRegistered, schema) => {
+  //     if (isBusinessRegistered === 'yes') {
+  //       return schema.required('Certificate of incorporation is required');
+  //     }
+  //     return schema;
+  //   }
+  // ),
+  // memorandumFile: Yup.mixed().when('isBusinessRegistered', (isBusinessRegistered, schema) => {
+  //   if (isBusinessRegistered === 'yes') {
+  //     return schema.required('Memorandum and AoA file is required');
+  //   }
+  //   return schema;
+  // }),
   sourceOfIncomeDesc: Yup.string().when('hasSourceOfIncome', (hasSourceOfIncome, schema) => {
     if (hasSourceOfIncome === 'yes') {
       return schema.required('Tell us about your source of income');

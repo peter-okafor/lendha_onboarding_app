@@ -18,7 +18,7 @@ interface Props {
   formik: FormikProps<PersonalInfoFormValues>;
 }
 const PersonalInfoForm = ({ formik, ...props }: Props) => {
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const handleOnDateOfBirth = (date: Date) => {
@@ -49,6 +49,15 @@ const PersonalInfoForm = ({ formik, ...props }: Props) => {
             handleChange={handleChange}
             errorMessage={errors.lastName}
             touchedField={touched.lastName}
+          />
+          <FormInput
+            label='Business name'
+            id='business-name'
+            name='businessName'
+            value={values.businessName}
+            handleChange={handleChange}
+            errorMessage={errors.businessName}
+            touchedField={touched.businessName}
           />
           <FormInput
             id='email'
@@ -200,6 +209,7 @@ const PersonalInfoForm = ({ formik, ...props }: Props) => {
 
           <Stack direction='row' spacing={3}>
             <NextCancelButton
+              isSubmitting={isSubmitting}
               onCancel={props.onBack}
               showCancelBtn={isLargerThan810 ? false : true}
             />

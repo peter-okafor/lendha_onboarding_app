@@ -1,7 +1,9 @@
+import { useGetUserDetailQuery } from '@/app/services/onboardingOfficer';
 import Placeholder from '@/assets/loan-placeholder.png';
 import Image1 from '@/assets/site/home/woman6.png';
 import { LendhaModal } from '@/components/common';
 import { Flex, Image, Stack, useDisclosure, useMediaQuery } from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
 import { Avatar, LoanHistoryTable, LoanInfo, LoanInfoContainer } from '../../components';
 import { LoanAction } from '../loans';
 
@@ -13,6 +15,16 @@ const UserProfile = () => {
     maxW: { base: '90% !important', lg: '300px !important' }
   };
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
+
+  const { id } = useParams();
+  const { data: response } = useGetUserDetailQuery({ user_id: Number(id) });
+
+  const user = response?.data;
+
+  const bank = user?.bank;
+  const homeAddress = user?.home_address;
+  const business = user?.business;
+  const socialMedia = user?.social_media_handles;
 
   return (
     <>
@@ -36,15 +48,19 @@ const UserProfile = () => {
                   }
                 }}
               >
-                <LoanInfo label='BVN' text='1234567890' />
-                <LoanInfo label='NIN' text='1234567890' />
+                <LoanInfo label='BVN' text={bank?.bvn || 'N/A'} />
+                <LoanInfo label='NIN' text={bank?.nin || 'N/A'} />
                 <LoanInfo
                   label='Home Address'
-                  text='113, New Lagos Road, UNIBEN, Ovia North East, Benin City, Edo State'
+                  text={`${homeAddress?.number || 'N/A'} ${homeAddress?.street_name || 'N/A'} ${
+                    homeAddress?.landmark || 'N/A'
+                  } ${homeAddress?.city || 'N/A'} ${homeAddress?.local_government || 'N/A'} ${
+                    homeAddress?.state || 'N/A'
+                  }`}
                 />
               </Flex>
               <Flex gap={[5, '34px']} flexDir={['column', 'row']}>
-                <LoanInfo label='Registration date' text='12th, Dec 2021' />
+                <LoanInfo label='Registration date' text={user?.created_at} />
                 <Flex gap={[5, '34px']}>
                   <LoanInfo label='Utility bill' hasImg onImgClick={onOpen} />
                   <LoanInfo
@@ -64,28 +80,28 @@ const UserProfile = () => {
           <Flex flexDir={['column', 'row']} gap={10}>
             <Flex gap='18px' alignItems={['flex-end', 'normal']} flexWrap='wrap'>
               <Avatar onImgClick={onOpen} cursor='pointer' src={Image1} />
-              <LoanInfo label='Full name' text='Jude Okorocha' />
+              <LoanInfo label='Full name' text={user?.name || 'N/A'} />
             </Flex>
             <Flex gap={10}>
-              <LoanInfo label='Phone number' text='08098989898' />
+              <LoanInfo label='Phone number' text={user?.phone_number || 'N/A'} />
               {isLargerThan810 ? (
                 <LoanInfo
                   label='Email address'
-                  text='Oghenerekvewe@gmail.com'
+                  text={user?.email || 'N/A'}
                   textProps={{
                     sx: emailW
                   }}
                 />
               ) : (
-                <LoanInfo label='Date of birth' text='12th Dec 1997' />
+                <LoanInfo label='Date of birth' text={user?.date_of_birth} />
               )}
             </Flex>
             {isLargerThan810 ? (
-              <LoanInfo label='Date of birth' text='12th Dec 1997' />
+              <LoanInfo label='Date of birth' text={user?.date_of_birth} />
             ) : (
               <LoanInfo
                 label='Email address'
-                text='OghenerekveweOkorocha@gmail.com'
+                text={user?.email || 'N/A'}
                 textProps={{
                   sx: emailW
                 }}
@@ -111,10 +127,12 @@ const UserProfile = () => {
                   }
                 }}
               >
-                <LoanInfo label='Business category' text='Farming' />
+                <LoanInfo label='Business category' text={business?.category || 'N/A'} />
                 <LoanInfo
                   label='Business Address'
-                  text='113, New Lagos Road, UNIBEN, Ovia North East, Benin City, Edo State'
+                  text={`${business?.address_number || 'N/A'} ${business?.street || 'N/A'} ${
+                    business?.landmark || 'N/A'
+                  } ${business?.city || 'N/A'} ${business?.state || 'N/A'}`}
                 />
               </Flex>
               <Flex gap={[5, '34px']} flexDir={['column', 'row']}>
@@ -144,30 +162,30 @@ const UserProfile = () => {
           }
         >
           <Flex flexDir={['column', 'row']} gap={[5, 10]}>
-            <LoanInfo label='Business name' text='Jude Okorocha Limited' />
+            <LoanInfo label='Business name' text={business?.name} />
             <LoanInfo
-              label='Twitter'
-              text='https://twitter.com/john_doe_001'
+              label='LinkedIn'
+              text={socialMedia?.linkedin}
               isLink
-              linkPath='https://twitter.com/john_doe_001'
+              linkPath={socialMedia?.linkedin}
               linkProps={{
                 textDecor: 'underline'
               }}
             />
             <LoanInfo
               label='Instagram'
-              text='https://instagram.com/john_doe_001'
+              text={socialMedia?.instagram}
               isLink
-              linkPath='https://instagram.com/john_doe_001'
+              linkPath={socialMedia?.instagram}
               linkProps={{
                 textDecor: 'underline'
               }}
             />
             <LoanInfo
               label='Facebook'
-              text='https://facebook.com/john_doe_001'
+              text={socialMedia?.facebook}
               isLink
-              linkPath='https://facebook.com/john_doe_001'
+              linkPath={socialMedia?.facebook}
               linkProps={{
                 textDecor: 'underline'
               }}

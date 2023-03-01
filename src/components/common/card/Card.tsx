@@ -73,7 +73,7 @@ export const HeaderGoBack = ({
     // >
     //   <RiArrowLeftLine
     //     cursor='pointer'
-    //     onClick={onClick ? onClick : () => navigate(goBackPath || path.WALLET)}
+    //     onClick={onClick ? onClick : () => navigate(goBackPath || path.CUSTOMERS)}
     //     color={`${globalStyles.colors.gray[300]}`}
     //   />
     //   <>{header}</>
@@ -93,7 +93,7 @@ export const HeaderGoBack = ({
         color='gray.300'
         cursor='pointer'
         fontSize={['20px', '24px']}
-        onClick={onClick ? onClick : () => navigate(goBackPath || path.WALLET)}
+        onClick={onClick ? onClick : () => navigate(goBackPath || path.CUSTOMERS)}
       />
       <Stack>
         <>{header}</>

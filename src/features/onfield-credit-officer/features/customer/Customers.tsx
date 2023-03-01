@@ -1,3 +1,4 @@
+import { useUsersQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { IconButton, TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
@@ -6,6 +7,7 @@ import {
   Box,
   Divider,
   Flex,
+  Skeleton,
   Stack,
   TableContainer,
   TabPanel,
@@ -19,7 +21,6 @@ import {
   Tr,
   useMediaQuery
 } from '@chakra-ui/react';
-import { faker } from '@faker-js/faker/locale/en_NG';
 import { ReactNode } from 'react';
 import { RiAddFill } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
@@ -93,67 +94,114 @@ const CustomerDetail = (props: CustomerDetailProps) => {
 interface TableData {
   name: string;
   id: string;
-  date: string;
-  phoneNumber: string;
-  status: Status;
+  created_at: string;
+  phone_number: string;
+  status?: Status;
 }
 interface CustomerTableProps {
   headers: string[];
   data: TableData[];
+  isLoading?: boolean;
 }
-const CustomerTable = (props: CustomerTableProps) => {
+const CustomerTable = ({ isLoading = false, ...props }: CustomerTableProps) => {
+  const { data } = props;
   const navigate = useNavigate();
 
   return (
-    <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
-      <TransactionTable>
-        <Thead>
-          <Tr
-            sx={{
-              'th:nth-of-type(2)': {
-                w: { '2xl': '140px' }
-              }
-            }}
-          >
-            {props.headers.map((th) => (
-              <Th key={key()}>{th}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {props.data.map((customer) => (
+    <>
+      <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
+        <TransactionTable>
+          <Thead>
             <Tr
-              key={key()}
-              _hover={{
-                bgColor: '#f3f3f3',
-                cursor: 'pointer',
-                transition: 'all .1s ease-in'
+              sx={{
+                'th:nth-of-type(2)': {
+                  w: { '2xl': '140px' }
+                }
               }}
-              onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
             >
-              <Td>{customer.name}</Td>
-              <Td>{customer.id}</Td>
-              <Td>{customer.date}</Td>
-              <Td>{customer.phoneNumber}</Td>
-              <Td>
-                <TableBadge
-                  bgColor={statusColor(customer.status).bgColor}
-                  color={statusColor(customer.status).color}
-                  text={customer.status}
-                  textTransform='uppercase'
-                />
-              </Td>
+              {props.headers.map((th) => (
+                <Th key={key()}>{th}</Th>
+              ))}
             </Tr>
-          ))}
-        </Tbody>
-      </TransactionTable>
-    </TableContainer>
+          </Thead>
+          <Tbody>
+            {isLoading
+              ? Array.from({ length: 10 }, () => (
+                  <Tr key={key()}>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                    <Td>
+                      <Skeleton height='50px'></Skeleton>
+                    </Td>
+                  </Tr>
+                ))
+              : data.map((customer) => (
+                  <Tr
+                    key={key()}
+                    _hover={{
+                      bgColor: '#f3f3f3',
+                      cursor: 'pointer',
+                      transition: 'all .1s ease-in'
+                    }}
+                    onClick={() => navigate(`/customers/profile/${customer.id}`)}
+                  >
+                    <Td>{customer.name}</Td>
+                    <Td>{customer.id}</Td>
+                    <Td>{customer.created_at}</Td>
+                    <Td>{customer.phone_number}</Td>
+                    <Td>
+                      <TableBadge
+                        bgColor={statusColor(customer.status || 'pending').bgColor}
+                        color={statusColor(customer.status || 'pending').color}
+                        text={customer.status}
+                        textTransform='uppercase'
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+
+            {!isLoading && data.length < 1 && (
+              <Tr>
+                <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
+                  <Text as='span' textStyle='2xl' fontWeight={700}>
+                    No customers
+                  </Text>
+                </Td>
+              </Tr>
+            )}
+          </Tbody>
+        </TransactionTable>
+      </TableContainer>
+    </>
   );
 };
 
 const Customers = () => {
   const [isLargerThan810] = useMediaQuery(`(min-width: 810px)`);
-  const navigate = useNavigate();
+
+  const { data: response, isLoading } = useUsersQuery();
+
+  const usersTable: TableData[] = response
+    ? response?.data.data.map(({ name, id, created_at, phone_number, profile_status }) => ({
+        name,
+        id,
+        created_at,
+        phone_number,
+        status: profile_status
+      }))
+    : [];
+
+  const tableHeaders = ['Customer name', '#ID', 'Date', 'Phone number', 'Account Status'];
 
   return (
     <>
@@ -168,7 +216,7 @@ const Customers = () => {
           textStyle={['base', 'xl']}
           color='black.DEFAULT'
         >
-          Customers (123)
+          Customers ({usersTable.length})
         </Text>
         <Link to={path.CUSTOMER_NEW}>
           <IconButton
@@ -204,189 +252,62 @@ const Customers = () => {
         >
           <TabPanel>
             <SearchInput />
-            <CustomerTable
-              headers={['Customer name', '#ID', 'Date', 'Phone number', 'Account Status']}
-              data={[
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'blocked'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'pending'
-                }
-              ]}
-            />
+            <CustomerTable headers={tableHeaders} data={usersTable} isLoading={isLoading} />
 
-            {['active', 'blocked', 'pending', 'active', 'blocked'].map((status) => (
-              <CustomerLink key={key()}>
+            {usersTable.map((customer) => (
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  phoneNumber='0901 294 4885'
-                  status={status}
+                  name={customer.name}
+                  id={customer.id}
+                  phoneNumber={customer.phone_number}
+                  status={customer.status || ''}
                 />
               </CustomerLink>
             ))}
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <CustomerTable
-              headers={['Customer name', '#ID', 'Date', 'Phone number', 'Account Status']}
-              data={[
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'active'
-                }
-              ]}
-            />
+            <CustomerTable headers={tableHeaders} data={usersTable} />
 
-            {['active', 'active', 'active', 'active', 'active'].map((status) => (
-              <CustomerLink key={key()}>
+            {usersTable.map((customer) => (
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  phoneNumber='0901 294 4885'
-                  status={status}
+                  name={customer.name}
+                  id={customer.id}
+                  phoneNumber={customer.phone_number}
+                  status={customer.status || ''}
                 />
               </CustomerLink>
             ))}
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <CustomerTable
-              headers={['Customer name', '#ID', 'Date', 'Phone number', 'Account Status']}
-              data={[
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'blocked'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'blocked'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'blocked'
-                }
-              ]}
-            />
+            <CustomerTable headers={tableHeaders} data={usersTable} />
 
-            {['blocked', 'blocked', 'blocked', 'blocked', 'blocked'].map((status) => (
-              <Box
-                display={['block', 'none']}
-                key={key()}
-                _hover={{
-                  bgColor: '#f3f3f3',
-                  cursor: 'pointer',
-                  transition: 'all .1s ease-in'
-                }}
-                onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
-              >
+            {usersTable.map((customer) => (
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  phoneNumber='0901 294 4885'
-                  status={status}
+                  name={customer.name}
+                  id={customer.id}
+                  phoneNumber={customer.phone_number}
+                  status={customer.status || ''}
                 />
-                <Divider color='gray.100' mt='18px' mb={4} />
-              </Box>
+              </CustomerLink>
             ))}
           </TabPanel>
           <TabPanel>
             <SearchInput />
-            <CustomerTable
-              headers={['Customer name', '#ID', 'Date', 'Phone number', 'Account Status']}
-              data={[
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'pending'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'pending'
-                },
-                {
-                  name: faker.name.fullName(),
-                  id: '00123R',
-                  date: '1st Jul, 2022',
-                  phoneNumber: faker.phone.number(),
-                  status: 'pending'
-                }
-              ]}
-            />
+            <CustomerTable headers={tableHeaders} data={usersTable} />
 
-            {['pending', 'pending', 'pending', 'pending', 'pending'].map((status) => (
-              <Box
-                display={['block', 'none']}
-                key={key()}
-                _hover={{
-                  bgColor: '#f3f3f3',
-                  cursor: 'pointer',
-                  transition: 'all .1s ease-in'
-                }}
-                onClick={() => navigate(path.CREDIT_OFFICER_USER_PROFILE)}
-              >
+            {usersTable.map((customer) => (
+              <CustomerLink key={key()} linkTo={`/customers/profile/${customer.id}`}>
                 <CustomerDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  phoneNumber='0901 294 4885'
-                  status={status}
+                  name={customer.name}
+                  id={customer.id}
+                  phoneNumber={customer.phone_number}
+                  status={customer.status || ''}
                 />
-                <Divider color='gray.100' mt='18px' mb={4} />
-              </Box>
+              </CustomerLink>
             ))}
           </TabPanel>
         </TabPanels>
@@ -401,10 +322,7 @@ interface CustomerWrapperProps {
   children: ReactNode;
   linkTo?: string;
 }
-const CustomerLink = ({
-  children,
-  linkTo = path.CREDIT_OFFICER_USER_PROFILE
-}: CustomerWrapperProps) => {
+const CustomerLink = ({ children, linkTo = path.CUSTOMERS }: CustomerWrapperProps) => {
   const navigate = useNavigate();
 
   return (

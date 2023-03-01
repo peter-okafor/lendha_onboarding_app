@@ -1,3 +1,5 @@
+import { loanSearch } from '@/app/services/misc';
+import { useLoansQuery } from '@/app/services/onboardingOfficer';
 import { TableBadge } from '@/components/badge';
 import { TransactionTable, TransactionTabList } from '@/components/common';
 import { SearchInput } from '@/components/common/';
@@ -7,6 +9,7 @@ import {
   Box,
   Divider,
   Flex,
+  Skeleton,
   Stack,
   TableContainer,
   TabPanel,
@@ -19,8 +22,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { faker } from '@faker-js/faker/locale/en_NG';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
 
@@ -72,7 +74,8 @@ const statusColor = (status: Status): Color => {
 
 interface LoanDetailProps {
   name: string;
-  id: string;
+  id: number;
+  appId: string;
   amount: number;
   status: Status | string;
 }
@@ -81,10 +84,10 @@ const LoanDetail = (props: LoanDetailProps) => {
     <Flex justifyContent='space-between' alignItems='center'>
       <Stack spacing='2px'>
         <Text fontWeight={500} textStyle='sm'>
-          {props.name}
+          {props.id}
         </Text>
         <Text color='gray.300' textStyle='xs'>
-          {props.id}
+          {props.appId}
         </Text>
       </Stack>
       <Stack spacing='2px'>
@@ -105,7 +108,8 @@ const LoanDetail = (props: LoanDetailProps) => {
 };
 
 interface TableData {
-  id: string;
+  id: number;
+  appId: string;
   name: string;
   date: string;
   amount: number;
@@ -114,58 +118,157 @@ interface TableData {
 interface LoanTableProps {
   headers: string[];
   data: TableData[];
+  isLoading?: boolean;
 }
-const LoanTable = (props: LoanTableProps) => {
+const LoanTable = ({ isLoading = false, ...props }: LoanTableProps) => {
   const navigate = useNavigate();
+  const { data } = props;
 
   return (
     <TableContainer maxH='800px' overflowY='auto' mt={[0, '24px']} display={['none', 'block']}>
       <TransactionTable>
         <Thead>
-          <Tr
-          // sx={{
-          //   'th:first-of-type': {
-          //     w: { base: '0', '2xl': '140px' }
-          //   }
-          // }}
-          >
+          <Tr>
             {props.headers.map((th) => (
               <Th key={key()}>{th}</Th>
             ))}
           </Tr>
         </Thead>
         <Tbody>
-          {props.data.map((loan) => (
-            <Tr
-              key={key()}
-              _hover={{
-                bgColor: '#f3f3f3',
-                cursor: 'pointer',
-                transition: 'all .1s ease-in'
-              }}
-              onClick={() => navigate(path.CREDIT_OFFICER_PAY_LOAN)}
-            >
-              <Td>{loan.id}</Td>
-              <Td>{loan.name}</Td>
-              <Td>{loan.date}</Td>
-              <Td>N{formatNumber(loan.amount)}</Td>
-              <Td>
-                <TableBadge
-                  bgColor={statusColor(loan.status).bgColor}
-                  color={statusColor(loan.status).color}
-                  text={loan.status}
-                  textTransform='uppercase'
-                />
+          {isLoading
+            ? Array.from({ length: 10 }, () => (
+                <Tr key={key()}>
+                  <Td>
+                    <Skeleton height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton height='50px'></Skeleton>
+                  </Td>
+                  <Td>
+                    <Skeleton height='50px'></Skeleton>
+                  </Td>
+                </Tr>
+              ))
+            : data.map((loan) => (
+                <Tr
+                  key={key()}
+                  _hover={{
+                    bgColor: '#f3f3f3',
+                    cursor: 'pointer',
+                    transition: 'all .1s ease-in'
+                  }}
+                  onClick={() => navigate(`/loans/${loan.id}`)}
+                >
+                  <Td>{loan.appId}</Td>
+                  <Td>{loan.name}</Td>
+                  <Td>{loan.date}</Td>
+                  <Td>N{formatNumber(loan.amount)}</Td>
+                  <Td>
+                    <TableBadge
+                      bgColor={statusColor(loan.status).bgColor}
+                      color={statusColor(loan.status).color}
+                      text={loan.status}
+                      textTransform='uppercase'
+                    />
+                  </Td>
+                </Tr>
+              ))}
+
+          {!isLoading && data.length < 1 && (
+            <Tr>
+              <Td colSpan={5} textAlign='center' sx={{ border: 'none !important' }}>
+                <Text as='span' textStyle='2xl' fontWeight={700}>
+                  No loans
+                </Text>
               </Td>
             </Tr>
-          ))}
+          )}
         </Tbody>
       </TransactionTable>
     </TableContainer>
   );
 };
 
+type LoanData = {
+  id: number;
+  application_id: string;
+  user_id: number;
+  created_at: string;
+  amount: number;
+  status: string;
+};
 const Loans = () => {
+  const [value, setValue] = useState('');
+  const { data: response, isLoading: isLoanLoading } = useLoansQuery();
+  const [isSearchingLoan, setIsSearchingLoan] = useState(false);
+
+  const [trigger] = loanSearch.useLazyQuerySubscription();
+
+  const allLoans = useMemo(() => {
+    if (response) {
+      return response.data.map((loan: LoanData) => ({
+        id: loan.id,
+        appId: loan.application_id,
+        name: loan.user_id.toString(),
+        date: loan.created_at,
+        amount: loan.amount,
+        status: loan.status
+      }));
+    }
+    return [];
+  }, [response]);
+
+  const [loansTable, setLoansTable] = useState(allLoans);
+
+  useEffect(() => {
+    setLoansTable(allLoans);
+  }, [allLoans]);
+
+  useEffect(() => {
+    const fetchedLoan = setTimeout(() => {
+      if (value.length > 2) {
+        setIsSearchingLoan(true);
+        trigger(
+          {
+            search: value
+          },
+          true
+        ).then((res: any) => {
+          setIsSearchingLoan(false);
+          setLoansTable(
+            res?.data?.data?.map((loan: LoanData) => ({
+              id: loan.id,
+              appId: loan.application_id,
+              name: loan.user_id.toString(),
+              date: loan.created_at,
+              amount: loan.amount,
+              status: loan.status
+            }))
+          );
+        });
+      } else {
+        setLoansTable(allLoans);
+      }
+    }, 400);
+
+    return () => clearTimeout(fetchedLoan);
+  }, [allLoans, trigger, value]);
+
+  const activeTable = loansTable.filter((loan) => loan.status === 'active');
+  const pendingTable = loansTable.filter((loan) => loan.status === 'pending');
+  const declinedTable = loansTable.filter((loan) => loan.status === 'declined');
+  const dueTable = loansTable.filter((loan) => loan.status === 'due');
+  const closedTable = loansTable.filter((loan) => loan.status === 'closed');
+  const defaultTable = loansTable.filter((loan) => loan.status === 'default');
+
+  const tableHeaders = ['#ID', 'Customer name', 'Date', 'Amount', 'Status'];
+
   return (
     <>
       <Text
@@ -175,7 +278,7 @@ const Loans = () => {
         textStyle={['base', 'xl']}
         color='black.DEFAULT'
       >
-        Loans (123)
+        Loans ({loansTable.length})
       </Text>
 
       <Tabs
@@ -205,239 +308,117 @@ const Loans = () => {
           }}
         >
           <TabPanel>
-            <SearchInput />
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
             <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'closed'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'default'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'declined'
-                }
-              ]}
+              headers={tableHeaders}
+              data={loansTable}
+              isLoading={isLoanLoading || isSearchingLoan}
             />
-            {['active', 'closed', 'pending', 'declined', 'default', 'due'].map((status) => (
-              <LoanLink key={key()}>
+
+            {loansTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status={status}
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'active'
-                }
-              ]}
-            />
-            {Array.from({ length: 5 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={activeTable} />
+
+            {activeTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='active'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'pending'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'pending'
-                }
-              ]}
-            />
-            {Array.from({ length: 5 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={pendingTable} />
+
+            {pendingTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='pending'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'declined'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'declined'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'declined'
-                }
-              ]}
-            />
-            {Array.from({ length: 5 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={declinedTable} />
+
+            {declinedTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='declined'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'due'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'due'
-                }
-              ]}
-            />
-            {Array.from({ length: 5 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={dueTable} />
+
+            {dueTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='due'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'closed'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'closed'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'closed'
-                }
-              ]}
-            />
-            {Array.from({ length: 5 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={closedTable} />
+
+            {closedTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='closed'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
           </TabPanel>
           <TabPanel>
-            <SearchInput />
-            <LoanTable
-              headers={['#ID', 'Customer name', 'Date', 'Amount', 'Status']}
-              data={[
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'defaul'
-                },
-                {
-                  id: '00123R',
-                  name: 'Oluwasegun Oloruntobi',
-                  date: '1st Jul, 2022',
-                  amount: 2000000,
-                  status: 'defaul'
-                }
-              ]}
-            />
-            {Array.from({ length: 2 }, () => (
-              <LoanLink key={key()}>
+            <SearchInput value={value} onChange={(e) => setValue(e.target.value)} />
+            <LoanTable headers={tableHeaders} data={defaultTable} />
+
+            {defaultTable.map((loan) => (
+              <LoanLink key={key()} linkTo={`/loans/${loan.id}`}>
                 <LoanDetail
-                  name={faker.name.fullName()}
-                  id='0231323'
-                  amount={20_000}
-                  status='default'
+                  name={loan.name}
+                  id={loan.id}
+                  appId={loan.appId}
+                  amount={loan.amount}
+                  status={loan.status}
                 />
               </LoanLink>
             ))}
@@ -454,7 +435,7 @@ interface LoanLinkProps {
   children: ReactNode;
   linkTo?: string;
 }
-const LoanLink = ({ children, linkTo = path.CREDIT_OFFICER_PAY_LOAN }: LoanLinkProps) => {
+const LoanLink = ({ children, linkTo = path.CREDIT_OFFICER_LOANS_DETAIL }: LoanLinkProps) => {
   const navigate = useNavigate();
 
   return (

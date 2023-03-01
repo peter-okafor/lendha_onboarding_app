@@ -1,10 +1,32 @@
+import {
+  useAddBankMutation,
+  useAddBusinessMutation,
+  useCreateAddressMutation,
+  useCreateUserMutation,
+  useProofOfResidenceMutation,
+  useUploadPhotographMutation,
+  useUploadValidIdMutation
+} from '@/app/services/onboardingOfficer';
 import { ReactComponent as DashedLine } from '@/assets/svg/dashed-line.svg';
 import { Alert, Card } from '@/components/common';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
-import { Box, BoxProps, Button, Divider, Flex, Icon, Link, Stack, Text } from '@chakra-ui/react';
+import ErrorMessages from '@/utils/components/ErrorMessages';
+import { sanitize } from '@/utils/helpers';
+import {
+  Box,
+  BoxProps,
+  Button,
+  Divider,
+  Flex,
+  Icon,
+  Link,
+  Stack,
+  Text,
+  useToast
+} from '@chakra-ui/react';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { IconType } from 'react-icons';
 import {
   RiArrowLeftLine,
@@ -14,6 +36,7 @@ import {
   RiUserFill
 } from 'react-icons/ri';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
+import { v4 as key } from 'uuid';
 import { CustomerSchema } from './@schema';
 import { BusinessInfoForm, PersonalInfoForm, VerificationInfoForm } from './components';
 import {
@@ -23,6 +46,13 @@ import {
 } from './types';
 
 const CustomerAddForm = () => {
+  const [proofOfResidence] = useProofOfResidenceMutation();
+  const [validId] = useUploadValidIdMutation();
+  const [photograph] = useUploadPhotographMutation();
+
+  const [userId, setUserId] = useState('');
+  const toast = useToast();
+
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4>(1);
 
   const navigate = useNavigate();
@@ -48,8 +78,14 @@ const CustomerAddForm = () => {
     }
   };
 
+  const [createUser] = useCreateUserMutation();
+  const [createAddress] = useCreateAddressMutation();
+  const [createBank] = useAddBankMutation();
+  const [createBusiness] = useAddBusinessMutation();
+
   const personalInfoFormik = useFormik<PersonalInfoFormValues>({
     initialValues: {
+      businessName: '',
       firstName: '',
       lastName: '',
       email: '',
@@ -65,8 +101,77 @@ const CustomerAddForm = () => {
       lga: '',
       state: ''
     },
-    onSubmit: async () => {
-      setActiveStep(2);
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const userResponse = await createUser({
+          business_name: values.businessName, // TODO: might probably remove this as it wasn't initially on UI
+          date_of_birth: values.dateOfBirth,
+          name: `${values.firstName} ${values.lastName}`,
+          password: '123456',
+          password_confirmation: '123456',
+          phone_number: values.phone,
+          referral_channel: '7'
+        }).unwrap();
+        setUserId(userResponse.data.user.id.toString());
+
+        toast({
+          title: 'Success',
+          description: userResponse.message || 'Account has been successfully registered',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const addressResponse = await createAddress({
+          number: values.addressNumber,
+          street_name: values.streetName,
+          landmark: values.nearestLandmark,
+          city: values.cityTown,
+          local_government: values.lga,
+          state: values.state,
+          user_id: userResponse.data.user.id
+        }).unwrap();
+        toast({
+          title: 'Success',
+          description: addressResponse.message || 'Address has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const residenceFormData = new FormData();
+        residenceFormData.append('residence_proof', values.proofOfResidence[0]);
+        residenceFormData.append('user_id', userId);
+
+        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: residenceResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(2);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: CustomerSchema.Personal
   });
@@ -77,13 +182,90 @@ const CustomerAddForm = () => {
       bvn: '',
       bankName: '',
       accountNumber: '',
-      accountName: 'John Doe',
+      accountName: '',
       utilityBillFile: '',
       idFile: '',
       passportPhotograph: ''
     },
-    onSubmit: async () => {
-      setActiveStep(3);
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const bankResponse = await createBank({
+          account_number: values.accountNumber,
+          bank: 'Zenith Bank',
+          bank_code: values.bankName,
+          bvn: values.bvn,
+          nin: values.nin,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: bankResponse.message || 'Bank has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const residenceFormData = new FormData();
+        residenceFormData.append('residence_proof', values.utilityBillFile[0]);
+        residenceFormData.append('user_id', userId);
+
+        const residenceResp = await proofOfResidence(residenceFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: residenceResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const idFormData = new FormData();
+        idFormData.append('user_id', userId);
+        idFormData.append('valid_id', values.idFile[0]);
+
+        const validIdResp = await validId(idFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: validIdResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        const photographFormData = new FormData();
+        photographFormData.append('user_id', userId);
+        photographFormData.append('passport_photo', values.passportPhotograph[0]);
+
+        const idResp = await photograph(photographFormData).unwrap();
+        toast({
+          title: 'Success',
+          description: idResp.message || 'Document has been uploaded',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        setActiveStep(3);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: CustomerSchema.Verification
   });
@@ -92,6 +274,7 @@ const CustomerAddForm = () => {
     initialValues: {
       businessName: '',
       businessCategory: '',
+      email: '',
       businessDesc: '',
       facebookHandle: '',
       twitterHandle: '',
@@ -106,7 +289,47 @@ const CustomerAddForm = () => {
       hasSourceOfIncome: 'no',
       isBusinessRegistered: 'no'
     },
-    onSubmit: async () => {
+    onSubmit: async (formValues) => {
+      const values = sanitize(formValues);
+
+      try {
+        const businessResponse = await createBusiness({
+          address_number: values.addressNumber,
+          business_name: values.businessName,
+          city: values.cityTown,
+          description: values.businessDesc,
+          email: values.email,
+          landmark: values.nearestLandmark,
+          state: values.state,
+          street: values.streetName,
+          user_id: userId
+        }).unwrap();
+
+        toast({
+          title: 'Success',
+          description: businessResponse.message || 'Business has been successfully added',
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+
+        // setActiveStep(4);
+      } catch (err: any) {
+        toast({
+          title: err?.data?.message || 'An error occurred',
+          description: err?.data?.errors ? (
+            <ErrorMessages errors={err?.data?.errors} />
+          ) : (
+            err?.data?.message
+          ),
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
+
       setActiveStep(4);
     },
     validationSchema: CustomerSchema.Business
@@ -296,7 +519,7 @@ const Stepper = ({ activeStep, steps }: StepperProps) => {
         }
 
         return (
-          <>
+          <Fragment key={key()}>
             <Circle
               icon={step.icon}
               isCompleted={activeStep - 1 > index}
@@ -305,7 +528,7 @@ const Stepper = ({ activeStep, steps }: StepperProps) => {
               text={step.text}
             />
             {index !== steps.length - 1 && <DashedLine />}
-          </>
+          </Fragment>
         );
       })}
     </>

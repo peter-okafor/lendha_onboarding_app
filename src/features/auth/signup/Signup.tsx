@@ -1,12 +1,14 @@
 import { SignupRequest as SignupPayload, useSignupMutation } from '@/app/services/auth';
+import { useReferralChannelsQuery } from '@/app/services/misc';
 import { ReactComponent as Underline } from '@/assets/svg/yellow-underline-sm.svg';
 import AuthCard from '@/components/auth/AuthCard';
 import { FormInput, FormLeftAddonInput, FormSelect, PasswordInput } from '@/components/common';
 import { SuccessMessage as VerifyMessage } from '@/components/message';
 import { path } from '@/routes/path';
+import ErrorMessages from '@/utils/components/ErrorMessages';
+import { sanitize } from '@/utils/helpers';
 import { Box, Button, Flex, Link, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
-import { escape, mapValues } from 'lodash';
 import { useState } from 'react';
 import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
 import VerifyEmailForm from './components/VerifyEmail';
@@ -47,7 +49,7 @@ const Signup = () => {
       referral: ''
     },
     onSubmit: async (formValues) => {
-      const values = mapValues(formValues, (value) => escape(value));
+      const values = sanitize<SignupFormValues>(formValues);
 
       try {
         const payload: SignupPayload = {
@@ -61,11 +63,11 @@ const Signup = () => {
           referral_channel: values.referral
         };
 
-        await signup(payload).unwrap();
+        const response = await signup(payload).unwrap();
 
         toast({
           title: 'Success',
-          description: 'You have successfully signed up',
+          description: response.message || 'You have successfully signed up',
           status: 'success',
           duration: 4000,
           position: 'top-right',
@@ -75,8 +77,8 @@ const Signup = () => {
         router(path.SIGNIN);
       } catch (err: any) {
         toast({
-          title: 'An error occured',
-          description: err?.data?.error || err?.data?.message,
+          title: err?.data?.message || 'An error occurred',
+          description: <ErrorMessages errors={err?.data.errors} />,
           status: 'error',
           duration: 4000,
           position: 'top-right',
@@ -88,6 +90,9 @@ const Signup = () => {
   });
 
   const { values, errors, touched, handleChange, isSubmitting } = formik;
+
+  const { data } = useReferralChannelsQuery();
+  const referralChannels = (data?.data || []).map(({ id, name }) => ({ value: id, label: name }));
 
   return (
     <>
@@ -231,16 +236,7 @@ const Signup = () => {
                     onChange={handleChange}
                     errorMessage={errors.referral}
                     touchedField={touched.referral}
-                    options={[
-                      { value: '', label: 'Select referral channel' },
-                      { value: '1', label: 'Facebook' },
-                      { value: '2', label: 'Instagram' },
-                      { value: '3', label: 'Twitter' },
-                      { value: '4', label: 'Google' },
-                      { value: '5', label: 'LinkedIn' },
-                      { value: '6', label: 'Medium' },
-                      { value: '7', label: 'Other' }
-                    ]}
+                    options={[{ value: '', label: 'Select referral channel' }, ...referralChannels]}
                   />
                   <Stack>
                     <Text textStyle='xs' color='gray.300'>

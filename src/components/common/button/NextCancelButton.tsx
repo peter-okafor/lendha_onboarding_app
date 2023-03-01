@@ -1,25 +1,4 @@
-import { ReactComponent as Spinner } from '@/assets/svg/spinner.svg';
 import { Button } from '@chakra-ui/react';
-import styled from '@emotion/styled';
-import { useState } from 'react';
-
-const SpinnerStyle = styled.div`
-  svg {
-    animation-name: spin;
-    animation-duration: 1000ms;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-`;
 
 export interface NextCancelProps {
   cancelBtnText?: string;
@@ -28,10 +7,13 @@ export interface NextCancelProps {
   onCancel?: () => void;
   onNext?: () => void;
   hasErrors?: boolean;
+  isSubmitting?: boolean;
 }
-const NextCancelButton = ({ showCancelBtn = true, ...props }: NextCancelProps) => {
-  const [loading] = useState(false);
-
+const NextCancelButton = ({
+  showCancelBtn = true,
+  isSubmitting = false,
+  ...props
+}: NextCancelProps) => {
   return (
     <>
       {showCancelBtn && (
@@ -40,30 +22,15 @@ const NextCancelButton = ({ showCancelBtn = true, ...props }: NextCancelProps) =
         </Button>
       )}
       <Button
-        disabled={loading}
+        isLoading={isSubmitting}
         size='md'
         type='submit'
         w='full'
         onClick={() => {
-          // if (props.hasErrors) {
-          //   return setLoading(false);
-          // }
-          // setLoading(true);
-
-          // setTimeout(() => {
-          //   setLoading(false);
-          //   if (props.onNext) props.onNext();
-          // }, 2000);
           if (props.onNext) props.onNext();
         }}
       >
-        {loading ? (
-          <SpinnerStyle>
-            <Spinner />{' '}
-          </SpinnerStyle>
-        ) : (
-          props.nextBtnText || 'Next'
-        )}
+        {props.nextBtnText || 'Next'}
       </Button>
     </>
   );

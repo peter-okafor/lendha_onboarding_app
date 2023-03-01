@@ -17,7 +17,7 @@ const App = () => {
           }}
         >
           <Spinner size='xl'>
-            <img src={logo} alt='logo' width='150px' height='150px' />
+            <img src={logo} alt='Logo' width='150px' height='150px' />
           </Spinner>
         </p>
       }

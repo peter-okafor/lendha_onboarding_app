@@ -52,6 +52,15 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
             value={values.businessName}
             type='text'
           />
+          <FormInput
+            name='email'
+            label='Email'
+            errorMessage={errors.email}
+            handleChange={handleChange}
+            touchedField={touched.email}
+            value={values.email}
+            type='text'
+          />
           <FormSelect
             label='Business category'
             name='businessCategory'
@@ -206,7 +215,7 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
                   value={values.regNumber}
                 />
 
-                <DropzoneFileUpload
+                {/* <DropzoneFileUpload
                   name='certOfIncorporationFile'
                   setFieldValue={setFieldValue}
                   label='Upload your Certification of Incorporation'
@@ -221,7 +230,7 @@ const BusinessInfoForm = ({ formik, ...props }: Props) => {
                   touchedField={touched.memorandumFile}
                   errorMessage={errors.memorandumFile}
                   fileSize={5}
-                />
+                /> */}
               </Stack>
             </>
           )}

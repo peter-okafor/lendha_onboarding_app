@@ -1,24 +1,21 @@
-import { authApi, User } from '@/app/services/auth';
-import { RootState } from '@/app/store';
-import { encryptToken } from '@/utils/helpers/token.helpers';
+import { login, logout, Officer } from '@/app/services/auth';
+import { profile } from '@/app/services/onboardingOfficer';
 import { createSlice } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 
 const initialState = {
-  user: null,
+  officer: null,
   token: '',
   isAuthenticated: false
-} as { user: User | null; token: string; isAuthenticated: boolean };
+} as { officer: Officer | null; token: string; isAuthenticated: boolean };
 
 const slice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    logout: () => initialState
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, { payload }) => {
-      const token = encryptToken(payload.access_token);
+    builder.addMatcher(login.matchFulfilled, (state, { payload }) => {
+      const token = payload.access_token;
       Cookies.set('token', token, {
         sameSite: 'strict'
         // expires: new Date(new Date(payload.expires_at).getTime())
@@ -26,10 +23,19 @@ const slice = createSlice({
 
       state.token = token;
     });
+
+    builder.addMatcher(profile.matchFulfilled, (state, { payload }) => {
+      state.officer = payload;
+    });
+
+    builder.addMatcher(logout.matchFulfilled, (state) => {
+      Cookies.remove('token');
+
+      state.token = '';
+    });
   }
 });
 
-export const { logout } = slice.actions;
 export default slice.reducer;
 
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+// export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;

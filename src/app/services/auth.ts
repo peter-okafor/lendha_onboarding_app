@@ -1,11 +1,17 @@
 import { api } from './api';
+import { ENDPOINTS as e } from './_endpoints';
 
-export interface User {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  password?: string;
+export interface Officer {
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    phone_number: string;
+    date_of_birth: string;
+    state_of_residence: string;
+    gender: string;
+    address: string;
+  };
 }
 
 export interface LoginRequest {
@@ -38,25 +44,36 @@ export interface SignupResponse {
   };
 }
 
-export interface SignupResponseError {
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetResponse {
   message: string;
-  errors: {
-    [key: string]: string[];
-  }[];
 }
 
 export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => ({
-        url: 'auth/login',
+        url: e.login,
         method: 'POST',
         body: credentials
       })
     }),
+    logout: build.query({
+      query: () => e.logout
+    }),
     signup: build.mutation<SignupResponse, SignupRequest>({
       query: (credentials) => ({
-        url: 'auth/signup',
+        url: e.signup,
+        method: 'POST',
+        body: credentials
+      })
+    }),
+    passwordReset: build.mutation<PasswordResetResponse, PasswordResetRequest>({
+      query: (credentials) => ({
+        url: e.passwordReset,
         method: 'POST',
         body: credentials
       })
@@ -64,8 +81,9 @@ export const authApi = api.injectEndpoints({
   })
 });
 
-export const { useLoginMutation, useSignupMutation } = authApi;
+export const { useLoginMutation, useSignupMutation, usePasswordResetMutation, useLogoutQuery } =
+  authApi;
 
 export const {
-  endpoints: { login }
+  endpoints: { login, logout }
 } = authApi;

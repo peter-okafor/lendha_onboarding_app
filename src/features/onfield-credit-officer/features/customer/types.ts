@@ -1,6 +1,7 @@
 import { Address } from '@/types';
 
 export type PersonalInfoFormValues = {
+  businessName: string; // TODO: might remove this later (reason: not present on UI but on backend)
   firstName: string;
   lastName: string;
   email: string;
@@ -26,6 +27,7 @@ export type BusinessInfoFormValues = {
   businessName: string;
   businessCategory: string;
   businessDesc: string;
+  email: string;
   facebookHandle: string;
   twitterHandle: string;
   instagramHandle: string;
@@ -33,7 +35,7 @@ export type BusinessInfoFormValues = {
   businessLocationFile?: string;
   hasSourceOfIncome: 'yes' | 'no';
   regNumber?: string;
-  certOfIncorporationFile?: string;
-  memorandumFile?: string;
+  // certOfIncorporationFile?: string;
+  // memorandumFile?: string;
   sourceOfIncomeDesc?: string;
 } & Address;

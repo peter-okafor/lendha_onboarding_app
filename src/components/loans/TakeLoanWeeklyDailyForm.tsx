@@ -1,6 +1,14 @@
+import { useAppSelector } from '@/app/hooks';
+import { useLoanApplyMutation } from '@/app/services/onboardingOfficer';
 import { FormInput, FormSelect, NextCancelButton } from '@/components/common';
-import { formatNumber, isObjectPropsEmpty, maskCurrency, stripCommas } from '@/utils/helpers';
-import { Box, Button, Icon, InputRightElement, Stack, Text } from '@chakra-ui/react';
+import {
+  formatNumber,
+  isObjectPropsEmpty,
+  maskCurrency,
+  sanitize,
+  stripCommas
+} from '@/utils/helpers';
+import { Box, Button, Icon, InputRightElement, Stack, Text, useToast } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useEffect } from 'react';
 import { RiBriefcaseFill } from 'react-icons/ri';
@@ -15,23 +23,55 @@ interface Props {
   showCancelBtn?: boolean;
 }
 interface TakeLoanValues {
-  paymentType: '' | 'daily' | 'weekly';
-  amount: string;
-  loanPeriod: string;
-  interestRate: '3%' | '3.6%';
+  paymentType: number;
+  amount: number;
+  loanPeriod: number;
+  interestRate: number;
 }
 
 const TakeLoanWeeklyDailyForm = (props: Props) => {
+  const toast = useToast();
+
+  const floatInterests = useAppSelector((state) => state.loan.loanInterests.slice(3));
+
+  const [loanApply] = useLoanApplyMutation();
+
   const formik = useFormik<TakeLoanValues>({
     initialValues: {
-      paymentType: '',
-      amount: '',
-      loanPeriod: '30 days',
-      interestRate: '3%'
+      paymentType: 1,
+      amount: 0,
+      loanPeriod: 1,
+      interestRate: 5
     },
-    onSubmit: async (values) => {
-      console.log(values);
-      props.onSubmit();
+    onSubmit: async (formValues) => {
+      const values = sanitize<TakeLoanValues>(formValues);
+      try {
+        const response = await loanApply({
+          loan_amount: values.amount,
+          loan_interest_id: values.interestRate,
+          loan_term: values.loanPeriod,
+          user_id: 21 //TODO: remove after getting user creation flow from Peter
+        }).unwrap();
+
+        toast({
+          title: 'Loan Application',
+          description: response?.message,
+          status: 'success',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+        props.onSubmit();
+      } catch (err: any) {
+        toast({
+          title: 'Loan Application Error',
+          description: err?.data?.message || 'An error occurred',
+          status: 'error',
+          duration: 4000,
+          position: 'top-right',
+          isClosable: true
+        });
+      }
     },
     validationSchema: Yup.object<Record<keyof TakeLoanValues, Yup.AnySchema>>({
       paymentType: Yup.string().required('Payment Type is required'),
@@ -43,27 +83,17 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
       interestRate: Yup.string().required('Interest Rate is required')
     })
   });
-  const { values, errors, touched, handleChange, setFieldValue } = formik;
-
-  useEffect(() => {
-    switch (values.paymentType) {
-      case 'daily':
-        setFieldValue('interestRate', '3%');
-        break;
-      case 'weekly':
-        setFieldValue('interestRate', '3.6%');
-        break;
-      default:
-        setFieldValue('interestRate', '3%');
-        break;
-    }
-  }, [setFieldValue, values.paymentType]);
+  const { values, errors, touched, handleChange, setFieldValue, isSubmitting } = formik;
 
   const handleInputChange = (e: any /**TODO: fix this type**/) => {
     const amount: number | '' = Number(stripCommas(maskCurrency(e.target.value))) || '';
 
     setFieldValue('amount', Number(amount) || '');
   };
+
+  useEffect(() => {
+    setFieldValue('interestRate', 5);
+  }, [setFieldValue]);
 
   return (
     <>
@@ -83,8 +113,14 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
                 label='Payment Type'
                 options={[
                   { value: '', label: '' },
-                  { value: 'daily', label: 'Daily Payment (3% total interest)' },
-                  { value: 'weekly', label: 'Weekly Payment (3.6% total interest)' }
+                  {
+                    value: floatInterests[0]?.id.toString(),
+                    label: `Daily Payment (${floatInterests[0]?.interest}% total interest)`
+                  },
+                  {
+                    value: floatInterests[1]?.id.toString(),
+                    label: `Weekly Payment (${floatInterests[1]?.interest}% total interest)`
+                  }
                 ]}
                 errorMessage={errors.paymentType}
                 touchedField={touched.paymentType}
@@ -120,7 +156,7 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
                 errorMessage={errors.loanPeriod}
                 touchedField={touched.loanPeriod}
                 handleChange={handleChange}
-                value={values.loanPeriod}
+                value={values.loanPeriod.toString()}
                 readonly
               />
               <FormInput
@@ -128,8 +164,8 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
                 name='interestRate'
                 id='interest-rate'
                 readonly
-                value={values.interestRate}
-                handleChange={handleChange}
+                value={values.interestRate.toString()}
+                // handleChange={handleChange}
                 touchedField={touched.interestRate}
                 errorMessage={errors.interestRate}
               />
@@ -141,6 +177,7 @@ const TakeLoanWeeklyDailyForm = (props: Props) => {
                 </Button>
               ) : (
                 <NextCancelButton
+                  isSubmitting={isSubmitting}
                   showCancelBtn={props.showCancelBtn}
                   onCancel={props.onGoBack}
                   hasErrors={Object.keys(errors).length > 0 || isObjectPropsEmpty(values)}

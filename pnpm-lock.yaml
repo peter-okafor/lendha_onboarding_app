@@ -28,7 +28,6 @@ specifiers:
   '@vitejs/plugin-react': ^2.0.0
   '@vitest/ui': ^0.20.3
   apexcharts: ^3.35.4
-  crypto-js: ^4.1.1
   danger: ^11.2.0
   date-fns: ^2.29.2
   dompurify: ^2.4.0
@@ -84,7 +83,6 @@ dependencies:
   '@types/react-redux': 7.1.24
   '@types/react-slick': 0.23.10
   apexcharts: 3.35.4
-  crypto-js: 4.1.1
   date-fns: 2.29.2
   dompurify: 2.4.0
   formik: 2.2.9_react@18.2.0
@@ -2589,10 +2587,6 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
-
-  /crypto-js/4.1.1:
-    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
-    dev: false
 
   /css-box-model/1.2.1:
     resolution: {integrity: sha512-a7Vr4Q/kd/aw96bnJG332W9V9LkJO69JRcaCYDUqjp6/z0w6VcZjgAcTbgFxEPfBgdnAwlh3iwu+hLopa+flJw==}

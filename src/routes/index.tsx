@@ -12,6 +12,10 @@ const CreditOfficerCustomerAddForm = lazy(
   () => import('@/features/onfield-credit-officer/features/customer/CustomerAddForm')
 );
 
+const CreditOfficerUserProfile = lazy(
+  () => import('@/features/onfield-credit-officer/features/user-profile/UserProfile')
+);
+
 export default function LendhaRouter() {
   return useRoutes([
     AuthRoutes,
@@ -23,6 +27,7 @@ export default function LendhaRouter() {
       children: [
         { path: path.CUSTOMERS, element: <CreditOfficerCustomers /> },
         { path: path.CUSTOMER_NEW, element: <CreditOfficerCustomerAddForm /> },
+        { path: path.CUSTOMER_PROFILE, element: <CreditOfficerUserProfile /> },
         { path: '*', element: <Navigate to={path.CUSTOMERS} replace /> }
       ]
     },

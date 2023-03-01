@@ -5,6 +5,7 @@ import {
   toggleSearchNav
 } from '@/app/appSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { useProfileQuery } from '@/app/services/onboardingOfficer';
 import { ReactComponent as MobileLogoSVG } from '@/assets/svg/logo/logo-blue-mobile.svg';
 import { path } from '@/routes/path';
 import { globalStyles } from '@/theme/styles';
@@ -21,7 +22,7 @@ import {
   RiSearchLine
 } from 'react-icons/ri';
 import { useLocation } from 'react-router-dom';
-import { useOnClickOutside, useReadLocalStorage } from 'usehooks-ts';
+import { useOnClickOutside } from 'usehooks-ts';
 import { BadgeIconLabel } from '../badge';
 import ProfileDropdown from '../dropdown/ProfileDropdown';
 import ActivateAccountLink from './ActivateAccountLink';
@@ -34,39 +35,34 @@ const Navbar = () => {
   const pathname = useLocation().pathname;
   const [pageTitle, setPageTitle] = useState('');
 
-  const userEmail = useReadLocalStorage('email');
-  const isCreditOfficer = userEmail === 'creditofficer@email.com';
-
   useEffect(() => {
-    if (isCreditOfficer) {
-      switch (pathname) {
-        case path.CUSTOMERS:
-          setPageTitle('Customer');
-          break;
-        case path.CUSTOMER_NEW:
-          setPageTitle('Customer');
-          break;
-        case path.CREDIT_OFFICER_TAKE_LOAN:
-          setPageTitle('Loans');
-          break;
-        case path.CREDIT_OFFICER_PAY_LOAN:
-          setPageTitle('Loans');
-          break;
-        case path.CREDIT_OFFICER:
-          setPageTitle('Credit Officer');
-          break;
-        case path.CREDIT_OFFICER_USER_PROFILE:
-          setPageTitle('User profile');
-          break;
-        case path.CREDIT_OFFICER_LOANS:
-          setPageTitle('Loans');
-          break;
-        default:
-          setPageTitle(stripSlashes(stripDashes(pathname.split('/')[1])));
-          break;
-      }
+    switch (pathname) {
+      case path.CUSTOMERS:
+        setPageTitle('Customer');
+        break;
+      case path.CUSTOMER_NEW:
+        setPageTitle('Customer');
+        break;
+      case path.CREDIT_OFFICER_TAKE_LOAN:
+        setPageTitle('Loans');
+        break;
+      case path.CREDIT_OFFICER_PAY_LOAN:
+        setPageTitle('Loans');
+        break;
+      case path.CREDIT_OFFICER:
+        setPageTitle('Credit Officer');
+        break;
+      case path.CUSTOMER_PROFILE:
+        setPageTitle('User profile');
+        break;
+      case path.CREDIT_OFFICER_LOANS:
+        setPageTitle('Loans');
+        break;
+      default:
+        setPageTitle(stripSlashes(stripDashes(pathname.split('/')[1])));
+        break;
     }
-  }, [isCreditOfficer, pathname]);
+  }, [pathname]);
 
   const dispatch = useAppDispatch();
 
@@ -83,6 +79,8 @@ const Navbar = () => {
   };
 
   useOnClickOutside(ref, handleClickOutside);
+
+  const { data: officerProfile } = useProfileQuery();
 
   return (
     <>
@@ -107,18 +105,6 @@ const Navbar = () => {
           </Text>
 
           <Stack spacing={4} direction='row' alignItems='center'>
-            {/* <InputGroup mr='44px'>
-              <InputLeftElement pointerEvents='none'>
-                <RiSearchLine color='#A2A2A2' />
-              </InputLeftElement>
-              <Input
-                type='search'
-                bgColor='white'
-                border='none'
-                placeholder='Search'
-                maxW='344px'
-              />
-            </InputGroup> */}
             <Flex>
               <Box as='button' onClick={handleClickInside}>
                 <BadgeIconLabel
@@ -133,7 +119,10 @@ const Navbar = () => {
               <RiQuestionFill fontSize='24px' color={globalStyles.colors.gray[300]} />
             </Box>
 
-            <ProfileDropdown email='johndoe@mail.com' name='John Doe' />
+            <ProfileDropdown
+              email={officerProfile?.data.email || ''}
+              name={officerProfile?.data.name || ''}
+            />
           </Stack>
         </Flex>
         <Box border='1px solid #eeeef0' my={5} />
