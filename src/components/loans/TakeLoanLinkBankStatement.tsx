@@ -1,11 +1,5 @@
 import { ReactComponent as Spinner } from '@/assets/svg/spinner.svg';
-import {
-  Card,
-  DropzoneFileUpload,
-  FormError,
-  FormInput,
-  NextCancelButton
-} from '@/components/common';
+import { Card, DropzoneFileUpload, FormError, NextCancelButton } from '@/components/common';
 import FormTextArea from '@/components/common/input/form-textarea';
 import { SpinnerStyle } from '@/components/styles';
 import { isObjectPropsEmpty, URL_PATTERN } from '@/utils/helpers';
@@ -13,7 +7,6 @@ import { Box, BoxProps, Button, Flex, Stack, Text } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { RiCheckboxCircleLine } from 'react-icons/ri';
-import { useReadLocalStorage } from 'usehooks-ts';
 import * as Yup from 'yup';
 
 interface Props extends BoxProps {
@@ -43,9 +36,6 @@ const TakeLoanLinkBankStatement = ({
   const [bankLinkLoading, setBankLinkLoading] = useState(false);
   const [bankLinkSuccess, setBankLinkSuccess] = useState(false);
 
-  const userEmail = useReadLocalStorage('email');
-  const hasLoan = userEmail === 'johndoe@email.com';
-
   const formik = useFormik<BankStatementValues>({
     initialValues: {
       reason: '',
@@ -72,7 +62,8 @@ const TakeLoanLinkBankStatement = ({
           bankStatementFile: Yup.mixed()
         })
       : Yup.object<Record<keyof BankStatementValues, Yup.AnySchema>>({
-          reason: Yup.string().required('Please fill this field'),
+          reason: Yup.string(),
+          //.required('Please fill this field'),
           facebookHandle: Yup.string().matches(URL_PATTERN, 'Enter a valid URL'),
           // .required('Facebook Handle is required'),
           twitterHandle: Yup.string().matches(URL_PATTERN, 'Enter a valid URL'),
@@ -80,7 +71,8 @@ const TakeLoanLinkBankStatement = ({
           instagramHandle: Yup.string().matches(URL_PATTERN, 'Enter a valid URL'),
           // .required('Instagram Handle is required')
           hasLinkedBankStatement: Yup.boolean().oneOf([true], 'Link your bank statement'),
-          bankStatementFile: Yup.mixed().required('Upload your bank statement')
+          bankStatementFile: Yup.mixed()
+          //.required('Upload your bank statement')
         })
   });
   const { values, errors, touched, handleChange, setFieldValue } = formik;
@@ -109,43 +101,6 @@ const TakeLoanLinkBankStatement = ({
                 value={values.reason}
                 handleChange={handleChange}
               />
-              {!hasLoan && showSocialHandles && (
-                <>
-                  <FormInput
-                    id='facebookHandle'
-                    name='facebookHandle'
-                    label='Facebook Handle'
-                    placeholder='http://www.facebook.com/'
-                    errorMessage={errors.facebookHandle}
-                    touchedField={touched.facebookHandle}
-                    value={values.facebookHandle}
-                    handleChange={handleChange}
-                    type='url'
-                  />
-                  <FormInput
-                    id='twitterHandle'
-                    name='twitterHandle'
-                    label='Twitter Handle'
-                    placeholder='http://www.twitter.com/'
-                    errorMessage={errors.twitterHandle}
-                    touchedField={touched.twitterHandle}
-                    value={values.twitterHandle}
-                    handleChange={handleChange}
-                    type='url'
-                  />
-                  <FormInput
-                    id='instagramHandle'
-                    name='instagramHandle'
-                    label='Instagram Handle'
-                    placeholder='http://www.instagram.com/'
-                    errorMessage={errors.instagramHandle}
-                    touchedField={touched.instagramHandle}
-                    value={values.instagramHandle}
-                    handleChange={handleChange}
-                    type='url'
-                  />
-                </>
-              )}
               <Box>
                 {showSocialHandles ? (
                   <Button
