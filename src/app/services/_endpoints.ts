@@ -1,3 +1,6 @@
+/**
+ * URIs are listed here
+ */
 export const ENDPOINTS = {
   login: 'auth/login',
   logout: 'auth/logout',
