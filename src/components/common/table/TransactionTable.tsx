@@ -8,7 +8,7 @@ const TransactionTable = (props: Props) => {
   return (
     <Table
       sx={{
-        tableLayout: 'fixed',
+        // tableLayout: 'fixed',
         th: {
           color: 'gray.400',
           fontWeight: 500,

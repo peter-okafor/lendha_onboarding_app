@@ -1,6 +1,7 @@
+import { useAppSelector } from '@/app/hooks';
 import { Card, FormInput, NextCancelButton } from '@/components/common';
 import { NextCancelProps } from '@/components/common/button/NextCancelButton';
-import { isObjectPropsEmpty } from '@/utils/helpers';
+import { formatCurrency, isObjectPropsEmpty } from '@/utils/helpers';
 import { Stack } from '@chakra-ui/react';
 import { Form, FormikProvider, useFormik } from 'formik';
 interface Props {
@@ -18,6 +19,9 @@ interface TakeLoanDetailsFormValues {
   amountToPay: string;
 }
 const TakeLoanDetails = ({ onCancel, onSubmit, showCancelBtn = true, formButtonProps }: Props) => {
+  const { loan_amount, loan_interest_id, loan_term } = useAppSelector(
+    (state) => state.loan.loanRequest
+  );
   const formik = useFormik<TakeLoanDetailsFormValues>({
     initialValues: {
       loanAmount: 'N1,200,000',
@@ -50,7 +54,7 @@ const TakeLoanDetails = ({ onCancel, onSubmit, showCancelBtn = true, formButtonP
               label='Loan amount'
               errorMessage={errors.loanAmount}
               touchedField={touched.loanAmount}
-              value={values.loanAmount}
+              value={formatCurrency(loan_amount).toString()}
               handleChange={handleChange}
             />
             <FormInput
@@ -70,7 +74,7 @@ const TakeLoanDetails = ({ onCancel, onSubmit, showCancelBtn = true, formButtonP
               label='Loan period'
               errorMessage={errors.period}
               touchedField={touched.period}
-              value={values.period}
+              value={`${loan_term} month${loan_term > 1 ? 's' : ''}`}
               handleChange={handleChange}
             />
             <FormInput
@@ -80,10 +84,10 @@ const TakeLoanDetails = ({ onCancel, onSubmit, showCancelBtn = true, formButtonP
               label='Interest rate'
               errorMessage={errors.interestRate}
               touchedField={touched.interestRate}
-              value={values.interestRate}
+              value={loan_interest_id.toString()}
               handleChange={handleChange}
             />
-            <FormInput
+            {/* <FormInput
               readonly
               id='amount-to-pay'
               name='amountToPay'
@@ -92,7 +96,7 @@ const TakeLoanDetails = ({ onCancel, onSubmit, showCancelBtn = true, formButtonP
               touchedField={touched.amountToPay}
               value={values.amountToPay}
               handleChange={handleChange}
-            />
+            /> */}
           </Stack>
           <Stack direction='row' mt='22px' gap={3}>
             <NextCancelButton

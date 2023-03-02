@@ -22,10 +22,11 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
+import { format } from 'date-fns';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as key } from 'uuid';
-import { format } from 'date-fns';
+
 
 
 type Status = 'active' | 'pending' | 'declined' | 'due' | 'closed' | 'default' | string;
@@ -149,7 +150,9 @@ const LoanTable = (props: LoanTableProps) => {
               >
                 <Td>{loan.appId}</Td>
                 <Td>{loan.name}</Td>
-                <Td>{format(new Date(loan.date), 'MMMM d, yyyy h:mma')}</Td>
+                <Td title={format(new Date(loan.date), 'MMMM d, yyyy h:mm a')}>
+                  {format(new Date(loan.date), 'MMMM d, yyyy h:mm a')}
+                </Td>
                 <Td>N{formatNumber(loan.amount)}</Td>
                 <Td>
                   <TableBadge
@@ -186,20 +189,22 @@ type LoanData = {
 };
 const Loans = () => {
   const [value, setValue] = useState('');
-  const { data: response, isLoading } = useLoansQuery();
+  const { data: response, isLoading, isFetching } = useLoansQuery();
 
   const [trigger] = loanSearch.useLazyQuerySubscription();
 
   const allLoans = useMemo(() => {
     if (response) {
-      return response.data.map((loan: LoanData) => ({
-        id: loan.id,
-        appId: loan.application_id,
-        name: loan.user_id.toString(),
-        date: loan.created_at,
-        amount: loan.amount,
-        status: loan.status
-      }));
+      return response.data
+        .map((loan: LoanData) => ({
+          id: loan.id,
+          appId: loan.application_id,
+          name: loan.user_id.toString(),
+          date: loan.created_at,
+          amount: loan.amount,
+          status: loan.status
+        }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }
     return [];
   }, [response]);
@@ -220,14 +225,19 @@ const Loans = () => {
           true
         ).then((res: any) => {
           setLoansTable(
-            res?.data?.data?.map((loan: LoanData) => ({
-              id: loan.id,
-              appId: loan.application_id,
-              name: loan.user_id.toString(),
-              date: loan.created_at,
-              amount: loan.amount,
-              status: loan.status
-            }))
+            res?.data?.data
+              ?.map((loan: LoanData) => ({
+                id: loan.id,
+                appId: loan.application_id,
+                name: loan.user_id.toString(),
+                date: loan.created_at,
+                amount: loan.amount,
+                status: loan.status
+              }))
+              .sort(
+                (a: { date: Date }, b: { date: Date }) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              )
           );
         });
       } else {
@@ -249,7 +259,7 @@ const Loans = () => {
 
   return (
     <>
-      <Skeleton isLoaded={!isLoading} h='40px' w='100px'>
+      <Skeleton isLoaded={!isLoading} h='40px' minW='100px'>
         <Text
           ml={{ base: 3, lg: 0 }}
           fontFamily={['Nunito', 'Poppins']}
@@ -275,7 +285,7 @@ const Loans = () => {
           <TransactionTabList tabs={['All', 'Active', 'Declined', 'Due', 'Closed', 'Default']} />
         </Skeleton>
 
-        <Skeleton isLoaded={!isLoading}>
+        <Skeleton isLoaded={!isLoading || !isFetching}>
           <TabPanels
             className='lendha__container'
             sx={{

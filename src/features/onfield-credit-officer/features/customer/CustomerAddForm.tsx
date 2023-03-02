@@ -599,7 +599,7 @@ const CustomerAddForm = () => {
       )
     },
     {
-      label: 'Guarantor Information',
+      label: 'Next of Kin Information',
       component: (
         <NextOfKinForm formik={nextOfKinFormik} onBack={() => setActiveStep(activeStep - 1)} />
       )
@@ -693,7 +693,7 @@ const CustomerAddForm = () => {
             { icon: 4, text: 'Business Reg.' },
             { icon: 5, text: 'Verification' },
             { icon: 6, text: 'Documents' },
-            { icon: 7, text: 'Guarantor' },
+            { icon: 7, text: 'Next of Kin' },
             { icon: 8, text: 'Social Media Handles' }
           ]}
         />
