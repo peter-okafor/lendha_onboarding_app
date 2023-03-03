@@ -6,6 +6,7 @@ import { Flex, Image, Stack, useDisclosure, useMediaQuery } from '@chakra-ui/rea
 import { useParams } from 'react-router-dom';
 import { Avatar, LoanHistoryTable, LoanInfo, LoanInfoContainer } from '../../components';
 import { LoanAction } from '../loans';
+import { format } from 'date-fns';
 
 const UserProfile = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -20,11 +21,11 @@ const UserProfile = () => {
   const { data: response } = useGetUserDetailQuery({ user_id: Number(id) });
 
   const user = response?.data;
-
   const bank = user?.bank;
   const homeAddress = user?.home_address;
   const business = user?.business;
   const socialMedia = user?.social_media_handles;
+  const dob = user?.date_of_birth ?? new Date().getUTCDate();
 
   return (
     <>
@@ -93,11 +94,11 @@ const UserProfile = () => {
                   }}
                 />
               ) : (
-                <LoanInfo label='Date of birth' text={user?.date_of_birth} />
+                <LoanInfo label='Date of birth' text={format(new Date(dob), 'MMMM d, yyyy')} />
               )}
             </Flex>
             {isLargerThan810 ? (
-              <LoanInfo label='Date of birth' text={user?.date_of_birth} />
+              <LoanInfo label='Date of birth' text={format(new Date(dob), 'MMMM d, yyyy')} />
             ) : (
               <LoanInfo
                 label='Email address'
