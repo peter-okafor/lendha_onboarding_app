@@ -29,6 +29,7 @@ import {
   PayLoanOption
 } from '../../components';
 import LoanAction from './LoanAction';
+import { format } from 'date-fns';
 
 // type PayLoanViaWalletValues = {
 //   amount: string;
@@ -136,7 +137,10 @@ const PayLoan = () => {
             />
           </GridItem>
           <GridItem>
-            <LoanInfo label='Application date' text={loan?.request_date} />
+            <LoanInfo
+              label='Application date'
+              text={loan ? format(new Date(loan?.request_date), 'MMMM d, yyyy') : 'N/A'}
+            />
           </GridItem>
           <GridItem>
             <LoanInfo label='Current Status' text={loan?.status} />
